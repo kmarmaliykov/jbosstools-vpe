@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category id="web.views.category.id" name="%ViewCategory_JBossToolsWeb">
+      </category>
+      <view
+            name="Preview"
+            icon="icons/sample.gif"
+            category="web.views.category.id"
+            class="org.jboss.tools.vpe.vpv.views.VpvView"
+            id="org.jboss.tools.vpe.vpv.views.VpvView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+</plugin>
