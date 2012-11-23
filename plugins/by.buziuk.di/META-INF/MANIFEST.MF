@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Di
+Bundle-SymbolicName: by.buziuk.di; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: by.buziuk.di.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: javax.inject,
+ org.eclipse.e4.core.di
