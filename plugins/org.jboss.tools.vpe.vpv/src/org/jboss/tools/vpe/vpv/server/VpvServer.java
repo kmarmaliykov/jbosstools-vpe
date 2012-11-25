@@ -1,10 +1,10 @@
-package by.buziuk.server;
+package org.jboss.tools.vpe.vpv.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import by.buziuk.di.Activator;
+import org.jboss.tools.vpe.vpv.Activator;
 
 public class VpvServer implements Runnable {
 
@@ -12,9 +12,7 @@ public class VpvServer implements Runnable {
 
 	private int port;
 	private ServerSocket serverSocket;
-	private Socket clientSocket;
-	private VpvSocketProcessor serverProcessor;
-
+	
 	private VpvServer() {
 	}
 
@@ -33,8 +31,8 @@ public class VpvServer implements Runnable {
 			port = serverSocket.getLocalPort();
 			System.out.println(port);
 			while (true) {
-				clientSocket = serverSocket.accept();
-				serverProcessor = new VpvSocketProcessor(clientSocket);
+				Socket clientSocket = serverSocket.accept();
+				VpvSocketProcessor serverProcessor = new VpvSocketProcessor(clientSocket);
 				new Thread(serverProcessor).start();
 			}
 		} catch (IOException e) {
@@ -43,10 +41,6 @@ public class VpvServer implements Runnable {
 	}
 	
 	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
+		return serverSocket.getLocalPort();
 	}
 }

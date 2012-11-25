@@ -1,4 +1,4 @@
-package by.buziuk.visitor;
+package org.jboss.tools.vpe.vpv.server;
 
 import java.io.File;
 

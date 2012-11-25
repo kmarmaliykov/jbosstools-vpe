@@ -1,4 +1,4 @@
-package by.buziuk.server;
+package org.jboss.tools.vpe.vpv.server;
 
 public class Main {
 

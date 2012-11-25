@@ -1,4 +1,4 @@
-package by.buziuk.server;
+package org.jboss.tools.vpe.vpv.server;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import by.buziuk.di.Activator;
+import org.jboss.tools.vpe.vpv.Activator;
 
 public class VpvSocketProcessor implements Runnable {
 
