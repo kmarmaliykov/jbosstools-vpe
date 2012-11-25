@@ -5,36 +5,35 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.transform.VpvController;
 
 public class VpvServer implements Runnable {
 
-	private static VpvServer instance;
-
-	private int port;
 	private ServerSocket serverSocket;
+	private VpvController vpvController;
 	
-	private VpvServer() {
-	}
-
-	public static VpvServer getInstance() {
-		if (instance == null) {
-			instance = new VpvServer();
-		}
-
-		return instance;
+	public VpvServer(VpvController vpvController) {
+		this.vpvController = vpvController;
+		new Thread(this).start();
 	}
 
 	@Override
 	public void run() {
 		try {
 			serverSocket = new ServerSocket(0);
-			port = serverSocket.getLocalPort();
-			System.out.println(port);
 			while (true) {
 				Socket clientSocket = serverSocket.accept();
-				VpvSocketProcessor serverProcessor = new VpvSocketProcessor(clientSocket);
+				VpvSocketProcessor serverProcessor = new VpvSocketProcessor(clientSocket, vpvController);
 				new Thread(serverProcessor).start();
 			}
+		} catch (IOException e) {
+			Activator.logError(e);
+		}
+	}
+	
+	public void stop() {
+		try {
+			serverSocket.close();
 		} catch (IOException e) {
 			Activator.logError(e);
 		}

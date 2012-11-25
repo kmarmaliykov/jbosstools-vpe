@@ -1,4 +1,4 @@
-package org.jboss.tools.vpe.vpv.server;
+package org.jboss.tools.vpe.vpv.transform;
 
 import java.io.File;
 

@@ -1,9 +1,14 @@
 package org.jboss.tools.vpe.vpv;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.vpe.vpv.server.VpvServer;
+import org.jboss.tools.vpe.vpv.transform.VpvController;
+import org.jboss.tools.vpe.vpv.views.VpvView;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -16,6 +21,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+
+	private Map<Integer, VpvView> vpvViewRegistry;
 	
 	/**
 	 * The constructor
@@ -30,6 +37,8 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		VpvController vpvController = new VpvController();
+		VpvServer vpvServer = new VpvServer(vpvController);
 	}
 
 	/*
@@ -39,6 +48,22 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+	}
+	
+	public int registerVpvView(VpvView vpvView) {
+		return 999; // TODO
+	}
+	
+	public void unregisterVpvView(VpvView vpvView) {
+		
+	}
+	
+	public VpvView getVpvViewById(Integer id) {
+		if (id == null) {
+			return null;
+		} else {
+			return vpvViewRegistry.get(id);
+		}
 	}
 
 	/**

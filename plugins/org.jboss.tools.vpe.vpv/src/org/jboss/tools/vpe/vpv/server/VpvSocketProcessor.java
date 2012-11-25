@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.transform.VpvController;
 
 public class VpvSocketProcessor implements Runnable {
 
@@ -20,28 +21,33 @@ public class VpvSocketProcessor implements Runnable {
 	public static final String VIEW_ID = "viewId";
 
 	private Socket clientSocket;
-	private InputStream inputStream;
-	private OutputStream outputStream;
+	private VpvController vpvController;
 
-	public VpvSocketProcessor(Socket clientSocket) throws IOException {
+	public VpvSocketProcessor(Socket clientSocket, VpvController vpvController) {
 		this.clientSocket = clientSocket;
-		this.inputStream = clientSocket.getInputStream();
-		this.outputStream = clientSocket.getOutputStream();
+		this.vpvController = vpvController;
 	}
 
 	@Override
 	public void run() {
-		// Server Logic
-		BufferedReader inputFromClient = new BufferedReader(
-				new InputStreamReader(inputStream));
-		DataOutputStream outputToClient = new DataOutputStream(outputStream);
-		List<String> requestHeaders = getRequestHeader(inputFromClient);
+		try {
+			InputStream inputStream = clientSocket.getInputStream();
+			OutputStream outputStream = clientSocket.getOutputStream();
 
-		if (requestHeaders.isEmpty()) {
-			return;
+			BufferedReader inputFromClient = new BufferedReader(
+					new InputStreamReader(inputStream));
+			DataOutputStream outputToClient = new DataOutputStream(outputStream);
+			List<String> requestHeaders = getRequestHeader(inputFromClient);
+			
+			if (requestHeaders.isEmpty()) {
+				return;
+			}
+			
+			processRequest(requestHeaders);
+		} catch (IOException e) {
+			Activator.logError(e);
 		}
-
-		processRequest(requestHeaders);
+		
 	}
 
 	public Socket getClientSocket() {
@@ -57,7 +63,7 @@ public class VpvSocketProcessor implements Runnable {
 		String initialRequestLine = requestHeaders.get(0);
 		String httpRequestString = getHttpRequestString(initialRequestLine);
 
-		Map<String, String> queryParametersMap = getqueryParameterMap(httpRequestString);
+		Map<String, String> queryParametersMap = parseRequestParameters(httpRequestString);
 
 		String path = getPath(httpRequestString);
 		String projectName = getProjectName(queryParametersMap);
@@ -81,7 +87,7 @@ public class VpvSocketProcessor implements Runnable {
 		// });
 	}
 
-	private Map<String, String> getqueryParameterMap(String httpRequestString) {
+	private Map<String, String> parseRequestParameters(String httpRequestString) {
 		int delimiterPosition = getDilimiterPosition(httpRequestString);
 
 		if (delimiterPosition == -1) {
@@ -94,9 +100,12 @@ public class VpvSocketProcessor implements Runnable {
 		String[] parameterArray = parameterString.split("&");
 		Map<String, String> parameterMap = new HashMap<String, String>();
 		for (String param : parameterArray) {
-			String name = param.split("=")[0];
-			String value = param.split("=")[1];
-			parameterMap.put(name, value);
+			if (param.length() > 0) {
+				String[] nameValue = param.split("=");
+				String name = nameValue[0];
+				String value = nameValue.length > 1 ? nameValue[1] : null;
+				parameterMap.put(name, value);
+			}
 		}
 		return parameterMap;
 	}
@@ -127,13 +136,13 @@ public class VpvSocketProcessor implements Runnable {
 		return projectName;
 	}
 
-	private int getViewId(Map<String, String> queryParametersMap) {
+	private Integer getViewId(Map<String, String> queryParametersMap) {
 		String viewId = queryParametersMap.get(VIEW_ID);
 		if (viewId != null) {
 			return Integer.parseInt(viewId);
 		}
 
-		return -1;
+		return null;
 	}
 
 	private List<String> getRequestHeader(BufferedReader inputFromClient) {
