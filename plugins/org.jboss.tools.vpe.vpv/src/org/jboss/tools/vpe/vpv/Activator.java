@@ -23,6 +23,10 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 
 	private Map<Integer, VpvView> vpvViewRegistry;
+
+	private VpvController vpvController;
+
+	private VpvServer vpvServer;
 	
 	/**
 	 * The constructor
@@ -37,8 +41,9 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		VpvController vpvController = new VpvController();
-		VpvServer vpvServer = new VpvServer(vpvController);
+		
+		vpvController = new VpvController();
+		vpvServer = new VpvServer(vpvController);
 	}
 
 	/*
@@ -46,6 +51,10 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		vpvServer.stop();
+		vpvServer = null;
+		vpvController = null;
+		
 		plugin = null;
 		super.stop(context);
 	}
