@@ -11,6 +11,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jboss.tools.vpe.vpv.server.VpvServer;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
+import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
+import org.jboss.tools.vpe.vpv.transform.VpvTemplateProvider;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.vpv.views.VpvView;
 import org.osgi.framework.BundleContext;
@@ -29,8 +31,6 @@ public class Activator extends AbstractUIPlugin {
 	private Map<Integer, VpvVisualModelHolder> visualModelHolderRegistry;
 	private static int vpvViewCounter = 0;
 
-	private VpvController vpvController;
-
 	private VpvServer vpvServer;
 	
 	/**
@@ -47,7 +47,9 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		vpvController = new VpvController();
+		VpvTemplateProvider templateProvider = new VpvTemplateProvider();
+		VpvDomBuilder domBuilder = new VpvDomBuilder(templateProvider);
+		VpvController vpvController = new VpvController(domBuilder);
 		vpvServer = new VpvServer(vpvController);
 		visualModelHolderRegistry = new HashMap<Integer, VpvVisualModelHolder>();
 	}
@@ -60,7 +62,6 @@ public class Activator extends AbstractUIPlugin {
 		visualModelHolderRegistry = null;
 		vpvServer.stop();
 		vpvServer = null;
-		vpvController = null;
 		
 		plugin = null;
 		super.stop(context);
