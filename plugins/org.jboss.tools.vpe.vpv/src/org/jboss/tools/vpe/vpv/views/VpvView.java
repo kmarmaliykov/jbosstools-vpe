@@ -20,8 +20,11 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
 
-public class VpvView extends ViewPart {
+public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	/**
 	 * The ID of the view as specified by the extension.
@@ -33,10 +36,17 @@ public class VpvView extends ViewPart {
 
 	private Browser browser;
 
+	private VpvVisualModel visualModel;
+
 	/**
 	 * The constructor.
 	 */
 	public VpvView() {
+	}
+	
+	@Override
+	public void dispose() {
+		Activator.getDefault().unregisterVisualModelHolder(this);
 	}
 
 	/**
@@ -123,5 +133,10 @@ public class VpvView extends ViewPart {
 	 */
 	public void setFocus() {
 		browser.setFocus();
+	}
+
+	@Override
+	public void setVisualModel(VpvVisualModel visualModel) {
+		this.visualModel = visualModel;
 	}
 }
