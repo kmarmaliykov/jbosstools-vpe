@@ -1,6 +1,9 @@
 package org.jboss.tools.vpe.vpv;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -23,6 +26,7 @@ public class Activator extends AbstractUIPlugin {
 	private static Activator plugin;
 
 	private Map<Integer, VpvView> vpvViewRegistry;
+	private static int vpvViewCounter = 0;
 
 	private VpvController vpvController;
 
@@ -44,6 +48,7 @@ public class Activator extends AbstractUIPlugin {
 		
 		vpvController = new VpvController();
 		vpvServer = new VpvServer(vpvController);
+		vpvViewRegistry = new HashMap<Integer, VpvView>();
 	}
 
 	/*
@@ -51,6 +56,7 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		vpvViewRegistry = null;
 		vpvServer.stop();
 		vpvServer = null;
 		vpvController = null;
@@ -60,11 +66,21 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public int registerVpvView(VpvView vpvView) {
-		return 999; // TODO
+		vpvViewRegistry.put(vpvViewCounter, vpvView);
+		return vpvViewCounter++;
 	}
 	
 	public void unregisterVpvView(VpvView vpvView) {
+		Integer key = null;
+		for (Entry<Integer, VpvView> entry : vpvViewRegistry.entrySet()) {
+			if (entry.getValue() == vpvView) {
+				key = entry.getKey();
+			}
+		}
 		
+		if (key != null) {
+			vpvViewRegistry.remove(key);
+		}
 	}
 	
 	public VpvView getVpvViewById(Integer id) {
