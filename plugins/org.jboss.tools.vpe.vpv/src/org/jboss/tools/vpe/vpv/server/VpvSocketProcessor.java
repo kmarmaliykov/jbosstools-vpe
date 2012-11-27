@@ -295,6 +295,7 @@ public class VpvSocketProcessor implements Runnable {
 		String responceHeader = "HTTP/1.1 200 OK\r\n" +
 				"Server: VPV server" +"\r\n"+
 				"Content-Type: " + mimeType + "\r\n" +
+				"Cache-Control: no-cache\r\n" +
 				"Connection: close\r\n\r\n";
 		return responceHeader;
 	}
