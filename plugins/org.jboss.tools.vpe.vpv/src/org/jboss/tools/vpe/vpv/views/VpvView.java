@@ -37,12 +37,13 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private Browser browser;
 
 	private VpvVisualModel visualModel;
+	private int modelHolderId;
 
 	/**
 	 * The constructor.
 	 */
 	public VpvView() {
-		Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this);
+		modelHolderId = Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this);
 	}
 	
 	@Override
