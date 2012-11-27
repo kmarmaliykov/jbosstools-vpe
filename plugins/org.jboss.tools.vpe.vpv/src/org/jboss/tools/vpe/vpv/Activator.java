@@ -29,7 +29,7 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 
-	private VpvServer vpvServer;
+	private VpvServer server;
 
 	private VpvVisualModelHolderRegistry visualModelHolderRegistry;
 	
@@ -51,7 +51,7 @@ public class Activator extends AbstractUIPlugin {
 		VpvDomBuilder domBuilder = new VpvDomBuilder(templateProvider);
 		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
 		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
-		vpvServer = new VpvServer(vpvController);
+		server = new VpvServer(vpvController);
 	}
 
 	/*
@@ -59,8 +59,8 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		vpvServer.stop();
-		vpvServer = null;
+		server.stop();
+		server = null;
 		visualModelHolderRegistry = null;
 		
 		plugin = null;
@@ -89,6 +89,10 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	
+	public VpvServer getServer() {
+		return server;
 	}
 	
 	public static void logError(Throwable e) {
