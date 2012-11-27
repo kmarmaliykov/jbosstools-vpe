@@ -1,21 +1,17 @@
 package org.jboss.tools.vpe.vpv;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.io.File;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jboss.tools.vpe.vpv.server.VpvServer;
+import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvTemplateProvider;
-import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolderRegistry;
-import org.jboss.tools.vpe.vpv.views.VpvView;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -51,6 +47,19 @@ public class Activator extends AbstractUIPlugin {
 		VpvDomBuilder domBuilder = new VpvDomBuilder(templateProvider);
 		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
 		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
+//		vpvController.getResource("jspTest", "/WebContent/pages/components/body.jsp", null, new ResourceAcceptor() {
+//			@Override
+//			public void acceptText(String text, String mimeType) {
+//				System.out.println("mimeType: " + mimeType);
+//				System.out.println(text);
+//			}
+//			
+//			@Override
+//			public void acceptFile(File file, String mimeType) {
+//				System.out.println("mimeType: " + mimeType);
+//				System.out.println(file.getAbsolutePath());
+//			}
+//		});
 		server = new VpvServer(vpvController);
 	}
 

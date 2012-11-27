@@ -1,5 +1,6 @@
 package org.jboss.tools.vpe.vpv.transform;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -7,6 +8,12 @@ public class VpvVisualModelHolderRegistry {
 	private static int vpvViewCounter = 0;
 	private Map<Integer, VpvVisualModelHolder> visualModelHolderRegistry;
 	
+	
+	
+	public VpvVisualModelHolderRegistry() {
+		visualModelHolderRegistry = new HashMap<Integer, VpvVisualModelHolder>();
+	}
+
 	public int registerHolder(VpvVisualModelHolder visualModelHolder) {
 		visualModelHolderRegistry.put(vpvViewCounter, visualModelHolder);
 		return vpvViewCounter++;

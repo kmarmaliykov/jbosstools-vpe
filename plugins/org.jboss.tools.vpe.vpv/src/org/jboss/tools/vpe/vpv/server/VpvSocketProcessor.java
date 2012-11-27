@@ -71,7 +71,7 @@ public class VpvSocketProcessor implements Runnable {
 		String projectName = getProjectName(queryParametersMap);
 		int viewId = getViewId(queryParametersMap);
 
-        VpvController.getResource(projectName, path, viewId, new ResourceAcceptor() {
+        vpvController.getResource(projectName, path, viewId, new ResourceAcceptor() {
 
             @Override
             public void acceptText(String text, String mimeType) {
