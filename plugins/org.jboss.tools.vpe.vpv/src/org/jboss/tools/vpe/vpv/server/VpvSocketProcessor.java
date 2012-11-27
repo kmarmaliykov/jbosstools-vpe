@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,21 +37,20 @@ public class VpvSocketProcessor implements Runnable {
 
 	@Override
 	public void run() {
-		try {
-			
+		try {	
 			InputStream inputStream = clientSocket.getInputStream();
 			OutputStream outputStream = clientSocket.getOutputStream();
 
 			BufferedReader inputFromClient = new BufferedReader(new InputStreamReader(inputStream));
 			DataOutputStream outputToClient = new DataOutputStream(outputStream);
-			Map<String, String> requestHeaders = getRequestHeader(inputFromClient);
+			Map<String, String> requestHeader = getRequestHeader(inputFromClient);
 			
-			if (requestHeaders.isEmpty()) {
-			    processBadRequest(outputToClient);	    
+			if (requestHeader.isEmpty()) {
+			    processNotFound(outputToClient);	    
 			    return;
 			}
 			
-			processRequest(requestHeaders, outputToClient);
+			processRequest(requestHeader, outputToClient);
 		} catch (IOException e) {
 			Activator.logError(e);
 		}
@@ -62,7 +62,7 @@ public class VpvSocketProcessor implements Runnable {
 		String httpRequestString = getHttpRequestString(initialRequestLine);
 		Map<String, String> queryParametersMap = parseRequestParameters(httpRequestString);
 		
-		if (queryParametersMap == null){
+		if (!queryParametersMap.containsKey(PROJECT_NAME)){
 		    processRequestHeaders(requestHeaders, outputToClient, httpRequestString);
 		    return;
 		}
@@ -75,7 +75,7 @@ public class VpvSocketProcessor implements Runnable {
 
             @Override
             public void acceptText(String text, String mimeType) {
-                String responceHeader = getResponceHeader(mimeType);
+                String responceHeader = getOkResponceHeader(mimeType);
                 try {
                     outputToClient.writeBytes(responceHeader);
                     outputToClient.writeBytes(text);
@@ -92,7 +92,7 @@ public class VpvSocketProcessor implements Runnable {
 
             @Override
             public void acceptFile(File file, String mimeType) {
-                String responceHeader = getResponceHeader(mimeType);
+                String responceHeader = getOkResponceHeader(mimeType);
                 try {
                     outputToClient.writeBytes(responceHeader);
                     sendFile(file, outputToClient);
@@ -109,151 +109,157 @@ public class VpvSocketProcessor implements Runnable {
         });
     }
 
-    private void processRequestHeaders(Map<String, String> requestHeaders, DataOutputStream outputToClient, String httpRequestString) {
-      String referer = requestHeaders.get(REFERER);
-      
-      if (referer == null){
-          processBadRequest(outputToClient);
-          return;
-      } 
-      
-      String host = requestHeaders.get(HOST);
-      String refererParameters = getRefererParameters(referer);
-      String httpRequestStingWithoutParameters = getHttpRequestStringWithoutParameters(httpRequestString);
-      
-      String redirectURL = HTTP + host + httpRequestStingWithoutParameters + refererParameters;
-      String redirectHeader = getRedirectHeader(redirectURL);
-      
-      processRedirectRequest(redirectHeader, outputToClient);
-    }
+	private void processRequestHeaders(Map<String, String> requestHeaders, DataOutputStream outputToClient,
+			String httpRequestString) {
+		String referer = requestHeaders.get(REFERER);
 
-    private void processRedirectRequest(String redirectHeader, DataOutputStream outputToClient) {
-        try {
-            outputToClient.writeBytes(redirectHeader);
-        } catch (IOException e) {
-            Activator.logError(e);
-        } finally {
-            try {
-                outputToClient.close();
-            } catch (IOException e) {
-                Activator.logError(e);
-            }
-        }     
-    }
-    
-    private void processBadRequest(DataOutputStream outputToClient) {
-        String badRequestHeader = getBadRequestHeader();
-        try {
-            outputToClient.writeBytes(badRequestHeader);
-        } catch (IOException e) {
-            Activator.logError(e);
-        } finally {
-            try {
-                outputToClient.close();
-            } catch (IOException e) {
-                Activator.logError(e);
-            }
-        }
-    }
+		if (referer == null) {
+			processNotFound(outputToClient);
+			return;
+		}
 
-    private String getRefererParameters(String referer) {
-        String  refererParameters = referer;
-        int delimiter = getDilimiterPosition(referer);
-        if (delimiter == -1) {
-            // TODO return error to client
-        }
-        
-        return refererParameters.substring(delimiter, referer.length());
-    }
+		String host = requestHeaders.get(HOST);
+		String refererParameters = getRefererParameters(referer);
 
-    private String getHttpRequestStringWithoutParameters(String httpRequestString) {
-        String httpRequestStringWitoutParameters = httpRequestString;
-        int delimiter = getDilimiterPosition(httpRequestString);
-        
-        if (delimiter == -1){
-            return httpRequestStringWitoutParameters;
-        } 
-            
-        return httpRequestStringWitoutParameters.substring(delimiter, httpRequestStringWitoutParameters.length());
-    }
+		if (refererParameters == null) {
+			processNotFound(outputToClient);
+			return;
+		}
 
-    private Map<String, String> parseRequestParameters(String httpRequestString) {
-        int delimiterPosition = getDilimiterPosition(httpRequestString);
+		String httpRequestStingWithoutParameters = getHttpRequestStringWithoutParameters(httpRequestString);
+		String redirectURL = HTTP + host + httpRequestStingWithoutParameters + refererParameters;
+		String redirectHeader = getRedirectHeader(redirectURL);
 
-        if (delimiterPosition == -1) {
-            return null;
-        }
+		processRedirectRequest(redirectHeader, outputToClient);
+	}
 
-        String parameterString = httpRequestString.substring(delimiterPosition + 1, httpRequestString.length());
+	private void processRedirectRequest(String redirectHeader, DataOutputStream outputToClient) {
+		try {
+			outputToClient.writeBytes(redirectHeader);
+		} catch (IOException e) {
+			Activator.logError(e);
+		} finally {
+			try {
+				outputToClient.close();
+			} catch (IOException e) {
+				Activator.logError(e);
+			}
+		}
+	}
 
-        String[] parameterArray = parameterString.split("&");
-        Map<String, String> parameterMap = new HashMap<String, String>();
-        for (String param : parameterArray) {
-            if (param.length() > 0) {
-                String[] nameValue = param.split("=");
-                String name = nameValue[0];
-                String value = nameValue.length > 1 ? nameValue[1] : null;
-                parameterMap.put(name, value);
-            }
-        }
-        return parameterMap;
-    }
+	private void processNotFound(DataOutputStream outputToClient) {
+		String notFoundHeader = getNotFoundHeader();
+		try {
+			outputToClient.writeBytes(notFoundHeader);
+		} catch (IOException e) {
+			Activator.logError(e);
+		} finally {
+			try {
+				outputToClient.close();
+			} catch (IOException e) {
+				Activator.logError(e);
+			}
+		}
+	}
 
-    int getDilimiterPosition(String httpRequestString) {
-        return httpRequestString.indexOf('?');
-    }
+	private String getRefererParameters(String referer) {
+		String refererParameters = referer;
+		int delimiter = getDilimiterPosition(referer);
+		if (delimiter == -1) {
+			return null;
+		}
 
-    private String getHttpRequestString(String initialRequestLine) {
-        String[] data = initialRequestLine.split(" ");
-        return data[1];
-    }
+		return refererParameters.substring(delimiter, referer.length());
+	}
 
-    private String getPath(String httpRequestString) {
-        String path = httpRequestString;
-        int delimiter = getDilimiterPosition(httpRequestString);
+	private String getHttpRequestStringWithoutParameters(String httpRequestString) {
+		String httpRequestStringWitoutParameters = httpRequestString;
+		int delimiter = getDilimiterPosition(httpRequestString);
 
-        if (delimiter == -1) {
-            return path.substring(1, path.length());
-        }
+		if (delimiter == -1) {
+			return httpRequestStringWitoutParameters;
+		}
 
-        return path.substring(1, delimiter);
+		return httpRequestStringWitoutParameters.substring(delimiter, httpRequestStringWitoutParameters.length());
+	}
 
-    }
+	private Map<String, String> parseRequestParameters(String httpRequestString) {
+		int delimiterPosition = getDilimiterPosition(httpRequestString);
 
-    private String getProjectName(Map<String, String> queryParametersMap) {
-        String projectName = queryParametersMap.get(PROJECT_NAME);
-        return projectName;
-    }
+		if (delimiterPosition == -1) {
+			return Collections.emptyMap();
+		}
 
-    private Integer getViewId(Map<String, String> queryParametersMap) {
-        String viewId = queryParametersMap.get(VIEW_ID);
-        if (viewId != null) {
-            return Integer.parseInt(viewId);
-        }
+		String parameterString = httpRequestString.substring(delimiterPosition + 1, httpRequestString.length());
 
-        return -1;
-    }
+		String[] parameterArray = parameterString.split("&");
+		Map<String, String> parameterMap = new HashMap<String, String>();
+		for (String param : parameterArray) {
+			if (param.length() > 0) {
+				String[] nameValue = param.split("=");
+				String name = nameValue[0];
+				String value = nameValue.length > 1 ? nameValue[1] : null;
+				parameterMap.put(name, value);
+			}
+		}
+		return parameterMap;
+	}
 
-    private Map<String, String> getRequestHeader(BufferedReader inputFromClient) {
-        Map<String, String> requestHeadersMap = new HashMap<String, String>();
-        try {
-            String line;
-            while ((line = inputFromClient.readLine()) != null && !line.isEmpty()) {
-                if (!line.contains(": ")) {
-                    requestHeadersMap.put(INITIAL_REQUEST_LINE, line);
-                } else {
-                    String[] nameValue = line.split(": ");
-                    String key = nameValue[0];
-                    String value = nameValue[1];
-                    requestHeadersMap.put(key, value);
-                }
-            }
-        } catch (IOException e) {
-            Activator.logError(e);
-        }
+	int getDilimiterPosition(String httpRequestString) {
+		return httpRequestString.indexOf('?');
+	}
 
-        return requestHeadersMap;
-    }
+	private String getHttpRequestString(String initialRequestLine) {
+		String[] data = initialRequestLine.split(" ");
+		return data[1];
+	}
+
+	private String getPath(String httpRequestString) {
+		String path = httpRequestString;
+		int delimiter = getDilimiterPosition(httpRequestString);
+
+		if (delimiter == -1) {
+			return path.substring(1, path.length());
+		}
+
+		return path.substring(1, delimiter);
+
+	}
+
+	private String getProjectName(Map<String, String> queryParametersMap) {
+		String projectName = queryParametersMap.get(PROJECT_NAME);
+		return projectName;
+	}
+
+	private Integer getViewId(Map<String, String> queryParametersMap) {
+		String viewId = queryParametersMap.get(VIEW_ID);
+		if (viewId != null) {
+			return Integer.parseInt(viewId);
+		}
+
+		return -1;
+	}
+
+	private Map<String, String> getRequestHeader(BufferedReader inputFromClient) {
+		Map<String, String> requestHeaders = new HashMap<String, String>();
+		try {
+			String line;
+			while ((line = inputFromClient.readLine()) != null && !line.isEmpty()) {
+				if (!line.contains(": ")) {
+					requestHeaders.put(INITIAL_REQUEST_LINE, line);
+				} else {
+					String[] nameValue = line.split(": ");
+					String key = nameValue[0];
+					String value = nameValue[1];
+					requestHeaders.put(key, value);
+				}
+			}
+		} catch (IOException e) {
+			Activator.logError(e);
+		}
+
+		return requestHeaders;
+	}
 
     private void sendFile(File file, OutputStream outputToClient) {
         FileInputStream fileInputStream = null;
@@ -285,7 +291,7 @@ public class VpvSocketProcessor implements Runnable {
         this.clientSocket = clientSocket;
     }
 	
-	private String getResponceHeader(String mimeType) {
+	private String getOkResponceHeader(String mimeType) {
 		String responceHeader = "HTTP/1.1 200 OK\r\n" +
 				"Server: VPV server" +"\r\n"+
 				"Content-Type: " + mimeType + "\r\n" +
@@ -293,7 +299,7 @@ public class VpvSocketProcessor implements Runnable {
 		return responceHeader;
 	}
 	
-	private String getBadRequestHeader(){
+	private String getNotFoundHeader(){
         String responceHeader = "HTTP/1.1 404 Not Found\r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Connection: close\r\n\r\n" +
