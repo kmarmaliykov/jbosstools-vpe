@@ -3,7 +3,7 @@ package org.jboss.tools.vpe.vpv.transform;
 public class VpvController {
 	private VpvDomBuilder domBuilder;	
 	
-	public VpvController(VpvDomBuilder domBuilder) {
+	public VpvController(VpvDomBuilder domBuilder, VpvVisualModelHolderRegistry visualModelHolderRegistry) {
 		this.domBuilder = domBuilder;
 	}
 

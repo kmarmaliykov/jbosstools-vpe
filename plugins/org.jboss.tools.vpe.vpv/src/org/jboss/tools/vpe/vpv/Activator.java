@@ -14,6 +14,7 @@ import org.jboss.tools.vpe.vpv.transform.VpvController;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvTemplateProvider;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolderRegistry;
 import org.jboss.tools.vpe.vpv.views.VpvView;
 import org.osgi.framework.BundleContext;
 
@@ -28,10 +29,9 @@ public class Activator extends AbstractUIPlugin {
 	// The shared instance
 	private static Activator plugin;
 
-	private Map<Integer, VpvVisualModelHolder> visualModelHolderRegistry;
-	private static int vpvViewCounter = 0;
-
 	private VpvServer vpvServer;
+
+	private VpvVisualModelHolderRegistry visualModelHolderRegistry;
 	
 	/**
 	 * The constructor
@@ -49,9 +49,9 @@ public class Activator extends AbstractUIPlugin {
 		
 		VpvTemplateProvider templateProvider = new VpvTemplateProvider();
 		VpvDomBuilder domBuilder = new VpvDomBuilder(templateProvider);
-		VpvController vpvController = new VpvController(domBuilder);
+		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
+		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
 		vpvServer = new VpvServer(vpvController);
-		visualModelHolderRegistry = new HashMap<Integer, VpvVisualModelHolder>();
 	}
 
 	/*
@@ -59,40 +59,14 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		visualModelHolderRegistry = null;
 		vpvServer.stop();
 		vpvServer = null;
+		visualModelHolderRegistry = null;
 		
 		plugin = null;
 		super.stop(context);
 	}
 	
-	public int registerVisualModelHolder(VpvVisualModelHolder visualModelHolder) {
-		visualModelHolderRegistry.put(vpvViewCounter, visualModelHolder);
-		return vpvViewCounter++;
-	}
-	
-	public void unregisterVisualModelHolder(VpvVisualModelHolder visualModelHolder) {
-		Integer key = null;
-		for (Entry<Integer, VpvVisualModelHolder> entry : visualModelHolderRegistry.entrySet()) {
-			if (entry.getValue() == visualModelHolder) {
-				key = entry.getKey();
-			}
-		}
-		
-		if (key != null) {
-			visualModelHolderRegistry.remove(key);
-		}
-	}
-	
-	public VpvVisualModelHolder getVisualModelHolderById(Integer id) {
-		if (id == null) {
-			return null;
-		} else {
-			return visualModelHolderRegistry.get(id);
-		}
-	}
-
 	/**
 	 * Returns the shared instance
 	 *
