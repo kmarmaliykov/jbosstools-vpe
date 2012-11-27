@@ -75,6 +75,10 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
+	
+	public VpvVisualModelHolderRegistry getVisualModelHolderRegistry() {
+		return visualModelHolderRegistry;
+	}
 
 	/**
 	 * Returns an image descriptor for the image file at the given

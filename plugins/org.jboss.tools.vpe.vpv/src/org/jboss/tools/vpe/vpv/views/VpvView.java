@@ -21,8 +21,8 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 import org.jboss.tools.vpe.vpv.Activator;
-import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
+import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
 
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
@@ -42,13 +42,14 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	 * The constructor.
 	 */
 	public VpvView() {
+		Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this);
 	}
 	
 	@Override
 	public void dispose() {
-		Activator.getDefault().unregisterVisualModelHolder(this);
+		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 	}
-
+	
 	/**
 	 * This is a callback that will allow us
 	 * to create the viewer and initialize it.
