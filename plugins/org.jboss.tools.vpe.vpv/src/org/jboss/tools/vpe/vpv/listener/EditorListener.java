@@ -8,6 +8,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.EditorReference;
 import org.jboss.tools.vpe.vpv.Activator;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.*;
@@ -25,21 +26,25 @@ public class EditorListener implements IPartListener2 {
 	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {
 		Activator.logInfo(partRef + " is Activated");
+		if (partRef instanceof EditorReference){
+			Activator.logInfo("instance of Editor reference");
+			IEditorPart editorPart = ((EditorReference) partRef).getEditor(false);
+		}
 	}
-	
+
+	private void setEditor(IEditorPart editorPart) {
+		IFile ifile = getFileOpenedInEditor(editorPart);
+		if (ifile != null){
+			String url = formUrl(ifile);
+			browser.setUrl(url);
+		} else {
+			// TODO: not html/jsp file... 
+		}
+	}
 
 	@Override
 	public void partOpened(IWorkbenchPartReference partRef) {
 		Activator.logInfo(partRef + " is Opened");
-		if (partRef instanceof EditorReference){
-			Activator.logInfo("instance of Editor reference");
-			IEditorPart editorPart = (IEditorPart) partRef.getPart(false);
-			IFile ifile = getFileOpenedInEditor(editorPart);
-			if (ifile != null){
-				String url = formUrl(ifile);
-				browser.setUrl(url);
-			}
-		}
 	}
 	
 	private String formUrl(IFile ifile) {
@@ -54,7 +59,7 @@ public class EditorListener implements IPartListener2 {
 
 	private IFile getFileOpenedInEditor(IEditorPart editorPart) {
 		IFile file = null;
-		if (editorPart.getEditorInput() instanceof IFileEditorInput) {
+		if (editorPart != null && editorPart.getEditorInput() instanceof IFileEditorInput) {
 			IFileEditorInput fileEditorInput = (IFileEditorInput) editorPart.getEditorInput();
 			file = fileEditorInput.getFile();
 		}
@@ -64,38 +69,31 @@ public class EditorListener implements IPartListener2 {
 	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
 		Activator.logInfo(partRef + " is Closed");
-
 	}
 
 	@Override
 	public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-
 	}
-
 
 	@Override
 	public void partDeactivated(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-
 	}
-
 
 	@Override
 	public void partHidden(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void partVisible(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void partInputChanged(IWorkbenchPartReference partRef) {
-		// TODO Auto-generated method stub
+	}
 
+	public void showBootstrapPart() {
+		IEditorPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().getActiveEditor();
+		setEditor(activeEditor);
 	}
 }

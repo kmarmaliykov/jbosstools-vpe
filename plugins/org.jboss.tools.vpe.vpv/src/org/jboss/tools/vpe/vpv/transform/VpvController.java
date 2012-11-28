@@ -33,8 +33,8 @@ public class VpvController {
 		this.visualModelHolderRegistry = visualModelHolderRegistry;
 	}
 
-	public void getResource(String projectName, String path, Integer viewId, ResourceAcceptor resourceAcceptor) {
-		Path workspacePath = new Path(projectName + path);
+	public void getResource(String path, Integer viewId, ResourceAcceptor resourceAcceptor) {
+		Path workspacePath = new Path(path);
 		IFile requestedFile = ResourcesPlugin.getWorkspace().getRoot().getFile(workspacePath);
 		
 		IStructuredModel sourceModel = StructuredModelManager.getModelManager().getExistingModelForEdit(requestedFile);

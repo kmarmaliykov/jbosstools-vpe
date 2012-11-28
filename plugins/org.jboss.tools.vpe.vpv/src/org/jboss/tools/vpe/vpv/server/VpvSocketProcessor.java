@@ -40,22 +40,23 @@ public class VpvSocketProcessor implements Runnable {
 
 			BufferedReader inputFromClient = new BufferedReader(new InputStreamReader(inputStream));
 			DataOutputStream outputToClient = new DataOutputStream(outputStream);
-			Map<String, String> requestHeader = getRequestHeader(inputFromClient);
+			String initialContextLine = getItialRequestLine(inputFromClient);
+			if (initialContextLine != null) {
+				Map<String, String> requestHeader = getRequestHeader(inputFromClient);				
 			
-			if (requestHeader.isEmpty()) {
-			    processNotFound(outputToClient);	    
-			    return;
+				if (requestHeader.isEmpty()) {
+				    processNotFound(outputToClient);	    
+				    return;
+				}
+				
+				processRequest(initialContextLine, requestHeader, outputToClient);
 			}
-			
-			processRequest(requestHeader, outputToClient);
 		} catch (IOException e) {
 			Activator.logError(e);
 		}
-		
 	}
 
-	private void processRequest(Map<String, String> requestHeaders, final DataOutputStream outputToClient) {
-		String initialRequestLine = requestHeaders.get(INITIAL_REQUEST_LINE);
+	private void processRequest(String initialRequestLine, Map<String, String> requestHeaders, final DataOutputStream outputToClient) {
 		String httpRequestString = getHttpRequestString(initialRequestLine);
 		Map<String, String> queryParametersMap = parseRequestParameters(httpRequestString);
 		
@@ -66,9 +67,9 @@ public class VpvSocketProcessor implements Runnable {
 		
 		String path = getPath(httpRequestString);
 		String projectName = getProjectName(queryParametersMap);
+		String fullPath = projectName + path;
 		int viewId = getViewId(queryParametersMap);
-
-        vpvController.getResource(projectName, path, viewId, new ResourceAcceptor() {
+		vpvController.getResource(fullPath, viewId, new ResourceAcceptor() {
 
             @Override
             public void acceptText(String text, String mimeType) {
@@ -214,13 +215,8 @@ public class VpvSocketProcessor implements Runnable {
 	private String getPath(String httpRequestString) {
 		String path = httpRequestString;
 		int delimiter = getDilimiterPosition(httpRequestString);
-
-		if (delimiter == -1) {
-			return path.substring(1, path.length());
-		}
-
-		return path.substring(1, delimiter);
-
+		int pathEnd = delimiter != -1 ? delimiter : path.length();
+		return path.substring(0, pathEnd);
 	}
 
 	private String getProjectName(Map<String, String> queryParametersMap) {
@@ -237,19 +233,33 @@ public class VpvSocketProcessor implements Runnable {
 		return -1;
 	}
 
+	private String getItialRequestLine(BufferedReader inputFromClient) {
+		String line = null;
+		try {
+			line = inputFromClient.readLine();
+		} catch (IOException e) {
+			Activator.logError(e);
+		}
+		
+		if (line == null && line.isEmpty()) {
+			return null;
+		} else {
+			return line;
+		}
+	}
+	
 	private Map<String, String> getRequestHeader(BufferedReader inputFromClient) {
 		Map<String, String> requestHeaders = new HashMap<String, String>();
 		try {
 			String line;
 			while ((line = inputFromClient.readLine()) != null && !line.isEmpty()) {
-				if (!line.contains(": ")) {
-					requestHeaders.put(INITIAL_REQUEST_LINE, line);
-				} else {
-					String[] nameValue = line.split(": ");
-					String key = nameValue[0];
-					String value = nameValue[1];
-					requestHeaders.put(key, value);
+				String[] nameValue = line.split(":");
+				String key = nameValue[0].trim();
+				String value = null;
+				if (nameValue.length > 1) {
+					value = nameValue[1].trim();
 				}
+				requestHeaders.put(key, value);
 			}
 		} catch (IOException e) {
 			Activator.logError(e);

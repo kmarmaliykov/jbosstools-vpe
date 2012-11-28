@@ -44,8 +44,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
 		EditorListener editorListener = new EditorListener(browser, modelHolderId);
-		final IWorkbenchWindow workbenchWindow = getSite().getWorkbenchWindow();
-		workbenchWindow.getPartService().addPartListener(editorListener);
+		getSite().getPage().addPartListener(editorListener);
+		editorListener.showBootstrapPart();
 	}
 
 	public void setFocus() {
