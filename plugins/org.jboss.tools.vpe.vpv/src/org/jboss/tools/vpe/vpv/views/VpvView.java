@@ -25,7 +25,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private int modelHolderId;
 
 	public VpvView() {
-		modelHolderId = Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this);
+		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 	}
 	
 	@Override
@@ -39,11 +39,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		browser = new Browser(parent, SWT.WEBKIT);
 		browser.setUrl("http://ww.google.com");
 		
-		inizializeEditorListener(browser);
+		inizializeEditorListener(browser, modelHolderId);
 	}
 
-	private void inizializeEditorListener(Browser browser) {
-		EditorListener editorListener = new EditorListener(browser);
+	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
+		EditorListener editorListener = new EditorListener(browser, modelHolderId);
 		final IWorkbenchWindow workbenchWindow = getSite().getWorkbenchWindow();
 		workbenchWindow.getPartService().addPartListener(editorListener);
 	}
@@ -55,6 +55,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	@Override
 	public void setVisualModel(VpvVisualModel visualModel) {
 		this.visualModel = visualModel;
+	}
+
+	public void setModelHolderId(int modelHolderId) {
+		this.modelHolderId = modelHolderId;
 	}
 }
 

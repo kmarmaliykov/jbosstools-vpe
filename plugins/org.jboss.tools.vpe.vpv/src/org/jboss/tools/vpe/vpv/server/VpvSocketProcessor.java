@@ -20,11 +20,8 @@ import org.jboss.tools.vpe.vpv.transform.VpvController;
 
 public class VpvSocketProcessor implements Runnable {
 
-    public static final String PROJECT_NAME = "projectName";
-    public static final String VIEW_ID = "viewId";
     public static final String INITIAL_REQUEST_LINE = "Initial request line";
     public static final String REFERER = "Referer";
-    public static final String HTTP = "http://";
     public static final String HOST = "Host";
 
 	private Socket clientSocket;
@@ -62,7 +59,7 @@ public class VpvSocketProcessor implements Runnable {
 		String httpRequestString = getHttpRequestString(initialRequestLine);
 		Map<String, String> queryParametersMap = parseRequestParameters(httpRequestString);
 		
-		if (!queryParametersMap.containsKey(PROJECT_NAME)){
+		if (!queryParametersMap.containsKey(HttpConstants.PROJECT_NAME)){
 		    processRequestHeaders(requestHeaders, outputToClient, httpRequestString);
 		    return;
 		}
@@ -127,7 +124,7 @@ public class VpvSocketProcessor implements Runnable {
 		}
 
 		String httpRequestStingWithoutParameters = getHttpRequestStringWithoutParameters(httpRequestString);
-		String redirectURL = HTTP + host + httpRequestStingWithoutParameters + refererParameters;
+		String redirectURL = HttpConstants.HTTP + host + httpRequestStingWithoutParameters + refererParameters;
 		String redirectHeader = getRedirectHeader(redirectURL);
 
 		processRedirectRequest(redirectHeader, outputToClient);
@@ -227,12 +224,12 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
 	private String getProjectName(Map<String, String> queryParametersMap) {
-		String projectName = queryParametersMap.get(PROJECT_NAME);
+		String projectName = queryParametersMap.get(HttpConstants.PROJECT_NAME);
 		return projectName;
 	}
 
 	private Integer getViewId(Map<String, String> queryParametersMap) {
-		String viewId = queryParametersMap.get(VIEW_ID);
+		String viewId = queryParametersMap.get(HttpConstants.VIEW_ID);
 		if (viewId != null) {
 			return Integer.parseInt(viewId);
 		}
