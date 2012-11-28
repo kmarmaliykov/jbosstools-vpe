@@ -160,7 +160,9 @@ public class VpvDomBuilder {
 				for (Node sourceChild : sourceChildren) {
 					Node visualChild 
 							= convertNode(sourceDocument, sourceChild, visualDocument, sourceVisualMapping);
-					visualParent.appendChild(visualChild);
+					if (visualChild != null) {
+						visualParent.appendChild(visualChild);
+					}
 				}
 			}
 		} else {
@@ -169,7 +171,9 @@ public class VpvDomBuilder {
 				Node sourceChild = sourceChildren.item(i);
 				Node visualChild 
 						= convertNode(sourceDocument, sourceChild, visualDocument, sourceVisualMapping);
-				visualNode.appendChild(visualChild);
+				if (visualChild != null) {
+					visualNode.appendChild(visualChild);
+				}
 			}
 		}
 		
