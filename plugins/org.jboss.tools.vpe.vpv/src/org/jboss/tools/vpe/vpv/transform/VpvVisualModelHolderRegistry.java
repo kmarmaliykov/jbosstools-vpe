@@ -6,9 +6,7 @@ import java.util.Map.Entry;
 
 public class VpvVisualModelHolderRegistry {
 	private static int vpvViewCounter = 0;
-	private static final Map<Integer, VpvVisualModelHolder> visualModelHolderRegistry = new HashMap<Integer, VpvVisualModelHolder>();
-	
-	
+	private final Map<Integer, VpvVisualModelHolder> visualModelHolderRegistry;
 	
 	public VpvVisualModelHolderRegistry() {
 		visualModelHolderRegistry = new HashMap<Integer, VpvVisualModelHolder>();
