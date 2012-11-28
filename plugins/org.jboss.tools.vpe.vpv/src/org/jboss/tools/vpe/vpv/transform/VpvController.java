@@ -69,10 +69,10 @@ public class VpvController {
 		
 		if (htmlText != null) {
 			resourceAcceptor.acceptText(htmlText, "text/html");
-		} else if (requestedFile.getFullPath() != null 
-				&& requestedFile.getFullPath().toFile() != null
-				&& requestedFile.getFullPath().toFile().exists()) {
-			File file = requestedFile.getFullPath().toFile();
+		} else if (requestedFile.getLocation() != null 
+				&& requestedFile.getLocation().toFile() != null
+				&& requestedFile.getLocation().toFile().exists()) {
+			File file = requestedFile.getLocation().toFile();
 			String mimeType = getMimeType(file);
 			resourceAcceptor.acceptFile(file, mimeType);
 		} else {

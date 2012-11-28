@@ -253,13 +253,15 @@ public class VpvSocketProcessor implements Runnable {
 		try {
 			String line;
 			while ((line = inputFromClient.readLine()) != null && !line.isEmpty()) {
-				String[] nameValue = line.split(":");
-				String key = nameValue[0].trim();
-				String value = null;
-				if (nameValue.length > 1) {
-					value = nameValue[1].trim();
+				int colonIndex = line.indexOf(':');
+				if (colonIndex >= 0) {
+					String key = line.substring(0, colonIndex).trim();
+					String value = null;
+					if (colonIndex < line.length()) {
+						value = line.substring(colonIndex + 1).trim();
+					}
+					requestHeaders.put(key, value);
 				}
-				requestHeaders.put(key, value);
 			}
 		} catch (IOException e) {
 			Activator.logError(e);
@@ -317,7 +319,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 	
 	private String getRedirectHeader(String location){
-	    String responceHeader = "HTTP/1.1 301 Moved Permanently\r\n" +
+	    String responceHeader = "HTTP/1.1 302 Found\r\n" +
                 "Location: " + location +  "\r\n\r\n";
 	    return responceHeader;
 	}

@@ -29,6 +29,7 @@ public class EditorListener implements IPartListener2 {
 		if (partRef instanceof EditorReference){
 			Activator.logInfo("instance of Editor reference");
 			IEditorPart editorPart = ((EditorReference) partRef).getEditor(false);
+			setEditor(editorPart);
 		}
 	}
 
@@ -36,7 +37,7 @@ public class EditorListener implements IPartListener2 {
 		IFile ifile = getFileOpenedInEditor(editorPart);
 		if (ifile != null){
 			String url = formUrl(ifile);
-			browser.setUrl(url);
+			browser.setUrl(url, null, new String[] {"Cache-Control: no-cache"});
 		} else {
 			// TODO: not html/jsp file... 
 		}

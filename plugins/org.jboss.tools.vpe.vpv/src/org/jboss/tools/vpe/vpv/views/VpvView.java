@@ -36,7 +36,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new FillLayout());
 		
-		browser = new Browser(parent, SWT.WEBKIT);
+		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl("http://ww.google.com");
 		
 		inizializeEditorListener(browser, modelHolderId);
