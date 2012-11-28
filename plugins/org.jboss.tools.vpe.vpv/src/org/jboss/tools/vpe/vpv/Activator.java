@@ -107,4 +107,8 @@ public class Activator extends AbstractUIPlugin {
 	public static void logError(Throwable e) {
 		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
 	}
+	
+	public static void logInfo(String info) {
+		getDefault().getLog().log(new Status(IStatus.INFO, PLUGIN_ID, info));
+	}
 }
