@@ -1,6 +1,7 @@
 package org.jboss.tools.vpe.vpv;
 
 import java.io.File;
+import java.net.URL;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -98,6 +99,10 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	
+	public static URL getFileUrl(String path) {
+		return plugin.getBundle().getEntry(path);
 	}
 	
 	public VpvServer getServer() {

@@ -24,6 +24,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
 
+	private EditorListener editorListener;
+
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 	}
@@ -31,19 +33,20 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	@Override
 	public void dispose() {
 		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
+		getSite().getPage().removePartListener(editorListener);
 	}
 	
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new FillLayout());
 		
-		browser = new Browser(parent, SWT.NONE);
+		browser = new Browser(parent, SWT.WEBKIT);
 		browser.setUrl("http://ww.google.com");
 		
 		inizializeEditorListener(browser, modelHolderId);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
-		EditorListener editorListener = new EditorListener(browser, modelHolderId);
+		editorListener = new EditorListener(browser, modelHolderId);
 		getSite().getPage().addPartListener(editorListener);
 		editorListener.showBootstrapPart();
 	}

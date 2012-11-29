@@ -10,9 +10,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
@@ -58,17 +63,17 @@ public class VpvSocketProcessor implements Runnable {
 
 	private void processRequest(String initialRequestLine, Map<String, String> requestHeaders, final DataOutputStream outputToClient) {
 		String httpRequestString = getHttpRequestString(initialRequestLine);
-		Map<String, String> queryParametersMap = parseRequestParameters(httpRequestString);
+		Map<String, String> queryParametersMap = parseUrlParameters(httpRequestString);
 		
-		if (!queryParametersMap.containsKey(HttpConstants.PROJECT_NAME)){
-		    processRequestHeaders(requestHeaders, outputToClient, httpRequestString);
-		    return;
-		}
+//		if (!queryParametersMap.containsKey(HttpConstants.PROJECT_NAME)){
+//		    processRequestHeaders(requestHeaders, outputToClient, httpRequestString);
+//		    return;
+//		}
 		
 		String path = getPath(httpRequestString);
-		String projectName = getProjectName(queryParametersMap);
+		String projectName = getProjectName(queryParametersMap, requestHeaders);
 		String fullPath = projectName + path;
-		int viewId = getViewId(queryParametersMap);
+		Integer viewId = getViewId(queryParametersMap);
 		vpvController.getResource(fullPath, viewId, new ResourceAcceptor() {
 
             @Override
@@ -107,29 +112,29 @@ public class VpvSocketProcessor implements Runnable {
         });
     }
 
-	private void processRequestHeaders(Map<String, String> requestHeaders, DataOutputStream outputToClient,
-			String httpRequestString) {
-		String referer = requestHeaders.get(REFERER);
-
-		if (referer == null) {
-			processNotFound(outputToClient);
-			return;
-		}
-
-		String host = requestHeaders.get(HOST);
-		String refererParameters = getRefererParameters(referer);
-
-		if (refererParameters == null) {
-			processNotFound(outputToClient);
-			return;
-		}
-
-		String httpRequestStingWithoutParameters = getHttpRequestStringWithoutParameters(httpRequestString);
-		String redirectURL = HttpConstants.HTTP + host + httpRequestStingWithoutParameters + refererParameters;
-		String redirectHeader = getRedirectHeader(redirectURL);
-
-		processRedirectRequest(redirectHeader, outputToClient);
-	}
+//	private void processRequestHeaders(Map<String, String> requestHeaders, DataOutputStream outputToClient,
+//			String httpRequestString) {
+//		String referer = requestHeaders.get(REFERER);
+//
+//		if (referer == null) {
+//			processNotFound(outputToClient);
+//			return;
+//		}
+//
+//		String host = requestHeaders.get(HOST);
+//		String refererParameters = getRefererParameters(referer);
+//
+//		if (refererParameters == null) {
+//			processNotFound(outputToClient);
+//			return;
+//		}
+//
+//		String httpRequestStingWithoutParameters = getHttpRequestStringWithoutParameters(httpRequestString);
+//		String redirectURL = HttpConstants.HTTP + host + httpRequestStingWithoutParameters + refererParameters;
+//		String redirectHeader = getRedirectHeader(redirectURL);
+//
+//		processRedirectRequest(redirectHeader, outputToClient);
+//	}
 
 	private void processRedirectRequest(String redirectHeader, DataOutputStream outputToClient) {
 		try {
@@ -181,14 +186,14 @@ public class VpvSocketProcessor implements Runnable {
 		return httpRequestStringWitoutParameters.substring(delimiter, httpRequestStringWitoutParameters.length());
 	}
 
-	private Map<String, String> parseRequestParameters(String httpRequestString) {
-		int delimiterPosition = getDilimiterPosition(httpRequestString);
+	private Map<String, String> parseUrlParameters(String urlString) {
+		int delimiterPosition = getDilimiterPosition(urlString);
 
 		if (delimiterPosition == -1) {
 			return Collections.emptyMap();
 		}
 
-		String parameterString = httpRequestString.substring(delimiterPosition + 1, httpRequestString.length());
+		String parameterString = urlString.substring(delimiterPosition + 1, urlString.length());
 
 		String[] parameterArray = parameterString.split("&");
 		Map<String, String> parameterMap = new HashMap<String, String>();
@@ -219,8 +224,14 @@ public class VpvSocketProcessor implements Runnable {
 		return path.substring(0, pathEnd);
 	}
 
-	private String getProjectName(Map<String, String> queryParametersMap) {
+	private String getProjectName(Map<String, String> queryParametersMap, Map<String, String> requestHeaders) {
 		String projectName = queryParametersMap.get(HttpConstants.PROJECT_NAME);
+		if (projectName == null) {
+			String referer = requestHeaders.get(REFERER);
+			if (referer != null) {
+				projectName = parseUrlParameters(referer).get(HttpConstants.PROJECT_NAME);
+			}
+		}
 		return projectName;
 	}
 
@@ -230,7 +241,7 @@ public class VpvSocketProcessor implements Runnable {
 			return Integer.parseInt(viewId);
 		}
 
-		return -1;
+		return null;
 	}
 
 	private String getItialRequestLine(BufferedReader inputFromClient) {
@@ -301,10 +312,23 @@ public class VpvSocketProcessor implements Runnable {
     }
 	
 	private String getOkResponceHeader(String mimeType) {
+		Date date = new Date();
+		String HTTP_RESPONSE_DATE_HEADER =
+			        "EEE, dd MMM yyyy HH:mm:ss zzz";
+		DateFormat httpDateFormat =
+		        new SimpleDateFormat(HTTP_RESPONSE_DATE_HEADER, Locale.US);
+		httpDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		String httpDate = httpDateFormat.format(date);
+		
 		String responceHeader = "HTTP/1.1 200 OK\r\n" +
 				"Server: VPV server" +"\r\n"+
 				"Content-Type: " + mimeType + "\r\n" +
-				"Cache-Control: no-cache\r\n" +
+				"Date: " + httpDate + "\r\n" +
+				"Expires: Fri, 01 Jan 1990 00:00:00 GMT\r\n" +
+				"Pragma: no-cache\r\n" +
+				"Cache-Control: no-cache, must-revalidate, no-store\r\n" +
+				"Vary: *\r\n" +
+
 				"Connection: close\r\n\r\n";
 		return responceHeader;
 	}
@@ -318,9 +342,9 @@ public class VpvSocketProcessor implements Runnable {
         return responceHeader;
 	}
 	
-	private String getRedirectHeader(String location){
-	    String responceHeader = "HTTP/1.1 302 Found\r\n" +
-                "Location: " + location +  "\r\n\r\n";
-	    return responceHeader;
-	}
+//	private String getRedirectHeader(String location){
+//	    String responceHeader = "HTTP/1.1 302 Found\r\n" +
+//                "Location: " + location +  "\r\n\r\n";
+//	    return responceHeader;
+//	}
 }

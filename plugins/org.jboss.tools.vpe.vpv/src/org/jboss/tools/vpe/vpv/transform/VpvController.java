@@ -1,6 +1,7 @@
 package org.jboss.tools.vpe.vpv.transform;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -81,7 +82,14 @@ public class VpvController {
 	}
 	
 	private static String getMimeType(File file) {
-		return new MimetypesFileTypeMap().getContentType(file);
+		MimetypesFileTypeMap mimeTypes;
+		try {
+			mimeTypes = new MimetypesFileTypeMap(Activator.getFileUrl("lib/mime.types").openStream());
+			return mimeTypes.getContentType(file);
+		} catch (IOException e) {
+			Activator.logError(e);
+			return "application/octet-stream";
+		}
 	}
 
 	public static String nodeToString(Node node) throws TransformerException {
