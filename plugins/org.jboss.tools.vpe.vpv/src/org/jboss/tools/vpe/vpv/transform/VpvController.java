@@ -69,7 +69,7 @@ public class VpvController {
 		}
 		
 		if (htmlText != null) {
-			resourceAcceptor.acceptText(htmlText, "text/html");
+			resourceAcceptor.acceptText("<!DOCTYPE html>\n" + htmlText, "text/html"); // XXX: remove doctype when selection will work in old IE
 		} else if (requestedFile.getLocation() != null 
 				&& requestedFile.getLocation().toFile() != null
 				&& requestedFile.getLocation().toFile().exists()) {

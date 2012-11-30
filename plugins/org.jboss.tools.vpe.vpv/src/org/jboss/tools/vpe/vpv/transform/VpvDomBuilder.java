@@ -20,6 +20,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class VpvDomBuilder {
+	public static final String ATTR_VPV_ID = "data-vpvid";
 	private static long markerId = 0;
 	private VpvTemplateProvider templateProvider;
 	
@@ -52,25 +53,27 @@ public class VpvDomBuilder {
 		 * 20. remove mappedVisualParent and its descendants from the visualDocument
 		 * 30. add newVisualNode to the place of mappedVisualParent
 		 */
+		Map<Node, Node> sourceVisualMapping = visualModel.getSourceVisualMapping();
+		
 		Node mappedSourceParent = sourceParent;
 		while (mappedSourceParent != null 
-				&& visualModel.getSourceVisualMapping().get(mappedSourceParent) == null) {
-			mappedSourceParent = mappedSourceParent.getParentNode();
+				&& sourceVisualMapping.get(mappedSourceParent) == null) {
+			mappedSourceParent = DomUtil.getParentNode(mappedSourceParent);
 		}		
-		Node oldMappedVisualParent = visualModel.getSourceVisualMapping().get(mappedSourceParent);
+		Node oldMappedVisualParent = sourceVisualMapping.get(mappedSourceParent);
 		
-		removeSubtreeFromMapping(mappedSourceParent, visualModel.getSourceVisualMapping());
+		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
 		
 		Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
-				visualModel.getVisualDocument(), visualModel.getSourceVisualMapping());
+				visualModel.getVisualDocument(), sourceVisualMapping);
 		
 		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
 		long newParentId = -1; 
 		if (newMappedVisualParent != null) {
-			oldMappedVisualParent.getParentNode().replaceChild(newMappedVisualParent, oldMappedVisualParent);
+			DomUtil.getParentNode(oldMappedVisualParent).replaceChild(newMappedVisualParent, oldMappedVisualParent);
 			newParentId = markSubtree(newMappedVisualParent);
 		} else {
-			oldMappedVisualParent.getParentNode().removeChild(oldMappedVisualParent);
+			DomUtil.getParentNode(oldMappedVisualParent).removeChild(oldMappedVisualParent);
 		}
 
 		return new VisualMutation(oldParentId, newParentId);
@@ -78,7 +81,7 @@ public class VpvDomBuilder {
 	
 	private long getNodeMarkerId(Node oldMappedVisualParent) {
 		if (oldMappedVisualParent instanceof Element) {
-			String stringMarkerId = ((Element) oldMappedVisualParent).getAttribute("data-vpvid");
+			String stringMarkerId = ((Element) oldMappedVisualParent).getAttribute(ATTR_VPV_ID);
 			if (stringMarkerId != null) {
 				try {
 					return Long.parseLong(stringMarkerId);
@@ -119,7 +122,7 @@ public class VpvDomBuilder {
 			// The outermost element will have the greatest id.
 			// Also this means if a subelement was modified, child element is will be greater.
 			long markerId = getNextMarkerId();
-			visualParentElement.setAttribute("data-vpvid", Long.toString( markerId ));
+			visualParentElement.setAttribute(ATTR_VPV_ID, Long.toString( markerId ));
 			
 			return markerId;
 		}
