@@ -5,6 +5,7 @@ public final class HttpConstants {
     public static final String VIEW_ID = "viewId";
     public static final String HTTP = "http://";
     public static final String LOCALHOST = "localhost";
+    public static final String ABOUT_BLANK = "about:blank";
     
 	private HttpConstants(){
 	}

@@ -252,7 +252,7 @@ public class VpvSocketProcessor implements Runnable {
 			Activator.logError(e);
 		}
 		
-		if (line == null && line.isEmpty()) {
+		if (line == null || line.isEmpty()) {
 			return null;
 		} else {
 			return line;
