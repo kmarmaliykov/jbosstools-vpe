@@ -34,8 +34,10 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
+import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -115,7 +117,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	public void editorChanged(IEditorPart editor) {
-		if (currentEditor != editor) {
+		if (currentEditor == editor) {
 			// do nothing
 		} else if (editor == null) {
 			browser.setUrl(ABOUT_BLANK);
@@ -311,6 +313,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		if (currentEditor != null) {
 			editorModel = (IDOMModel) currentEditor.getAdapter(IDOMModel.class);
 		}
+
 		IDOMDocument editorIdomDocument = null;
 		if (editorModel != null) {
 			editorIdomDocument = editorModel.getDocument();
@@ -326,6 +329,25 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			editorDocument = editorDocumentElement.getOwnerDocument();
 		}
 		return editorDocument;
+	}
+	
+	@SuppressWarnings("restriction")
+	private Node getNodeBySourcePosition(IDocument document, int position) {
+		IStructuredModel model = null;
+		Node node = null;
+		try {
+			model = StructuredModelManager.getModelManager()
+					.getExistingModelForRead(document);
+
+			node  = (Node) model.getIndexedRegion(position);
+
+		} finally {
+			if (model != null) {
+				model.releaseFromRead();
+			}
+		}
+		
+		return node;
 	}
 	
 	private Node getNodeFromSelection(IStructuredSelection selection) {
