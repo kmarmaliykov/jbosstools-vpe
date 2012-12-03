@@ -13,6 +13,12 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -28,6 +34,8 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
+import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
@@ -53,6 +61,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private SelectionListener selectionListener;
 	
 	private IEditorPart currentEditor;
+
+	private IDocumentListener documentListener;
 	
 	
 	public VpvView() {
@@ -105,17 +115,18 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	public void editorChanged(IEditorPart editor) {
-		if (currentEditor == editor) {
-			return;
+		if (currentEditor != editor) {
+			// do nothing
 		} else if (editor == null) {
 			browser.setUrl(ABOUT_BLANK);
+			setCurrentEditor(null);
 		} else if (isImportant(editor)) {
 			formRequestToServer(editor);
+			setCurrentEditor(editor);
 		} else {
 			browser.setUrl(ABOUT_BLANK);
+			setCurrentEditor(null);
 		}
-
-		setCurrentEditor(editor);
 	}
 	
 	private boolean isImportant(IEditorPart editor) {
@@ -125,10 +136,54 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return false;
 	}
 
-	public void setCurrentEditor(IEditorPart currentEditor) {
+	private void setCurrentEditor(IEditorPart currentEditor) {
+		if (this.currentEditor != null) {
+			IDocument document = (IDocument) this.currentEditor.getAdapter(IDocument.class);
+			if (document != null) {
+				document.removeDocumentListener(getDocumentListener());
+			}
+		}
+		
 		this.currentEditor = currentEditor;
+		
+		if (this.currentEditor != null) {
+			IDocument document = (IDocument) this.currentEditor.getAdapter(IDocument.class);
+			if (document != null) {
+				document.addDocumentListener(getDocumentListener());
+			}
+		}
 	}
 	
+	private IDocumentListener getDocumentListener() {
+		if (documentListener == null) {
+			documentListener = new IDocumentListener() {
+				@Override
+				public void documentChanged(DocumentEvent event) {
+
+				}
+				
+				@Override
+				public void documentAboutToBeChanged(DocumentEvent event) {
+					
+				}
+			};
+		}
+
+		return documentListener;
+	}
+	
+	private void sourceDomChanged(Node commonNode) {
+		Job job = new Job("Preview Update") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+		job.setUser(true);
+		job.schedule();
+	}
+
 	private boolean isCurrentEditor(IEditorPart editorPart) {
 		if (currentEditor == editorPart) {
 			return true;
@@ -242,7 +297,16 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			selectionDocument = selectedNode.getOwnerDocument();
 		}
 		
-		Document editorDocument = null;
+		Document editorDocument = getEditorDomDocument();
+		
+		if (selectionDocument != null && selectionDocument == editorDocument) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private Document getEditorDomDocument() {
 		IDOMModel editorModel = null;
 		if (currentEditor != null) {
 			editorModel = (IDOMModel) currentEditor.getAdapter(IDOMModel.class);
@@ -257,16 +321,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			editorDocumentElement = editorIdomDocument.getDocumentElement();
 		}
 		
+		Document editorDocument = null;
 		if (editorDocumentElement != null) {
 			editorDocument = editorDocumentElement.getOwnerDocument();
 		}
-		
-		
-		if (selectionDocument != null && selectionDocument == editorDocument) {
-			return true;
-		} else {
-			return false;
-		}
+		return editorDocument;
 	}
 	
 	private Node getNodeFromSelection(IStructuredSelection selection) {
@@ -330,25 +389,5 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 //			"}" +
 			"style.id = 'VPV-STYLESHEET';" + 
 			"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')");
-		
-		System.out.println("(function(css) {" +
-				"var style=document.getElementById('VPV-STYLESHEET');" +
-				"if ('\\v' == 'v') /* old ie only */ {" +
-					"if (style == null) {" +
-						"style = document.createStyleSheet();" +
-					"}" +
-					"style.cssText = css;" + // TODO won't work in compatibility mode HTML1113 (without proper doctype)
-				"}" +
-				"else {" +
-					"if (style == null) {" +
-						"style = document.createElement('STYLE');" +
-						"style.type = 'text/css';" +
-					"}" +
-					"style.innerHTML = css;" +
-					"document.body.appendChild(style);" +
-//				"}" +
-				"style.id = 'VPV-STYLESHEET';" + 
-				"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')");
-		
 	}
 }
