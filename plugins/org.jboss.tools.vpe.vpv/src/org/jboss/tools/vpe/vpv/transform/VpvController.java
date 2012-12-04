@@ -7,7 +7,6 @@ import java.io.StringWriter;
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -87,6 +86,10 @@ public class VpvController {
 		} else {
 			// TODO: resourceAcceptor.acceptError or something
 		}
+	}
+	
+	public VisualMutation rebuildSubtree(VpvVisualModel visualModel, Document sourceDocument, Node sourceParent) {
+		return domBuilder.rebuildSubtree(visualModel, sourceDocument, sourceParent);
 	}
 	
 	private static String getMimeType(File file) {
