@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -38,19 +39,26 @@ public class VpvController {
 		Path workspacePath = new Path(path);
 		IFile requestedFile = ResourcesPlugin.getWorkspace().getRoot().getFile(workspacePath);
 		
-		IStructuredModel sourceModel = StructuredModelManager.getModelManager().getExistingModelForEdit(requestedFile);
-		Document sourceDocument = null;
-		if (sourceModel instanceof IDOMModel) {
-			IDOMModel sourceDomModel = (IDOMModel) sourceModel;
-			sourceDocument = sourceDomModel.getDocument();
-		}
-		
 		VpvVisualModel visualModel = null;
-		if (sourceDocument != null) {
-			try {
-				visualModel = domBuilder.buildVisualModel(sourceDocument);
-			} catch (ParserConfigurationException e) {
-				Activator.logError(e);
+		IStructuredModel sourceModel = null;
+		try {
+			sourceModel = StructuredModelManager.getModelManager().getExistingModelForRead(requestedFile);
+			Document sourceDocument = null;
+			if (sourceModel instanceof IDOMModel) {
+				IDOMModel sourceDomModel = (IDOMModel) sourceModel;
+				sourceDocument = sourceDomModel.getDocument();
+			}
+			
+			if (sourceDocument != null) {
+				try {
+					visualModel = domBuilder.buildVisualModel(sourceDocument);
+				} catch (ParserConfigurationException e) {
+					Activator.logError(e);
+				}
+			}
+		} finally {
+			if (sourceModel != null) {
+				sourceModel.releaseFromRead();
 			}
 		}
 		
