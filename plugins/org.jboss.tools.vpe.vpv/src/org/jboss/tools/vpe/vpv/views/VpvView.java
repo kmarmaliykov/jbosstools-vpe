@@ -9,12 +9,16 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
+import static org.jboss.tools.vpe.vpv.transform.DomUtil.*;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
@@ -159,30 +163,107 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IDocumentListener getDocumentListener() {
 		if (documentListener == null) {
 			documentListener = new IDocumentListener() {
-				@Override
-				public void documentChanged(DocumentEvent event) {
 
-				}
-				
 				@Override
 				public void documentAboutToBeChanged(DocumentEvent event) {
-					
+					// Don't handle this event
 				}
+
+				@Override
+				public void documentChanged(DocumentEvent event) {
+					IDocument document = getIDocumentFromCurrentEditor();
+					if (document != null) 	{
+						int startSelectionPosition = event.getOffset();
+						int endSelectionPosition = startSelectionPosition + event.getLength();
+
+						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
+						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
+
+						processNodes(firstSelectedNode, lastSelectedNode);
+					}
+				}
+				
+
+				
+				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
+					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
+						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
+					} else if (firstSelectedNode == lastSelectedNode){
+						sourceDomChanged(firstSelectedNode);
+					} else {
+						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
+						if (commonNode != null){
+							sourceDomChanged(commonNode);
+						}
+					}
+				}
+
+				private Node getCommonNode(Node firstSelectedNode, Node lastSelectedNode) {
+					Node commonNode = null;		
+					Set<Node> allParentNodesOfFirstSelectedNode = getParentNodes(firstSelectedNode);	
+					if (allParentNodesOfFirstSelectedNode.isEmpty()) {
+					      commonNode = getRootNode(firstSelectedNode);
+					} else {
+						allParentNodesOfFirstSelectedNode.add(firstSelectedNode); // firstSelectedNode could be parent node for lastSelectedNode
+						boolean commonNodeNotFound = true;
+						Node parentNodeOfLastSelectedNode = getParentNode(lastSelectedNode);
+
+						while ((parentNodeOfLastSelectedNode != null) && commonNodeNotFound) {
+							if (allParentNodesOfFirstSelectedNode.contains(parentNodeOfLastSelectedNode)) {
+								commonNode = parentNodeOfLastSelectedNode;
+								commonNodeNotFound = false;
+							}
+
+							parentNodeOfLastSelectedNode = getParentNode(parentNodeOfLastSelectedNode);
+
+						}
+
+						if (commonNode == null) {
+							commonNode = getRootNode(firstSelectedNode);
+						}
+
+					}
+
+					return commonNode;
+				}
+
 			};
 		}
 
 		return documentListener;
 	}
 	
-	private void sourceDomChanged(Node commonNode) {
+	private IDocument getIDocumentFromCurrentEditor() {
+		return (IDocument) currentEditor.getAdapter(IDocument.class);
+	}
+	
+	private Node getRootNode(Node node) {
+		return node.getOwnerDocument().getDocumentElement();
+	}
+
+	
+	private Set<Node> getParentNodes(Node firstSelectedNode) {
+		Set<Node> allParentNodes = new HashSet<Node>();
+		Node parentNode = getParentNode(firstSelectedNode) ;
+		while (parentNode != null) {
+			allParentNodes.add(parentNode);
+			parentNode = getParentNode(parentNode);
+		}
+
+		return allParentNodes;
+	}
+	
+	private void sourceDomChanged(final Node commonNode) {
 		Job job = new Job("Preview Update") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// TODO Auto-generated method stub
-				return null;
+				// TODO rebuild subtree
+
+				Document document = commonNode.getOwnerDocument();
+
+				return Status.OK_STATUS;
 			}
 		};
-		job.setUser(true);
 		job.schedule();
 	}
 

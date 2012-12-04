@@ -23,7 +23,7 @@ public class VpvDomBuilder {
 	public static final String ATTR_VPV_ID = "data-vpvid";
 	private static long markerId = 0;
 	private VpvTemplateProvider templateProvider;
-	
+
 	public VpvDomBuilder(VpvTemplateProvider templateProvider) {
 		this.templateProvider = templateProvider;
 	}
@@ -33,12 +33,12 @@ public class VpvDomBuilder {
 		Map<Node, Node> sourceVisualMapping = new HashMap<Node, Node>();
 		Element documentElement = sourceDocument.getDocumentElement();
 		Node visualRoot = convertNode(sourceDocument, documentElement, visualDocument, sourceVisualMapping);
-		
+
 		if (visualRoot != null) {
 			markSubtree(visualRoot);
 			visualDocument.appendChild(visualRoot);
 		}
-		
+
 		VpvVisualModel visualModel = new VpvVisualModel(visualDocument, sourceVisualMapping);
 		return visualModel;
 	}
