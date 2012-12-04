@@ -1,18 +1,20 @@
 package org.jboss.tools.vpe.vpv.transform;
 
+import org.w3c.dom.Node;
+
 public class VisualMutation {
 	private long oldParentId;
-	private long newParentId;
+	private Node newParentNode;
 	
-	public VisualMutation(long oldParentId, long newParentId) {
+	public VisualMutation(long oldParentId, Node newParentNode) {
 		super();
 		this.oldParentId = oldParentId;
-		this.newParentId = newParentId;
+		this.newParentNode = newParentNode;
 	}
 	public long getOldParentId() {
 		return oldParentId;
 	}
-	public long getNewParentId() {
-		return newParentId;
+	public Node getNewParentNode() {
+		return newParentNode;
 	}
 }

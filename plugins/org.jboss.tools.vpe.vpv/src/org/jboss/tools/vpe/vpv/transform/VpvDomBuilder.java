@@ -56,11 +56,20 @@ public class VpvDomBuilder {
 		Map<Node, Node> sourceVisualMapping = visualModel.getSourceVisualMapping();
 		
 		Node mappedSourceParent = sourceParent;
-		while (mappedSourceParent != null 
-				&& sourceVisualMapping.get(mappedSourceParent) == null) {
+		Node oldMappedVisualParent = null;
+		while (true) {
+			if (mappedSourceParent != null) { 
+				oldMappedVisualParent = sourceVisualMapping.get(mappedSourceParent);
+				if (oldMappedVisualParent instanceof Element 
+						&& ((Element) oldMappedVisualParent).hasAttribute(ATTR_VPV_ID)) {
+					break;
+				}
+			} else {
+				break;
+			}
+				
 			mappedSourceParent = DomUtil.getParentNode(mappedSourceParent);
 		}		
-		Node oldMappedVisualParent = sourceVisualMapping.get(mappedSourceParent);
 		
 		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
 		
@@ -76,7 +85,7 @@ public class VpvDomBuilder {
 			DomUtil.getParentNode(oldMappedVisualParent).removeChild(oldMappedVisualParent);
 		}
 
-		return new VisualMutation(oldParentId, newParentId);
+		return new VisualMutation(oldParentId, newMappedVisualParent);
 	}
 	
 	private long getNodeMarkerId(Node oldMappedVisualParent) {

@@ -69,7 +69,7 @@ public class VpvController {
 		String htmlText = null;
 		if (visualModel != null) {
 			try {
-				htmlText = nodeToString(visualModel.getVisualDocument());
+				htmlText = DomUtil.nodeToString(visualModel.getVisualDocument());
 			} catch (TransformerException e) {
 				Activator.logError(e);
 			}
@@ -88,10 +88,6 @@ public class VpvController {
 		}
 	}
 	
-	public VisualMutation rebuildSubtree(VpvVisualModel visualModel, Document sourceDocument, Node sourceParent) {
-		return domBuilder.rebuildSubtree(visualModel, sourceDocument, sourceParent);
-	}
-	
 	private static String getMimeType(File file) {
 		MimetypesFileTypeMap mimeTypes;
 		try {
@@ -101,23 +97,5 @@ public class VpvController {
 			Activator.logError(e);
 			return "application/octet-stream";
 		}
-	}
-
-	public static String nodeToString(Node node) throws TransformerException {
-		Transformer transformer = getTransformer();
-		StringWriter buffer = new StringWriter();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-		transformer.transform(new DOMSource(node), new StreamResult(buffer));
-		return buffer.toString();
-	}
-	
-	private static Transformer transformer;
-	public static Transformer getTransformer() throws TransformerConfigurationException {
-		if (transformer == null) {
-			TransformerFactory transFactory = TransformerFactory.newInstance();
-			transformer = transFactory.newTransformer();
-		}
-		
-		return transformer;
 	}
 }

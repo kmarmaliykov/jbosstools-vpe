@@ -29,6 +29,8 @@ public class Activator extends AbstractUIPlugin {
 	private VpvServer server;
 
 	private VpvVisualModelHolderRegistry visualModelHolderRegistry;
+
+	private VpvDomBuilder domBuilder;
 	
 	/**
 	 * The constructor
@@ -45,7 +47,7 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		
 		VpvTemplateProvider templateProvider = new VpvTemplateProvider();
-		VpvDomBuilder domBuilder = new VpvDomBuilder(templateProvider);
+		domBuilder = new VpvDomBuilder(templateProvider);
 		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
 		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
 //		vpvController.getResource("jspTest", "/WebContent/pages/components/body.jsp", null, new ResourceAcceptor() {
@@ -72,6 +74,7 @@ public class Activator extends AbstractUIPlugin {
 		server.stop();
 		server = null;
 		visualModelHolderRegistry = null;
+		domBuilder = null;
 		
 		plugin = null;
 		super.stop(context);
@@ -88,6 +91,10 @@ public class Activator extends AbstractUIPlugin {
 	
 	public VpvVisualModelHolderRegistry getVisualModelHolderRegistry() {
 		return visualModelHolderRegistry;
+	}
+
+	public VpvDomBuilder getDomBuilder() {
+		return domBuilder;
 	}
 
 	/**

@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.transform.TransformerException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,11 +44,13 @@ import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
+import org.jboss.tools.vpe.vpv.transform.VisualMutation;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
 import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
@@ -171,10 +175,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					IDocument document = getIDocumentFromCurrentEditor();
+					IDocument document = event.getDocument();
 					if (document != null) 	{
 						int startSelectionPosition = event.getOffset();
-						int endSelectionPosition = startSelectionPosition + event.getLength();
+						int endSelectionPosition = startSelectionPosition + event.getText().length();
 
 						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
 						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
@@ -188,8 +192,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
 					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
 						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
-					} else if (firstSelectedNode == lastSelectedNode){
-						sourceDomChanged(firstSelectedNode);
 					} else {
 						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
 						if (commonNode != null){
@@ -198,33 +200,28 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					}
 				}
 
-				private Node getCommonNode(Node firstSelectedNode, Node lastSelectedNode) {
-					Node commonNode = null;		
-					Set<Node> allParentNodesOfFirstSelectedNode = getParentNodes(firstSelectedNode);	
-					if (allParentNodesOfFirstSelectedNode.isEmpty()) {
-					      commonNode = getRootNode(firstSelectedNode);
+				private Node getCommonNode(Node firstNode, Node secondNode) {
+					if (firstNode == secondNode) {
+						return firstNode;
 					} else {
-						allParentNodesOfFirstSelectedNode.add(firstSelectedNode); // firstSelectedNode could be parent node for lastSelectedNode
-						boolean commonNodeNotFound = true;
-						Node parentNodeOfLastSelectedNode = getParentNode(lastSelectedNode);
-
-						while ((parentNodeOfLastSelectedNode != null) && commonNodeNotFound) {
-							if (allParentNodesOfFirstSelectedNode.contains(parentNodeOfLastSelectedNode)) {
-								commonNode = parentNodeOfLastSelectedNode;
-								commonNodeNotFound = false;
+						Set<Node> firstNodeParents = getParentNodes(firstNode);	
+						firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
+						
+						Node commonNode = null;
+						Node secondNodeParent = secondNode;
+						while (secondNodeParent != null && commonNode == null) {
+							if (firstNodeParents.contains(secondNodeParent)) {
+								commonNode = secondNodeParent;
 							}
-
-							parentNodeOfLastSelectedNode = getParentNode(parentNodeOfLastSelectedNode);
-
+							secondNodeParent = getParentNode(secondNodeParent);
 						}
-
+	
 						if (commonNode == null) {
-							commonNode = getRootNode(firstSelectedNode);
+							commonNode = getRootNode(firstNode);
 						}
-
+						
+						return commonNode;
 					}
-
-					return commonNode;
 				}
 
 			};
@@ -257,9 +254,33 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		Job job = new Job("Preview Update") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				// TODO rebuild subtree
-
-				Document document = commonNode.getOwnerDocument();
+				VpvDomBuilder domBuilder = Activator.getDefault().getDomBuilder();
+				Document sourceDocument = commonNode.getOwnerDocument();
+				if (domBuilder != null) {
+//					if (commonNode.getNodeType() == Node.ELEMENT_NODE) {
+//						System.out.println("node = " + commonNode.getNodeName());
+//					} else {
+//						System.out.println("node.Parent= " + (getParentNode(commonNode) == null ? null : getParentNode(commonNode).getNodeName()));
+//					}
+					final VisualMutation mutation = domBuilder.rebuildSubtree(visualModel, sourceDocument, commonNode);
+					try {
+						final String newParentHtml = DomUtil.nodeToString(mutation.getNewParentNode())
+								.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r")
+								.replace("\"", "\\\"").replace("\'", "\\\'");
+						browser.getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+									browser.execute(
+											"var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" +
+											"oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');" +
+											"oldElement.parentElement.removeChild(oldElement);"
+											);
+							}
+						});
+					} catch (TransformerException e) {
+						Activator.logError(e);
+					}
+				}
 
 				return Status.OK_STATUS;
 			}
@@ -417,11 +438,13 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		IStructuredModel model = null;
 		Node node = null;
 		try {
-			model = StructuredModelManager.getModelManager()
-					.getExistingModelForRead(document);
-
-			node  = (Node) model.getIndexedRegion(position);
-
+			model = StructuredModelManager.getModelManager().getExistingModelForRead(document);
+			if (model != null) {
+				IndexedRegion indexedRegion = model.getIndexedRegion(position);
+				if (indexedRegion instanceof Node) {
+					node  = (Node) indexedRegion;
+				}
+			}
 		} finally {
 			if (model != null) {
 				model.releaseFromRead();
