@@ -389,8 +389,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				Node sourceNode = getNodeFromSelection((IStructuredSelection) selection);
 				Long idForSelection = getIdForSelection(sourceNode, visualModel);
 				setBrowserSelection(idForSelection);
+				scrollToSelection(idForSelection);
 			}
 		}
+
+
 
 		
 	}
@@ -516,5 +519,14 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 //			"}" +
 			"style.id = 'VPV-STYLESHEET';" + 
 			"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')");
+	}
+	
+	private void scrollToSelection(Long idForSelection) {
+		browser.execute(
+				"(function(){" +
+						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"]');" +
+						"selectedElement.scrollIntoView(true);" +
+				"})()"  
+		);
 	}
 }
