@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PreDestroy;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.IFile;
@@ -81,9 +82,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	
 	@Override
 	public void dispose() {
-		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		getSite().getPage().removePartListener(editorListener);
 		getSite().getPage().removeSelectionListener(selectionListener);
+		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		super.dispose();
 	}
 	
@@ -96,7 +97,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
-		EditorListener editorListener = new EditorListener();
+		editorListener = new EditorListener();
 		getSite().getPage().addPartListener(editorListener);
 		editorListener.showBootstrapPart();
 	}
