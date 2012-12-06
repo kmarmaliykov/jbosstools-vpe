@@ -2,17 +2,10 @@ package org.jboss.tools.vpe.vpv.transform;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -22,7 +15,6 @@ import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
 public class VpvController {

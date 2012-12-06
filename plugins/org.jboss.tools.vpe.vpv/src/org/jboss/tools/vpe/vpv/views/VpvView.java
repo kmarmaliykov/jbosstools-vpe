@@ -9,7 +9,6 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.REFRESH;
 import static org.jboss.tools.vpe.vpv.transform.DomUtil.*;
 
 import java.util.HashSet;
@@ -23,6 +22,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -30,12 +32,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
@@ -65,9 +64,11 @@ import org.w3c.dom.Node;
 
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
-	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView";
+	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
 
 	private Browser browser;
+	
+	private IAction refreshAction;
 	
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
@@ -93,23 +94,23 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(1, false));
-		
-		Button refreshButton = new Button(parent, SWT.PUSH);
-		refreshButton.setText(REFRESH);
-		refreshButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				browser.refresh();
-			}
-		});
-		
+		parent.setLayout(new FillLayout());	
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
-		GridData data = new GridData(GridData.FILL_BOTH);
-		browser.setLayoutData(data);
-		
 		inizializeSelectionListener();	
 		inizializeEditorListener(browser, modelHolderId);
+		
+		makeActions();
+		contributeToActionBars();
+	}
+	
+	private void contributeToActionBars() {
+		IActionBars bars = getViewSite().getActionBars();
+		fillLocalToolBar(bars.getToolBarManager());
+	}
+
+	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(refreshAction);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
@@ -247,6 +248,18 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return documentListener;
 	}
 	
+	private void makeActions() {
+		refreshAction = new Action() {
+			public void run() {
+				browser.refresh();
+			}
+		};
+		refreshAction.setText(Messages.VpvView_REFRESH);
+		refreshAction.setToolTipText(Messages.VpvView_REFRESH);
+		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
+	}
+	   
+	
 	private IDocument getIDocumentFromCurrentEditor() {
 		return (IDocument) currentEditor.getAdapter(IDocument.class);
 	}
@@ -268,7 +281,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	private void sourceDomChanged(final Node commonNode) {
-		Job job = new Job("Preview Update") {
+		Job job = new Job("Preview Update") { //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				VpvDomBuilder domBuilder = Activator.getDefault().getDomBuilder();
@@ -282,15 +295,15 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					final VisualMutation mutation = domBuilder.rebuildSubtree(visualModel, sourceDocument, commonNode);
 					try {
 						final String newParentHtml = DomUtil.nodeToString(mutation.getNewParentNode())
-								.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r")
-								.replace("\"", "\\\"").replace("\'", "\\\'");
+								.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+								.replace("\"", "\\\"").replace("\'", "\\\'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 						browser.getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
 									browser.execute(
-											"var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" +
-											"oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');" +
-											"oldElement.parentElement.removeChild(oldElement);"
+											"var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+											"oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');" + //$NON-NLS-1$ //$NON-NLS-2$
+											"oldElement.parentElement.removeChild(oldElement);" //$NON-NLS-1$
 											);
 							}
 						});
@@ -316,8 +329,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		String projectName = ifile.getProject().getName();
 		String projectRelativePath = ifile.getProjectRelativePath().toString();
 		int port = Activator.getDefault().getServer().getPort();
-		String url = HTTP + LOCALHOST + ":" + port + "/" + projectRelativePath + "?" + PROJECT_NAME + "="
-				+ projectName + "&" + VIEW_ID + "=" + modelHolderId;
+		String url = HTTP + LOCALHOST + ":" + port + "/" + projectRelativePath + "?" + PROJECT_NAME + "=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ projectName + "&" + VIEW_ID + "=" + modelHolderId; //$NON-NLS-1$ //$NON-NLS-2$
 
 		return url;
 	}
@@ -335,7 +348,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		IFile ifile = getFileOpenedInEditor(editor);
 		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
 			String url = formUrl(ifile);
-			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache, no-store" });
+			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache, no-store" }); //$NON-NLS-1$
 		} else {
 			browser.setUrl(ABOUT_BLANK);
 		}
@@ -345,9 +358,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
-			Activator.logInfo(partRef + " is Activated");
+			Activator.logInfo(partRef + " is Activated"); //$NON-NLS-1$
 			if (partRef instanceof EditorReference) {
-				Activator.logInfo("instance of Editor reference");
+				Activator.logInfo("instance of Editor reference"); //$NON-NLS-1$
 				IEditorPart editor = ((EditorReference) partRef).getEditor(false);
 				editorChanged(editor);
 			}
@@ -355,12 +368,12 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {
-			Activator.logInfo(partRef + " is Opened");
+			Activator.logInfo(partRef + " is Opened"); //$NON-NLS-1$
 		}
 
 		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
-			Activator.logInfo(partRef + " is Closed");
+			Activator.logInfo(partRef + " is Closed"); //$NON-NLS-1$
 			if (partRef instanceof EditorReference) {
 				IEditorPart editorPart = ((EditorReference) partRef).getEditor(false);
 				if (isCurrentEditor(editorPart)) {
@@ -517,8 +530,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	
 	private void setBrowserSelection(Long idForSelection) {
 		browser.execute(
-		"(function(css) {" +
-			"var style=document.getElementById('VPV-STYLESHEET');" +
+		"(function(css) {" + //$NON-NLS-1$
+			"var style=document.getElementById('VPV-STYLESHEET');" + //$NON-NLS-1$
 //			"if ('\\v' == 'v') /* ie only */ {alert('ie');" +
 //				"if (style == null) {" +
 //					"style = document.createStyleSheet();" +
@@ -526,23 +539,23 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 //				"style.cssText = css;" +
 //			"}" +
 //			"else {" +
-				"if (style == null) {" +
-					"style = document.createElement('STYLE');" +
-					"style.type = 'text/css';" +
-				"}" +
-				"style.innerHTML = css;" +
-				"document.body.appendChild(style);" +
+				"if (style == null) {" + //$NON-NLS-1$
+					"style = document.createElement('STYLE');" + //$NON-NLS-1$
+					"style.type = 'text/css';" + //$NON-NLS-1$
+				"}" + //$NON-NLS-1$
+				"style.innerHTML = css;" + //$NON-NLS-1$
+				"document.body.appendChild(style);" + //$NON-NLS-1$
 //			"}" +
-			"style.id = 'VPV-STYLESHEET';" + 
-			"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')");
+			"style.id = 'VPV-STYLESHEET';" +  //$NON-NLS-1$
+			"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	private void scrollToSelection(Long idForSelection) {
 		browser.execute(
-				"(function(){" +
-						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"]');" +
-						"selectedElement.scrollIntoView(true);" +
-				"})()"  
+				"(function(){" + //$NON-NLS-1$
+						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
+				"})()"   //$NON-NLS-1$
 		);
 	}
 }

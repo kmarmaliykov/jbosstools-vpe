@@ -1,6 +1,5 @@
 package org.jboss.tools.vpe.vpv;
 
-import java.io.File;
 import java.net.URL;
 
 import org.eclipse.core.runtime.IStatus;
@@ -8,7 +7,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.jboss.tools.vpe.vpv.server.VpvServer;
-import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.vpv.transform.VpvTemplateProvider;
