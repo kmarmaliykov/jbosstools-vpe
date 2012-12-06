@@ -9,13 +9,13 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
+import static org.jboss.tools.vpe.vpv.server.HttpConstants.REFRESH;
 import static org.jboss.tools.vpe.vpv.transform.DomUtil.*;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PreDestroy;
 import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.IFile;
@@ -30,7 +30,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -89,9 +93,21 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new FillLayout());
+		parent.setLayout(new GridLayout(1, false));
+		
+		Button refreshButton = new Button(parent, SWT.PUSH);
+		refreshButton.setText(REFRESH);
+		refreshButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				browser.refresh();
+			}
+		});
+		
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
+		GridData data = new GridData(GridData.FILL_BOTH);
+		browser.setLayoutData(data);
+		
 		inizializeSelectionListener();	
 		inizializeEditorListener(browser, modelHolderId);
 	}
