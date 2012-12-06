@@ -9,13 +9,8 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
-import static org.jboss.tools.vpe.vpv.transform.DomUtil.*;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-
-import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +27,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.ProgressAdapter;
+import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
@@ -39,11 +36,15 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
 import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
@@ -67,8 +68,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
 
 	private Browser browser;
-	
 	private IAction refreshAction;
+	private Job currentJob;
 	
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
@@ -97,6 +98,13 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		parent.setLayout(new FillLayout());	
 		browser = new Browser(parent, SWT.NONE);
 		browser.setUrl(ABOUT_BLANK);
+		browser.addProgressListener(new ProgressAdapter() {
+			@Override
+			public void completed(ProgressEvent event) {
+				ISelection currentSelection = getCurrentSelection();
+				updateSelectionAndScrollToIt(currentSelection);
+			}
+		});
 		inizializeSelectionListener();	
 		inizializeEditorListener(browser, modelHolderId);
 		
@@ -193,54 +201,64 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					IDocument document = event.getDocument();
-					if (document != null) 	{
-						int startSelectionPosition = event.getOffset();
-						int endSelectionPosition = startSelectionPosition + event.getText().length();
-
-						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
-						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
-
-						processNodes(firstSelectedNode, lastSelectedNode);
+		            	
+					if (currentJob == null || currentJob.getState() != Job.WAITING) {
+						if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
+							currentJob.cancel();
+						}
+						currentJob = createPreviewUpdateJob();
 					}
+					
+					currentJob.schedule(500);
+					
+//					IDocument document = event.getDocument();
+//					if (document != null) 	{
+//						int startSelectionPosition = event.getOffset();
+//						int endSelectionPosition = startSelectionPosition + event.getText().length();
+//
+//						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
+//						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
+//
+//						processNodes(firstSelectedNode, lastSelectedNode);
+//					}
 				}
 				
 
 				
-				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
-					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
-						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
-					} else {
-						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
-						if (commonNode != null){
-							sourceDomChanged(commonNode);
-						}
-					}
-				}
+//				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
+//					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
+//						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
+//					} else {
+//						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
+//						if (commonNode != null){
+//							sourceDomChanged(commonNode);
+//						}
+//					}
+//				}
 
-				private Node getCommonNode(Node firstNode, Node secondNode) {
-					if (firstNode == secondNode) {
-						return firstNode;
-					} else {
-						Set<Node> firstNodeParents = getParentNodes(firstNode);	
-						firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
-						
-						Node commonNode = null;
-						Node secondNodeParent = secondNode;
-						while (secondNodeParent != null && commonNode == null) {
-							if (firstNodeParents.contains(secondNodeParent)) {
-								commonNode = secondNodeParent;
-							}
-							secondNodeParent = getParentNode(secondNodeParent);
-						}
-	
-						if (commonNode == null) {
-							commonNode = getRootNode(firstNode);
-						}
-						
-						return commonNode;
-					}
-				}
+//				private Node getCommonNode(Node firstNode, Node secondNode) {
+//					if (firstNode == secondNode) {
+//						return firstNode;
+//					} else {
+//						Set<Node> firstNodeParents = getParentNodes(firstNode);	
+//						firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
+//						
+//						Node commonNode = null;
+//						Node secondNodeParent = secondNode;
+//						while (secondNodeParent != null && commonNode == null) {
+//							if (firstNodeParents.contains(secondNodeParent)) {
+//								commonNode = secondNodeParent;
+//							}
+//							secondNodeParent = getParentNode(secondNodeParent);
+//						}
+//	
+//						if (commonNode == null) {
+//							commonNode = getRootNode(firstNode);
+//						}
+//						
+//						return commonNode;
+//					}
+//				}
 
 			};
 		}
@@ -258,64 +276,18 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		refreshAction.setToolTipText(Messages.VpvView_REFRESH);
 		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
 	}
-	   
-	
-	private IDocument getIDocumentFromCurrentEditor() {
-		return (IDocument) currentEditor.getAdapter(IDocument.class);
-	}
-	
-	private Node getRootNode(Node node) {
-		return node.getOwnerDocument().getDocumentElement();
-	}
-
-	
-	private Set<Node> getParentNodes(Node firstSelectedNode) {
-		Set<Node> allParentNodes = new HashSet<Node>();
-		Node parentNode = getParentNode(firstSelectedNode) ;
-		while (parentNode != null) {
-			allParentNodes.add(parentNode);
-			parentNode = getParentNode(parentNode);
-		}
-
-		return allParentNodes;
-	}
-	
-	private void sourceDomChanged(final Node commonNode) {
-		Job job = new Job("Preview Update") { //$NON-NLS-1$
+	   	
+	private Job createPreviewUpdateJob() {
+		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				VpvDomBuilder domBuilder = Activator.getDefault().getDomBuilder();
-				Document sourceDocument = commonNode.getOwnerDocument();
-				if (domBuilder != null) {
-//					if (commonNode.getNodeType() == Node.ELEMENT_NODE) {
-//						System.out.println("node = " + commonNode.getNodeName());
-//					} else {
-//						System.out.println("node.Parent= " + (getParentNode(commonNode) == null ? null : getParentNode(commonNode).getNodeName()));
-//					}
-					final VisualMutation mutation = domBuilder.rebuildSubtree(visualModel, sourceDocument, commonNode);
-					try {
-						final String newParentHtml = DomUtil.nodeToString(mutation.getNewParentNode())
-								.replace("\\", "\\\\").replace("\n", "\\n").replace("\r", "\\r") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-								.replace("\"", "\\\"").replace("\'", "\\\'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-						browser.getDisplay().asyncExec(new Runnable() {
-							@Override
-							public void run() {
-									browser.execute(
-											"var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-											"oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');" + //$NON-NLS-1$ //$NON-NLS-2$
-											"oldElement.parentElement.removeChild(oldElement);" //$NON-NLS-1$
-											);
-							}
-						});
-					} catch (TransformerException e) {
-						Activator.logError(e);
-					}
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (!browser.isDisposed()) {
+					browser.refresh();
 				}
-
 				return Status.OK_STATUS;
 			}
 		};
-		job.schedule();
+		return job;
 	}
 
 	private boolean isCurrentEditor(IEditorPart editorPart) {
@@ -414,17 +386,19 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 		@Override
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if(selection instanceof IStructuredSelection && isInCurrentEditor((IStructuredSelection) selection)){
-				Node sourceNode = getNodeFromSelection((IStructuredSelection) selection);
-				Long idForSelection = getIdForSelection(sourceNode, visualModel);
-				setBrowserSelection(idForSelection);
-				scrollToSelection(idForSelection);
+			if (selection instanceof IStructuredSelection && isInCurrentEditor((IStructuredSelection) selection)) {
+				updateSelectionAndScrollToIt(selection);
 			}
 		}
-
-
-
-		
+	}
+	
+	private ISelection getCurrentSelection() {
+		Activator activator = Activator.getDefault();
+		IWorkbench workbench = activator.getWorkbench();
+		IWorkbenchWindow workbenchWindow = workbench.getActiveWorkbenchWindow();
+		ISelectionService selectionService = workbenchWindow.getSelectionService();
+		ISelection selection = selectionService.getSelection();
+		return selection;
 	}
 
 	private boolean isInCurrentEditor(IStructuredSelection selection) {
@@ -497,38 +471,46 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	public Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
-		Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();
-		
-		Node visualNode = null;
-		Node sourceNode = selectedSourceNode;
-		do {
-			visualNode = sourceVisuaMapping.get(sourceNode);
-			sourceNode = DomUtil.getParentNode(sourceNode);
-		} while (visualNode == null && sourceNode != null);
-		
-		if (!(visualNode instanceof Element)) { // text node, comment, etc
-			visualNode = DomUtil.getParentNode(visualNode); // should be element now or null
-		}
-		
-		String idString = null;
-		if (visualNode instanceof Element) {
-			Element elementNode = (Element) visualNode;
-			idString = elementNode.getAttribute(VpvDomBuilder.ATTR_VPV_ID);
-		}
-		
 		Long id = null;
-		if (idString != null && !idString.isEmpty()) {
-			try {
-				id = Long.parseLong(idString);
-			} catch (NumberFormatException e) {
-				Activator.logError(e);
+		if (selectedSourceNode != null && visualModel != null) {
+			Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();
+			
+			Node visualNode = null;
+			Node sourceNode = selectedSourceNode;
+			do {
+				visualNode = sourceVisuaMapping.get(sourceNode);
+				sourceNode = DomUtil.getParentNode(sourceNode);
+			} while (visualNode == null && sourceNode != null);
+			
+			if (!(visualNode instanceof Element)) { // text node, comment, etc
+				visualNode = DomUtil.getParentNode(visualNode); // should be element now or null
+			}
+			
+			String idString = null;
+			if (visualNode instanceof Element) {
+				Element elementNode = (Element) visualNode;
+				idString = elementNode.getAttribute(VpvDomBuilder.ATTR_VPV_ID);
+			}
+			
+			if (idString != null && !idString.isEmpty()) {
+				try {
+					id = Long.parseLong(idString);
+				} catch (NumberFormatException e) {
+					Activator.logError(e);
+				}
 			}
 		}
-		
 		return id;
 	}
 	
-	private void setBrowserSelection(Long idForSelection) {
+	private void updateBrowserSelection(Long currentSelectionId) {
+		String selectionStyle;
+		if (currentSelectionId == null) {
+			selectionStyle = "";
+		} else {
+			selectionStyle = "'[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"] {outline: 2px solid blue;}'";
+		}
+		
 		browser.execute(
 		"(function(css) {" + //$NON-NLS-1$
 			"var style=document.getElementById('VPV-STYLESHEET');" + //$NON-NLS-1$
@@ -547,15 +529,26 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				"document.body.appendChild(style);" + //$NON-NLS-1$
 //			"}" +
 			"style.id = 'VPV-STYLESHEET';" +  //$NON-NLS-1$
-			"})('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"] {outline: 2px solid blue;}')"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"})(" + selectionStyle + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
-	private void scrollToSelection(Long idForSelection) {
-		browser.execute(
-				"(function(){" + //$NON-NLS-1$
-						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + idForSelection + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
-				"})()"   //$NON-NLS-1$
-		);
+	private void scrollToId(Long currentSelectionId) {
+		if (currentSelectionId != null) {
+			browser.execute(
+					"(function(){" + //$NON-NLS-1$
+							"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
+					"})()"   //$NON-NLS-1$
+			);
+		}
+	}
+
+	private void updateSelectionAndScrollToIt(ISelection currentSelection) {
+		if (currentSelection instanceof IStructuredSelection) {
+			Node sourceNode = getNodeFromSelection((IStructuredSelection) currentSelection);
+			Long currentSelectionId = getIdForSelection(sourceNode, visualModel);
+			updateBrowserSelection(currentSelectionId);
+			scrollToId(currentSelectionId);
+		}
 	}
 }
