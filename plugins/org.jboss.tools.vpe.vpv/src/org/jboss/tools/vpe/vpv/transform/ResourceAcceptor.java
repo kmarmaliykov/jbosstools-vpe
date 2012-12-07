@@ -8,4 +8,5 @@ public interface ResourceAcceptor {
 
 	void acceptFile(File file, String mimeType);
 
+	void acceptError();
 }

@@ -76,7 +76,7 @@ public class VpvController {
 			String mimeType = getMimeType(file);
 			resourceAcceptor.acceptFile(file, mimeType);
 		} else {
-			// TODO: resourceAcceptor.acceptError or something
+			resourceAcceptor.acceptError();
 		}
 	}
 	

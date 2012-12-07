@@ -109,6 +109,11 @@ public class VpvSocketProcessor implements Runnable {
                     }
                 }
             }
+
+			@Override
+			public void acceptError() {
+				 processNotFound(outputToClient);	   
+			}
         });
     }
 
