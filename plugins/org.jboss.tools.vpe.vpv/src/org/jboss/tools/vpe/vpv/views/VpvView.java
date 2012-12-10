@@ -58,7 +58,6 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.vpv.Activator;
-import org.jboss.tools.vpe.vpv.exceptions.ExceptionNotifier;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.VisualMutation;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
@@ -288,7 +287,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					Program.launch(url.toString());
 				} catch (MalformedURLException e) {
 					Activator.logError(e);
-					ExceptionNotifier.showErrorMessage(new Shell(), Messages.VpvView_COULD_NOT_OPEN_DEFAULT_BROWSER + e.getMessage());
 				}
 			}
 		}; 
