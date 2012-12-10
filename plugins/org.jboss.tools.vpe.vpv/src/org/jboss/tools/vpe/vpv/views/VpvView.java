@@ -292,6 +292,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					disableAutomaticRefresh = true;
 				} else {
 					disableAutomaticRefresh = false;
+					browser.refresh();
 				}
 			}
 		};
