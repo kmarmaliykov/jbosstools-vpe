@@ -10,6 +10,8 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
@@ -30,7 +32,9 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressAdapter;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -54,6 +58,7 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.vpv.Activator;
+import org.jboss.tools.vpe.vpv.exceptions.ExceptionNotifier;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.VisualMutation;
 import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
@@ -69,6 +74,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	private Browser browser;
 	private IAction refreshAction;
+	private IAction openInDefaultBrowserAction;
 	private Job currentJob;
 	
 	private VpvVisualModel visualModel;
@@ -119,6 +125,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
+		manager.add(openInDefaultBrowserAction);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
@@ -267,6 +274,31 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	private void makeActions() {
+		makeRefreshAction();
+		makeOpenInDefaultBrowserAction();
+
+	}
+	
+	private void makeOpenInDefaultBrowserAction() {
+		openInDefaultBrowserAction = new Action() {
+			public void run(){
+				URL url;
+				try {
+					url = new URL(browser.getUrl()); // validate URL (to do not open 'about:blank' and similar)
+					Program.launch(url.toString());
+				} catch (MalformedURLException e) {
+					Activator.logError(e);
+					ExceptionNotifier.showErrorMessage(new Shell(), Messages.VpvView_COULD_NOT_OPEN_DEFAULT_BROWSER + e.getMessage());
+				}
+			}
+		}; 
+		
+		openInDefaultBrowserAction.setText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
+		openInDefaultBrowserAction.setToolTipText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
+		openInDefaultBrowserAction.setImageDescriptor(Activator.getImageDescriptor("icons/open_in_default_browser.gif"));
+	}
+
+	private void makeRefreshAction() {
 		refreshAction = new Action() {
 			public void run() {
 				browser.refresh();
@@ -275,6 +307,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		refreshAction.setText(Messages.VpvView_REFRESH);
 		refreshAction.setToolTipText(Messages.VpvView_REFRESH);
 		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
+
 	}
 	   	
 	private Job createPreviewUpdateJob() {
