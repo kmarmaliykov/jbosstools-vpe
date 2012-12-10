@@ -74,6 +74,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private Browser browser;
 	private IAction refreshAction;
 	private IAction openInDefaultBrowserAction;
+	private IAction disableAutomaticRefreshAction;
+	private boolean disableAutomaticRefresh = false;
+	
 	private Job currentJob;
 	
 	private VpvVisualModel visualModel;
@@ -125,6 +128,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
 		manager.add(openInDefaultBrowserAction);
+		manager.add(disableAutomaticRefreshAction);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
@@ -207,15 +211,15 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-		            	
-					if (currentJob == null || currentJob.getState() != Job.WAITING) {
-						if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
-							currentJob.cancel();
+					if (!disableAutomaticRefresh) { 
+						if (currentJob == null || currentJob.getState() != Job.WAITING) {
+							if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
+								currentJob.cancel();
+							}
+							currentJob = createPreviewUpdateJob();
 						}
-						currentJob = createPreviewUpdateJob();
-					}
-					
-					currentJob.schedule(500);
+
+						currentJob.schedule(500);
 					
 //					IDocument document = event.getDocument();
 //					if (document != null) 	{
@@ -227,6 +231,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 //
 //						processNodes(firstSelectedNode, lastSelectedNode);
 //					}
+					}
 				}
 				
 
@@ -275,9 +280,26 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void makeActions() {
 		makeRefreshAction();
 		makeOpenInDefaultBrowserAction();
+		makeDisableAutomaticRefreshAction();
 
 	}
-	
+
+	private void makeDisableAutomaticRefreshAction() {
+		disableAutomaticRefreshAction = new Action(Messages.VpvView_DISABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (disableAutomaticRefreshAction.isChecked()) {
+					disableAutomaticRefresh = true;
+				} else {
+					disableAutomaticRefresh = false;
+				}
+			}
+		};
+
+		disableAutomaticRefreshAction.setChecked(false);
+		disableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.gif"));
+	}
+
 	private void makeOpenInDefaultBrowserAction() {
 		openInDefaultBrowserAction = new Action() {
 			public void run(){
