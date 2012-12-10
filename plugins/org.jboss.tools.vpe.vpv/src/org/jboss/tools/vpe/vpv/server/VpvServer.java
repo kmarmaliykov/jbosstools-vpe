@@ -1,6 +1,7 @@
 package org.jboss.tools.vpe.vpv.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -23,7 +24,7 @@ public class VpvServer implements Runnable {
 	@Override
 	public void run() {
 		try {
-			serverSocket = new ServerSocket(0);
+			serverSocket = new ServerSocket(0, 0, InetAddress.getByName("localhost"));
 			while (true) {
 				Socket clientSocket = serverSocket.accept();
 				VpvSocketProcessor serverProcessor = new VpvSocketProcessor(clientSocket, vpvController);
