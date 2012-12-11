@@ -34,7 +34,6 @@ import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -292,7 +291,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 					disableAutomaticRefresh = true;
 				} else {
 					disableAutomaticRefresh = false;
-					browser.refresh();
+					refresh(browser);
 				}
 			}
 		};
@@ -322,7 +321,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void makeRefreshAction() {
 		refreshAction = new Action() {
 			public void run() {
-				browser.refresh();
+				refresh(browser);
 			}
 		};
 		refreshAction.setText(Messages.VpvView_REFRESH);
@@ -336,12 +335,16 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (!browser.isDisposed()) {
-					browser.refresh();
+					refresh(browser);
 				}
 				return Status.OK_STATUS;
 			}
 		};
 		return job;
+	}
+	
+	private void refresh(Browser browser){
+		browser.setUrl(browser.getUrl());
 	}
 
 	private boolean isCurrentEditor(IEditorPart editorPart) {
