@@ -10,18 +10,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
+
+import static org.jboss.tools.vpe.vpv.util.TimeUtil.*;
 
 public class VpvSocketProcessor implements Runnable {
 
@@ -32,6 +29,7 @@ public class VpvSocketProcessor implements Runnable {
 	private Socket clientSocket;
 	private VpvController vpvController;
 
+
 	public VpvSocketProcessor(Socket clientSocket, VpvController vpvController) {
 		this.clientSocket = clientSocket;
 		this.vpvController = vpvController;
@@ -40,7 +38,7 @@ public class VpvSocketProcessor implements Runnable {
 	@Override
 	public void run() {
 		try {	
-			InputStream inputStream = clientSocket.getInputStream();
+ 			InputStream inputStream = clientSocket.getInputStream();
 			OutputStream outputStream = clientSocket.getOutputStream();
 
 			BufferedReader inputFromClient = new BufferedReader(new InputStreamReader(inputStream));
@@ -78,7 +76,8 @@ public class VpvSocketProcessor implements Runnable {
 
             @Override
             public void acceptText(String text, String mimeType) {
-                String responceHeader = getOkResponceHeader(mimeType);
+            	String currentDate = toGMTString(new Date());
+                String responceHeader = getOkResponceHeader(mimeType,  currentDate);
                 try {
                     outputToClient.writeBytes(responceHeader);
                     outputToClient.writeBytes(text);
@@ -95,7 +94,10 @@ public class VpvSocketProcessor implements Runnable {
 
             @Override
             public void acceptFile(File file, String mimeType) {
-                String responceHeader = getOkResponceHeader(mimeType);
+            	Date fileLastModifiedDate = new Date(file.lastModified()); 
+            	String fileLastModifiedDateInGMT = toGMTString(fileLastModifiedDate); // getting file last modified date
+                
+            	String responceHeader = getOkResponceHeader(mimeType, fileLastModifiedDateInGMT);
                 try {
                     outputToClient.writeBytes(responceHeader);
                     sendFile(file, outputToClient);
@@ -109,6 +111,7 @@ public class VpvSocketProcessor implements Runnable {
                     }
                 }
             }
+
 
 			@Override
 			public void acceptError() {
@@ -315,37 +318,27 @@ public class VpvSocketProcessor implements Runnable {
     public void setClientSocket(Socket clientSocket) {
         this.clientSocket = clientSocket;
     }
-	
-	private String getOkResponceHeader(String mimeType) {
-		Date date = new Date();
-		String HTTP_RESPONSE_DATE_HEADER =
-			        "EEE, dd MMM yyyy HH:mm:ss zzz";
-		DateFormat httpDateFormat =
-		        new SimpleDateFormat(HTTP_RESPONSE_DATE_HEADER, Locale.US);
-		httpDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		String httpDate = httpDateFormat.format(date);
-		
+    	
+
+	private String getOkResponceHeader(String mimeType, String lastModifiedDate) {
 		String responceHeader = "HTTP/1.1 200 OK\r\n" +
 				"Server: VPV server" +"\r\n"+
 				"Content-Type: " + mimeType + "\r\n" +
-				"Date: " + httpDate + "\r\n" +
-				"Expires: Fri, 01 Jan 1990 00:00:00 GMT\r\n" +
-				"Pragma: no-cache\r\n" +
-				"Cache-Control: no-cache, must-revalidate, no-store\r\n" +
-				"Vary: *\r\n" +
-
+				"Date: " + lastModifiedDate + "\r\n" +
+				"Cache-Control: max-age=0\r\n" + 
+				"Last-Modified: " + lastModifiedDate + "\r\n" +
 				"Connection: close\r\n\r\n";
 		return responceHeader;
 	}
 	
-	private String getNotFoundHeader(){
+	private String getNotFoundHeader() {
         String responceHeader = "HTTP/1.1 404 Not Found\r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Connection: close\r\n\r\n" +
                 "<!DOCTYPE HTML>" +
                 "<h1>404 Not Found<//h1>";
         return responceHeader;
-	}
+	} 
 	
 //	private String getRedirectHeader(String location){
 //	    String responceHeader = "HTTP/1.1 302 Found\r\n" +

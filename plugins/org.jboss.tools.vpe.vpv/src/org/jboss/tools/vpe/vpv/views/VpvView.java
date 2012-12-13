@@ -377,7 +377,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		IFile ifile = getFileOpenedInEditor(editor);
 		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
 			String url = formUrl(ifile);
-			browser.setUrl(url, null, new String[] { "Cache-Control: no-cache, no-store" }); //$NON-NLS-1$
+			browser.setUrl(url); 
 		} else {
 			browser.setUrl(ABOUT_BLANK);
 		}
