@@ -18,13 +18,11 @@ import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.ResourceAcceptor;
 import org.jboss.tools.vpe.vpv.transform.VpvController;
 
-import static org.jboss.tools.vpe.vpv.util.TimeUtil.*;
-
 public class VpvSocketProcessor implements Runnable {
 
     public static final String INITIAL_REQUEST_LINE = "Initial request line";
     public static final String REFERER = "Referer";
-    public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
+    public static final String IF_NONE_MATCH = "If-None-Match";
     public static final String HOST = "Host";
 
 	private Socket clientSocket;
@@ -77,41 +75,22 @@ public class VpvSocketProcessor implements Runnable {
 
             @Override
             public void acceptText(String text, String mimeType) {
-            	String currentDate = toGMTString(new Date());
-                String responceHeader = getOkResponceHeader(mimeType,  currentDate);
-                try {
-                    outputToClient.writeBytes(responceHeader);
-                    outputToClient.writeBytes(text);
-                } catch (IOException e) {
-                    Activator.logError(e);
-                } finally {
-                    try {
-                        outputToClient.close();
-                    } catch (IOException e) {
-                        Activator.logError(e);
-                    }
-                }
+            	String etag = formEtagForText();
+                String responceHeader = getOkResponceHeader(mimeType,  etag);
+                sendOkResponce(responceHeader, outputToClient, text);
             }
 
             @Override
             public void acceptFile(File file, String mimeType) {   	
-				String ifModifiedSinceValue = getIfModifiedSinceValue(requestHeaders);		
-				
-				if (ifModifiedSinceValue.isEmpty()) {
-					String fileLastModifiedDateInGMT = getFileLastModifiedDateInGMT(file);
-					String okHeader = getOkResponceHeader(mimeType, fileLastModifiedDateInGMT);
-					sendOkResponse(okHeader, outputToClient, file);	
+				String ifNoneMatchValue = getIfNoneMatchValue(requestHeaders);
+				String etag = formEtagForFile(file);
+
+				if (ifNoneMatchValue.isEmpty() || !etag.equals(ifNoneMatchValue)) {
+					String okHeader = getOkResponceHeader(mimeType, etag);
+					sendOkResponse(okHeader, outputToClient, file);
 				} else {
-					Date fileLastModifiedDate = new Date(file.lastModified());
-					Date ifModifiedSinceDate = toLocalDate(ifModifiedSinceValue);
-					String newFileLastModifiedValue = toGMTString(fileLastModifiedDate);
-					if (true) { // TODO Change code to Etag
-						String okHeader = getOkResponceHeader(mimeType, newFileLastModifiedValue);
-						sendOkResponse(okHeader, outputToClient, file);
-					} else {
-						String notModifiedHeader = getNotModifiedHeader(newFileLastModifiedValue);
-						sendNotModifiedResponse(notModifiedHeader, outputToClient);
-					}
+					String notModifiedHeader = getNotModifiedHeader(etag);
+					sendNotModifiedResponse(notModifiedHeader, outputToClient);
 				}
 			}
 
@@ -119,6 +98,14 @@ public class VpvSocketProcessor implements Runnable {
 			@Override
 			public void acceptError() {
 				 processNotFound(outputToClient);	   
+			}
+			
+			private String formEtagForFile (File file) {
+				return String.valueOf(file.lastModified());
+			} 
+			
+			private String formEtagForText() {
+				return String.valueOf(new Date().getTime());
 			}
 			
 			private void sendNotModifiedResponse(String header, DataOutputStream outputToclient) {
@@ -149,15 +136,30 @@ public class VpvSocketProcessor implements Runnable {
 					}
 				}
 			}
+			
+			private void sendOkResponce(String header, DataOutputStream outputToclient, String text) {
+				try {
+					outputToClient.writeBytes(header);
+					outputToClient.writeBytes(text);
+				} catch (IOException e) {
+					Activator.logError(e);
+				} finally {
+					try {
+						outputToClient.close();
+					} catch (IOException e) {
+						Activator.logError(e);
+					}
+				}
+			}
         });
     }
 	
-	private String getIfModifiedSinceValue(Map<String, String> headers) {
-		String ifModiviedSinceValue = "";
-		if (headers != null && headers.containsKey(IF_MODIFIED_SINCE)) {
-			ifModiviedSinceValue = headers.get(IF_MODIFIED_SINCE);
+	private String getIfNoneMatchValue(Map<String, String> headers) {
+		String ifNoneMatchValue = "";
+		if (headers != null && headers.containsKey(IF_NONE_MATCH)) {
+			ifNoneMatchValue = headers.get(IF_NONE_MATCH);
 		}
-		return ifModiviedSinceValue;
+		return ifNoneMatchValue;
 	}
 
 //	private void processRequestHeaders(Map<String, String> requestHeaders, DataOutputStream outputToClient,
@@ -184,25 +186,19 @@ public class VpvSocketProcessor implements Runnable {
 //		processRedirectRequest(redirectHeader, outputToClient);
 //	}
 	
-	private String getFileLastModifiedDateInGMT(File file){
-		Date fileLastModifiedDate = new Date(file.lastModified()); 
-    	String fileLastModifiedDateInGMT = toGMTString(fileLastModifiedDate); 
-    	return fileLastModifiedDateInGMT;
-	}
-
-	private void processRedirectRequest(String redirectHeader, DataOutputStream outputToClient) {
-		try {
-			outputToClient.writeBytes(redirectHeader);
-		} catch (IOException e) {
-			Activator.logError(e);
-		} finally {
-			try {
-				outputToClient.close();
-			} catch (IOException e) {
-				Activator.logError(e);
-			}
-		}
-	}
+//	private void processRedirectRequest(String redirectHeader, DataOutputStream outputToClient) {
+//		try {
+//			outputToClient.writeBytes(redirectHeader);
+//		} catch (IOException e) {
+//			Activator.logError(e);
+//		} finally {
+//			try {
+//				outputToClient.close();
+//			} catch (IOException e) {
+//				Activator.logError(e);
+//			}
+//		}
+//	}
 
 	private void processNotFound(DataOutputStream outputToClient) {
 		String notFoundHeader = getNotFoundHeader();
@@ -219,26 +215,26 @@ public class VpvSocketProcessor implements Runnable {
 		}
 	}
 
-	private String getRefererParameters(String referer) {
-		String refererParameters = referer;
-		int delimiter = getDilimiterPosition(referer);
-		if (delimiter == -1) {
-			return null;
-		}
-
-		return refererParameters.substring(delimiter, referer.length());
-	}
-
-	private String getHttpRequestStringWithoutParameters(String httpRequestString) {
-		String httpRequestStringWitoutParameters = httpRequestString;
-		int delimiter = getDilimiterPosition(httpRequestString);
-
-		if (delimiter == -1) {
-			return httpRequestStringWitoutParameters;
-		}
-
-		return httpRequestStringWitoutParameters.substring(delimiter, httpRequestStringWitoutParameters.length());
-	}
+//	private String getRefererParameters(String referer) {
+//		String refererParameters = referer;
+//		int delimiter = getDilimiterPosition(referer);
+//		if (delimiter == -1) {
+//			return null;
+//		}
+//
+//		return refererParameters.substring(delimiter, referer.length());
+//	}
+//
+//	private String getHttpRequestStringWithoutParameters(String httpRequestString) {
+//		String httpRequestStringWitoutParameters = httpRequestString;
+//		int delimiter = getDilimiterPosition(httpRequestString);
+//
+//		if (delimiter == -1) {
+//			return httpRequestStringWitoutParameters;
+//		}
+//
+//		return httpRequestStringWitoutParameters.substring(delimiter, httpRequestStringWitoutParameters.length());
+//	}
 
 	private Map<String, String> parseUrlParameters(String urlString) {
 		int delimiterPosition = getDilimiterPosition(urlString);
@@ -366,12 +362,12 @@ public class VpvSocketProcessor implements Runnable {
     }
     	
 
-	private String getOkResponceHeader(String mimeType, String lastModifiedDate) {
+	private String getOkResponceHeader(String mimeType, String eTag) {
 		String responceHeader = "HTTP/1.1 200 OK\r\n" +
 				"Server: VPV server" +"\r\n"+
 				"Content-Type: " + mimeType + "\r\n" +
 				"Cache-Control: max-age=0\r\n" + 
-				"Last-Modified: " + lastModifiedDate + "\r\n" +
+				"Etag: " + eTag + "\r\n" +
 				"Connection: close\r\n\r\n";
 		return responceHeader;
 	}
@@ -385,10 +381,10 @@ public class VpvSocketProcessor implements Runnable {
         return responceHeader;
 	} 
 	
-	private String getNotModifiedHeader(String lastModifiedDate) {
+	private String getNotModifiedHeader(String eTag) {
 		String responceHeader = "HTTP/1.1 304 Not Modified\r\n" +
 				"Server: VPV server\r\n"+
-				"Last-Modified: " + lastModifiedDate + "\r\n" +
+				"Etag: " + eTag + "\r\n" +
 				"Connection: close\r\n\r\n";
 		return responceHeader;
 	}
