@@ -337,7 +337,7 @@ public class BrowserSim {
 		browser.addOpenWindowListener(new OpenWindowListener() {
 			public void open(WindowEvent event) {
 				BrowserSim browserSim = new BrowserSim(display, homeUrl, isStandalone);
-				int parentDeviceIndex = devicesListHolder.getDevicesList().getSelectedDeviceIndex();
+				int parentDeviceIndex = 0;//devicesListHolder.getDevicesList().getSelectedDeviceIndex();
 
 				DevicesList devicesList = DevicesListStorage.loadUserDefinedDevicesList();
 				if (devicesList == null) {
@@ -356,7 +356,6 @@ public class BrowserSim {
 //				if (cocoaUIEnhancer != null) {
 //					browserSim.addMacOsMenuApplicationHandler(cocoaUIEnhancer);
 //				}
-				
 				event.browser = browserSim.skin.getBrowser();
 				
 				browserSim.skin.getShell().open();
@@ -456,6 +455,9 @@ public class BrowserSim {
 
 				new MenuItem(contextMenu, SWT.BAR);
 				addFileMenuItems(contextMenu);
+				
+				new MenuItem(contextMenu, SWT.BAR);
+				addFirebugItem(contextMenu);
 				
 				new MenuItem(contextMenu, SWT.BAR);
 				addAboutItem(contextMenu);
@@ -586,6 +588,19 @@ public class BrowserSim {
 			}
 
 		});
+	}
+	
+	public void addFirebugItem(Menu menu) {
+			MenuItem weinre = new MenuItem(menu, SWT.PUSH);
+			weinre.setText("firebug");
+			weinre.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					skin.getBrowser().execute("var head = document.head;"
+							+	"var script = document.createElement('script');"
+							+	"head.appendChild(script);" 
+							+	"script.src='https://getfirebug.com/firebug-lite.js#startInNewWindow,debug'");
+				}
+			});
 	}
 	
 	public void addPreferencesItem(Menu menu){
