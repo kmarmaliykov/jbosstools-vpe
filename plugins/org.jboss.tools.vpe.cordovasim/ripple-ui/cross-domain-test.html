@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script src="/ripple-ui/cross-domain.js"></script>
+<script type="text/javascript">
+function loadTweets() {
+  $.ajax({
+    dataType: "json",
+    url: "http://search.twitter.com/search.json?q=phonegap",
+  }).done(function ( tweets ) {
+    if( console && console.log ) {
+      var data = "<table cellspacing='0'>";
+      var tableClass;
+      for (i = 0; i < tweets.results.length; i++) {
+        if (i % 2 === 0) {
+          tableClass = 'tweetOdd';
+        }
+        else {
+          tableClass = 'tweetEven';
+        }
+        data += "<tr style='border: 1px solid black'>";
+        data += "<td class='" + tableClass + "'>";
+        data += "<img src='" + tweets.results[i].profile_image_url + "'/>";
+        data += "</td>";
+        data += "<td class='" + tableClass + "'>";
+        data += "<b>" + tweets.results[i].from_user + "</b><br/>";
+        data += tweets.results[i].text + "<br/>";
+        data += tweets.results[i].created_at;
+        data += "</td>";
+        data += "</tr>";
+      }
+      data += "</table>";
+      var twitter = document.getElementById("latestTweets");
+      twitter.innerHTML = data;
+    }
+  });
+}
+</script>
+<meta charset=utf-8 />
+<title>JS Bin</title>
+</head>
+<body onload="loadTweets()">
+  <div id="latestTweets"></div>
+</body>
+</html>
