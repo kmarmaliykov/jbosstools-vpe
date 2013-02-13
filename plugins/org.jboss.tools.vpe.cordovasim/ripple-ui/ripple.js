@@ -64131,19 +64131,8 @@ function _createFrame(src) {
 }
 
 function _createBsPopup(src) {
-  alert(5);
-  //debugger;
-  if (!window.__bsPopup || !window.__bsPopup.location) {
-  	window.__bsPopup = window.open('' ,'popup',
-      	'width=500,height=500,scrollbars=no,resizable=no,toolbar=no,directories=no,location=no,menubar=no,status=no,left=0,top=0');
-  }
-  window.__bsPopup.location = src;
-
-
-
-    /*if(bsPopup.location == 'about:blank' ){
-        bsPopup.location = src;
-    }*/
+	var bsPopup = window.open(src ,'popup',
+    	'width=500,height=500,scrollbars=no,resizable=no,toolbar=no,directories=no,location=no,menubar=no,status=no,left=0,top=0');
     bsPopup.focus();
     //bsPopup.setAttribute("id", "document");
     //bsPopup.src = src;
@@ -64181,7 +64170,9 @@ function _post(src) {
     var event = require('ripple/event'),
         frame = _createFrame(src);
     
+    var oldBsPopup = window.bsPopup; 
     window.bsPopup = _createBsPopup(src);
+    
 
     _console.log("Initialization Finished (Make it so.)");
 
@@ -64220,9 +64211,9 @@ function _post(src) {
 
     // append frame
     document.getElementById("viewport-container").appendChild(frame);
-    /*if (oldBsPopup) {
+    if (oldBsPopup) {
     	oldBsPopup.close();
-    }*/
+    }
 
     delete tinyHippos.boot;
 }
