@@ -64131,27 +64131,30 @@ function _createFrame(src) {
 }
 
 function _createBsPopup(src) {
-	var bsPopup = window.open(src ,'popup',
+	if (!window._bsPopup || window._bsPopup.closed || window._bsPopup.bsClosed) {
+		window._bsPopup = window.open('' ,'popup',
     	'width=500,height=500,scrollbars=no,resizable=no,toolbar=no,directories=no,location=no,menubar=no,status=no,left=0,top=0');
-    bsPopup.focus();
+	}
+	window._bsPopup.location = src;
+    window._bsPopup.focus();
     //bsPopup.setAttribute("id", "document");
     //bsPopup.src = src;
 
    if (ui.registered("omnibar")) {
         //bsPopup.document.addEventListener("beforeload", function () {
             _boundPopup = false;
-            _bindObjectsPopup(bsPopup, bsPopup.document);
+            _bindObjectsPopup(window._bsPopup, window._bsPopup.document);
             var id = window.setInterval(function () {
                 if (_boundPopup) {
                     window.clearInterval(id);
                 } else {
-                    _bindObjectsPopup(bsPopup, bsPopup.document);
+                    _bindObjectsPopup(window._bsPopup, window._bsPopup.document);
                 }
             }, 1);
         //});
     }
 
-    return bsPopup;
+    return window._bsPopup;
 }
 
 function _cleanBody() {
