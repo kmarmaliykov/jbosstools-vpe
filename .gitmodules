@@ -1,0 +1,3 @@
+[submodule "plugins/org.jboss.tools.vpe.cordovasim/ripple-ui"]
+	path = plugins/org.jboss.tools.vpe.cordovasim/ripple-ui
+	url = git@github.com:yradtsevich/ripple-temp.git
