@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+  <script>
+   function sendXHR() {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange=function() {
+    if (xhr.readyState==4 && xhr.status==200) {
+      alert("Cross Domain ajax works");
+      console.log(xhr.responseText);
+    }
+  }
+  xhr.open("GET","http://www.w3schools.com/ajax/ajax_xmlhttprequest_send.asp",true);
+  xhr.send();
+}
+  </script>
+<title>JS Bin</title>
+</head>
+<body>
+  <input type='button' onclick='sendXHR()' value='Send XHR'/>
+</body>
+</html>
