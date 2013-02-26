@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.callbacks;
+package org.jboss.tools.vpe.cordovasim.eclipse.callbacks;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,10 +31,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.vpe.browsersim.eclipse.Activator;
-import org.jboss.tools.vpe.browsersim.eclipse.util.BrowserSimLauncher;
-import org.jboss.tools.vpe.browsersim.eclipse.util.TransparentReader;
+//import org.jboss.tools.jst.jsp.jspeditor.JSPMultiPageEditor;
+import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
 
 /**
  * Handler for the BrowserSim commands printed to the console in the following form:
@@ -43,11 +43,11 @@ import org.jboss.tools.vpe.browsersim.eclipse.util.TransparentReader;
  * Base64EncodedPageSource==</code>
  * @author Yahor Radtsevich (yradtsevich)
  */
-public class ViewSourceCallback implements BrowserSimCallback {
-	private static final String VIEW_SOURCE_COMMAND = BrowserSimLauncher.BROWSERSIM_CLASS_NAME + ".command.viewSource:"; //$NON-NLS-1$
+public class ViewSourceCallback implements CordovaSimCallback {
+	private static final String VIEW_SOURCE_COMMAND = CordovaSimLauncher.CORDOVASIM_CLASS_NAME + ".command.viewSource:"; //$NON-NLS-1$
 
 	/* (non-Javadoc)
-	 * @see org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback#getCallbackId()
+	 * @see org.jboss.tools.vpe.cordovasim.eclipse.callbacks.BrowserSimCallback#getCallbackId()
 	 */
 	@Override
 	public String getCallbackId() {
@@ -55,7 +55,7 @@ public class ViewSourceCallback implements BrowserSimCallback {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback#callback(java.io.InputStreamReader)
+	 * @see org.jboss.tools.vpe.cordovasim.eclipse.callbacks.BrowserSimCallback#callback(java.io.InputStreamReader)
 	 */
 	@Override
 	public void call(final String lastString, TransparentReader reader) throws IOException {
@@ -102,12 +102,12 @@ public class ViewSourceCallback implements BrowserSimCallback {
 				// this checking is needed to do not load jst.jsp plug-ins if it is unnecessary
 				if ("org.jboss.tools.jst.jsp.jspeditor.HTMLTextEditor".equals(editorId)) { //$NON-NLS-1$
 					try {
-						if (editor instanceof JSPMultiPageEditor) {
-							JSPMultiPageEditor multiPageEditor = (JSPMultiPageEditor) editor;
-							doc = multiPageEditor.getSourceEditor().getTextViewer().getDocument();
-							doc.set(content);
-							editor.doSave(null); // reset resource-changed marker
-						}
+//						if (editor instanceof JSPMultiPageEditor) {
+//							JSPMultiPageEditor multiPageEditor = (JSPMultiPageEditor) editor;
+//							doc = multiPageEditor.getSourceEditor().getTextViewer().getDocument();
+//							doc.set(content);
+//							editor.doSave(null); // reset resource-changed marker
+//						}
 					} catch (NoClassDefFoundError e1) {
 						// this is OK - there are some optional dependencies
 						ITextEditor textEditor = null;

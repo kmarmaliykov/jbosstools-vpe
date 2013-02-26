@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.callbacks;
+package org.jboss.tools.vpe.cordovasim.eclipse.callbacks;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,9 +21,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.jboss.tools.vpe.browsersim.eclipse.Activator;
-import org.jboss.tools.vpe.browsersim.eclipse.util.BrowserSimLauncher;
-import org.jboss.tools.vpe.browsersim.eclipse.util.TransparentReader;
+import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
 
 
 /**
@@ -32,11 +32,11 @@ import org.jboss.tools.vpe.browsersim.eclipse.util.TransparentReader;
  * 
  * @author Yahor Radtsevich (yradtsevich)
  */
-public class OpenFileCallback implements BrowserSimCallback {
-	private static final String OPEN_FILE_COMMAND = BrowserSimLauncher.BROWSERSIM_CLASS_NAME + ".command.openFile:"; //$NON-NLS-1$
+public class OpenFileCallback implements CordovaSimCallback {
+	private static final String OPEN_FILE_COMMAND = CordovaSimLauncher.CORDOVASIM_CLASS_NAME + ".command.openFile:"; //$NON-NLS-1$
 
 	/* (non-Javadoc)
-	 * @see org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback#getCallbackId()
+	 * @see org.jboss.tools.vpe.cordovasim.eclipse.callbacks.BrowserSimCallback#getCallbackId()
 	 */
 	@Override
 	public String getCallbackId() {
@@ -44,7 +44,7 @@ public class OpenFileCallback implements BrowserSimCallback {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback#callback(java.io.InputStreamReader)
+	 * @see org.jboss.tools.vpe.cordovasim.eclipse.callbacks.BrowserSimCallback#callback(java.io.InputStreamReader)
 	 */
 	@Override
 	public void call(final String lastString, TransparentReader reader) {

@@ -8,12 +8,14 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.util;
+package org.jboss.tools.vpe.cordovasim.eclipse.util;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,26 +28,33 @@ import org.eclipse.osgi.framework.internal.core.BundleHost;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
-import org.jboss.tools.vpe.browsersim.eclipse.Activator;
-import org.jboss.tools.vpe.browsersim.eclipse.callbacks.BrowserSimCallback;
-import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
-import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
+import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
+import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.CordovaSimCallback;
+import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.OpenFileCallback;
+import org.jboss.tools.vpe.cordovasim.eclipse.callbacks.ViewSourceCallback;
 import org.osgi.framework.Bundle;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
  */
 @SuppressWarnings("restriction")
-public class BrowserSimLauncher {
-	public static final String BROWSERSIM_CLASS_NAME = "org.jboss.tools.vpe.browsersim.BrowserSimRunner"; //$NON-NLS-1$
-	private static final BrowserSimCallback[] BROWSERSIM_CALLBACKS = { new ViewSourceCallback(), new OpenFileCallback() };
+public class CordovaSimLauncher {
+	public static final String CORDOVASIM_CLASS_NAME = "org.jboss.tools.vpe.cordovasim.CordovaSimRunner"; //$NON-NLS-1$
+	private static final CordovaSimCallback[] BROWSERSIM_CALLBACKS = { new ViewSourceCallback(), new OpenFileCallback() };
 	private static final String[] REQUIRED_BUNDLES = {
 		"org.jboss.tools.vpe.browsersim",
+		"org.jboss.tools.vpe.cordovasim",
 		"org.jboss.tools.vpe.browsersim.browser",
-		"org.eclipse.swt"
+		"org.eclipse.swt",
+		"org.eclipse.jetty.continuation",
+		"org.eclipse.jetty.http",
+		"org.eclipse.jetty.io",
+		"org.eclipse.jetty.server",
+		"org.eclipse.jetty.servlet",
+		"org.eclipse.jetty.util",
+		"javax.servlet"
 	};
-	private static final String[] OPTIONAL_BUNDLES = {
-		
+	private static final String[] OPTIONAL_BUNDLES = {		
 		// org.eclipse.swt plugin may contain this fragment in itself - that is why it is optional. See JBIDE-11923
 		"org.eclipse.swt." + PlatformUtil.CURRENT_PLATFORM 
 	};
@@ -53,7 +62,7 @@ public class BrowserSimLauncher {
 	private static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
 	
 
-	public static void launchBrowserSim(String initialUrl) {
+	public static void launchCordovaSim(String initialUrl) {
 		try {
 			
 			String classPath = getClassPathString();
@@ -85,19 +94,31 @@ public class BrowserSimLauncher {
 			
 			commandElements.add("-cp"); //$NON-NLS-1$
 			commandElements.add(classPath);
-			commandElements.add(BROWSERSIM_CLASS_NAME);
+			commandElements.add(CORDOVASIM_CLASS_NAME);
 			
 			//optional parameters
 			commandElements.add(NOT_STANDALONE);
 			if (initialUrl != null) {
-				commandElements.add(initialUrl);
+				String file = null;
+				try {
+					file = new File(new URI(initialUrl)).toString();
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				}
+				if (file != null) {
+					commandElements.add(file);
+				}
 			}
-			
+			for (String c : commandElements) {
+				System.out.println(c + " ");
+			}
 			ProcessBuilder processBuilder = new ProcessBuilder(commandElements);
 			processBuilder.directory(ConfigurationScope.INSTANCE.getLocation().toFile());
 			
 			Process browserSimProcess = processBuilder.start();
-			final IWorkbenchListener browserSimPostShutDownDestroyer = new BrowserSimPostShutDownDestroyer(browserSimProcess);
+			final IWorkbenchListener browserSimPostShutDownDestroyer = new CordovaSimPostShutDownDestroyer(browserSimProcess);
 			PlatformUI.getWorkbench().addWorkbenchListener(browserSimPostShutDownDestroyer);
 			
 			final InputStreamReader errorReader = new InputStreamReader(browserSimProcess.getErrorStream());
@@ -108,7 +129,7 @@ public class BrowserSimLauncher {
 						TransparentReader transparentReader = new TransparentReader(inputReader, System.out);
 						String nextLine;
 						while ((nextLine = transparentReader.readLine(true)) != null) {
-							for (BrowserSimCallback callback : BROWSERSIM_CALLBACKS) { 
+							for (CordovaSimCallback callback : BROWSERSIM_CALLBACKS) { 
 								if (nextLine.startsWith(callback.getCallbackId())) {
 									callback.call(nextLine, transparentReader);
 								}

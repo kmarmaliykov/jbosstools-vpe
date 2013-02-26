@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.actions;
+package org.jboss.tools.vpe.cordovasim.eclipse.actions;
 
 import java.lang.reflect.Field;
 
@@ -33,20 +33,20 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.browser.BrowserViewer;
 import org.eclipse.ui.internal.browser.WebBrowserEditor;
 import org.eclipse.ui.internal.browser.WebBrowserView;
-import org.jboss.tools.vpe.browsersim.eclipse.Activator;
-import org.jboss.tools.vpe.browsersim.eclipse.editors.BrowserSimEditorLauncher;
-import org.jboss.tools.vpe.browsersim.eclipse.util.BrowserSimLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.Activator;
+import org.jboss.tools.vpe.cordovasim.eclipse.editors.CordovaSimEditorLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
  */
 @SuppressWarnings("restriction")
-public class RunBrowserSimAction implements IWorkbenchWindowActionDelegate {
+public class RunCordovaSimAction implements IWorkbenchWindowActionDelegate {
 
 	@Override
 	public void run(IAction action) {
 		String url = guessUrl();
-		BrowserSimLauncher.launchBrowserSim(url);
+		CordovaSimLauncher.launchCordovaSim(url);
 	}
 
 	private String guessUrl() {
@@ -84,7 +84,7 @@ public class RunBrowserSimAction implements IWorkbenchWindowActionDelegate {
 					.getEditorRegistry().getEditors(file.getName());
 
 			for (IEditorDescriptor editor : editors) {
-				if (BrowserSimEditorLauncher.EDITOR_ID.equals(editor.getId())) {
+				if (CordovaSimEditorLauncher.EDITOR_ID.equals(editor.getId())) {
 					return true;
 				}
 			}

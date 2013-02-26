@@ -8,16 +8,16 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.callbacks;
+package org.jboss.tools.vpe.cordovasim.eclipse.callbacks;
 
 import java.io.IOException;
 
-import org.jboss.tools.vpe.browsersim.eclipse.util.TransparentReader;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.TransparentReader;
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
  */
-public interface BrowserSimCallback {
+public interface CordovaSimCallback {
 	String getCallbackId();
 	void call(String lastString, TransparentReader reader) throws IOException;
 }

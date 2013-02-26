@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse integrations of BrowserSim
-Bundle-SymbolicName: org.jboss.tools.vpe.browsersim.eclipse;singleton:=true
+Bundle-SymbolicName: org.jboss.tools.vpe.cordovasim.eclipse;singleton:=true
 Bundle-Version: 3.5.0.qualifier
-Bundle-Activator: org.jboss.tools.vpe.browsersim.eclipse.Activator
+Bundle-Activator: org.jboss.tools.vpe.cordovasim.eclipse.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.jboss.tools.vpe.browsersim.browser;bundle-version="1.0.0",

@@ -8,16 +8,16 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.util;
+package org.jboss.tools.vpe.cordovasim.eclipse.util;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 
-public class BrowserSimPostShutDownDestroyer implements IWorkbenchListener {
+public class CordovaSimPostShutDownDestroyer implements IWorkbenchListener {
 
 	Process browserSimProcess;
 
-	public BrowserSimPostShutDownDestroyer(Process browserSimProcess) {
+	public CordovaSimPostShutDownDestroyer(Process browserSimProcess) {
 		this.browserSimProcess = browserSimProcess;
 	}
 

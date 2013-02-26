@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse.util;
+package org.jboss.tools.vpe.cordovasim.eclipse.util;
 
 import java.io.IOException;
 import java.io.PrintStream;

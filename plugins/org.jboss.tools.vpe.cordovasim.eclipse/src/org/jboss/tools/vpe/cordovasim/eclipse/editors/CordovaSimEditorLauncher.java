@@ -9,20 +9,20 @@
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 
-package org.jboss.tools.vpe.browsersim.eclipse.editors;
+package org.jboss.tools.vpe.cordovasim.eclipse.editors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.IEditorLauncher;
-import org.jboss.tools.vpe.browsersim.eclipse.util.BrowserSimLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
  */
-public class BrowserSimEditorLauncher implements IEditorLauncher {
-	public static final String EDITOR_ID = "org.jboss.tools.vpe.browsersim.eclipse.editors.BrowserSimLauncher"; //$NON-NLS-1$
+public class CordovaSimEditorLauncher implements IEditorLauncher {
+	public static final String EDITOR_ID = "org.jboss.tools.vpe.cordovasim.eclipse.editors.CordovaSimLauncher"; //$NON-NLS-1$
 
 	@Override
 	public void open(IPath file) {
-		BrowserSimLauncher.launchBrowserSim(file.toFile().toURI().toASCIIString()); // XXX: NPE
+		CordovaSimLauncher.launchCordovaSim(file.toFile().toURI().toASCIIString()); // XXX: NPE
 	}
 }

@@ -8,28 +8,28 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.browsersim.eclipse;
+package org.jboss.tools.vpe.cordovasim.eclipse;
 
 import java.net.URL;
 
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.browser.BrowserFactory;
 import org.eclipse.ui.browser.IWebBrowser;
-import org.jboss.tools.vpe.browsersim.eclipse.util.BrowserSimLauncher;
+import org.jboss.tools.vpe.cordovasim.eclipse.util.CordovaSimLauncher;
 
 /**
  * Contribution to the {@code org.eclipse.ui.editors} extension point
  * 
  * @author "Yahor Radtsevich (yradtsevich)"
  */
-public class BrowserSimFactory extends BrowserFactory {
+public class CordovaSimFactory extends BrowserFactory {
 	@Override
 	public IWebBrowser createBrowser(final String id, String location,
 			String parameters) {
 		return new IWebBrowser() {
 			@Override
 			public void openURL(URL url) throws PartInitException {
-				BrowserSimLauncher.launchBrowserSim(url.toString());	
+				CordovaSimLauncher.launchCordovaSim(url.toString());	
 			}
 			@Override
 			public String getId() {
