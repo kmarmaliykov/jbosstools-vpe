@@ -98,24 +98,24 @@ public class CordovaSimLauncher {
 			
 			//optional parameters
 			commandElements.add(NOT_STANDALONE);
+			File file = null;
 			if (initialUrl != null) {
-				String file = null;
 				try {
-					file = new File(new URI(initialUrl)).toString();
+					file = new File(new URI(initialUrl));
 				} catch (URISyntaxException e) {
 					e.printStackTrace();
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				}
 				if (file != null) {
-					commandElements.add(file);
+					commandElements.add(file.toString());
 				}
 			}
 			for (String c : commandElements) {
 				System.out.println(c + " ");
 			}
 			ProcessBuilder processBuilder = new ProcessBuilder(commandElements);
-			processBuilder.directory(ConfigurationScope.INSTANCE.getLocation().toFile());
+			processBuilder.directory(FileLocator.getBundleFile(Platform.getBundle("org.jboss.tools.vpe.cordovasim"))); // еее
 			
 			Process browserSimProcess = processBuilder.start();
 			final IWorkbenchListener browserSimPostShutDownDestroyer = new CordovaSimPostShutDownDestroyer(browserSimProcess);
