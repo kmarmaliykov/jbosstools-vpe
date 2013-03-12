@@ -23,11 +23,13 @@ import org.eclipse.swt.graphics.Point;
 public class SpecificPreferences extends Observable {
 	private int selectedDeviceIndex;
 	private boolean useSkins;
+	private int orientationAngle;
 	private Point location;
 
-	public SpecificPreferences(int selectedDeviceIndex, boolean useSkins, Point location) {
+	public SpecificPreferences(int selectedDeviceIndex, boolean useSkins, int orientationAngle, Point location) {
 		this.selectedDeviceIndex = selectedDeviceIndex;
 		this.useSkins = useSkins;
+		this.orientationAngle = orientationAngle;
 		this.location = location;
 	}
 
@@ -52,6 +54,14 @@ public class SpecificPreferences extends Observable {
 			setChanged();
 		}
 	}
+	
+	public int getOrientationAngle() {
+		return orientationAngle;
+	}
+
+	public void setOrientationAngle(int orientationAngle) {
+		this.orientationAngle = orientationAngle;
+	}
 
 	public Point getLocation() {
 		return location;
@@ -64,6 +74,7 @@ public class SpecificPreferences extends Observable {
 	public void copyProperties(SpecificPreferences sp) {
 		setSelectedDeviceIndex(sp.getSelectedDeviceIndex());
 		setUseSkins(sp.getUseSkins());
+		setOrientationAngle(sp.getOrientationAngle());
 		setLocation(sp.getLocation());
 	}
 }

@@ -438,29 +438,14 @@ public class BrowserSim {
 			initSkin(newSkinClass, currentLocation);
 		}
 
-		deviceOrientation = new DeviceOrientation(device.getWidth() < device.getHeight()
-								? DeviceOrientation.PORTRAIT
-								: DeviceOrientation.LANDSCAPE);
-		Rectangle clientArea = BrowserSimUtil.getMonitorClientArea(skin.getShell().getMonitor());
-		Point size = BrowserSimUtil.getSizeInDesktopPixels(device);
-		skin.setOrientationAndSize(deviceOrientation.getOrientationAngle(), size, resizableSkinSizeAdvisor);
-		BrowserSimUtil.fixShellLocation(skin.getShell(), clientArea);
+		deviceOrientation = new DeviceOrientation(specificPreferences.getOrientationAngle());
+		setOrientation(deviceOrientation.getOrientationAngle(), device);
 		deviceOrientation.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
 				int orientationAngle = ((DeviceOrientation) o).getOrientationAngle();
-
-				Point size = BrowserSimUtil.getSizeInDesktopPixels(device);
-				int minSize = Math.min(size.x, size.y);
-				int maxSize = Math.max(size.x, size.y);
-				Point browserSize;
-				if (orientationAngle == DeviceOrientation.LANDSCAPE
-						|| orientationAngle == DeviceOrientation.LANDSCAPE_INVERTED) {
-					browserSize = new Point(maxSize, minSize);
-				} else {
-					browserSize = new Point(minSize, maxSize);
-				}
-
-				fireOrientationChangeEvent(orientationAngle, browserSize);
+				specificPreferences.setOrientationAngle(orientationAngle);
+				
+				setOrientation(orientationAngle, device);
 			}
 		});
 
@@ -497,11 +482,20 @@ public class BrowserSim {
 	}
 	
 	@SuppressWarnings("nls")
-	private void fireOrientationChangeEvent(int orientation, Point browserSize) {
+	private void setOrientation(int orientationAngle, Device device) {
+		Point size = BrowserSimUtil.getSizeInDesktopPixels(device);
+		Point browserSize;
+		if (orientationAngle == DeviceOrientation.LANDSCAPE
+				|| orientationAngle == DeviceOrientation.LANDSCAPE_INVERTED) {
+			browserSize = new Point(size.y, size.x);
+		} else {
+			browserSize = size;
+		}
+		
 		Rectangle clientArea = BrowserSimUtil.getMonitorClientArea(skin.getShell().getMonitor());
-		skin.setOrientationAndSize(orientation, browserSize, resizableSkinSizeAdvisor);
+		skin.setOrientationAndSize(orientationAngle, browserSize, resizableSkinSizeAdvisor);
 		BrowserSimUtil.fixShellLocation(skin.getShell(), clientArea);
-		skin.getBrowser().execute("window.orientation = " + orientation + ";"
+		skin.getBrowser().execute("window.orientation = " + orientationAngle + ";"
 				+ "(function(){"
 				+ 		"var event = document.createEvent('Event');"
 				+ 		"event.initEvent('orientationchange', false, false);" // http://jsbin.com/azefow/6   https://developer.mozilla.org/en/DOM/document.createEvent
