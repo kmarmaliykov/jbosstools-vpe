@@ -13,6 +13,7 @@ package org.jboss.tools.vpe.browsersim.ui.skin.ios;
 import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
@@ -264,7 +265,7 @@ public class AppleIPhone3ResizableSkin extends ResizableSkin {
 	}
 
 	@Override
-	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor) {
+	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor, Browser browser) {
 		vertical = (orientation == SpecificPreferences.ORIENTATION_PORTRAIT || orientation == SpecificPreferences.ORIENTATION_PORTRAIT_INVERTED);
 		String urlTextText = deviceComposite.getUrlText().getText();
 		String pageTitle = deviceComposite.getPageTitleStyledText() != null ? deviceComposite.getPageTitleStyledText().getText() : "";
@@ -299,7 +300,7 @@ public class AppleIPhone3ResizableSkin extends ResizableSkin {
 		}
 
 		Point prefferedShellSize = shell.computeSize(shellWidthHint, shellHeightHint);
-		Point shellSize = sizeAdvisor.checkWindowSize(orientation, browserSize, prefferedShellSize);
+		Point shellSize = sizeAdvisor.checkWindowSize(orientation, browserSize, prefferedShellSize, browser);
 		shell.setSize(shellSize);
 		shell.layout(true);
 		setShellRegion();

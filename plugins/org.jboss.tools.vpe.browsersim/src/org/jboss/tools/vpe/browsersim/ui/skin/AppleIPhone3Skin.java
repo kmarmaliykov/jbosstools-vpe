@@ -12,6 +12,7 @@ package org.jboss.tools.vpe.browsersim.ui.skin;
 
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
@@ -349,7 +350,7 @@ public class AppleIPhone3Skin implements BrowserSimSkin {
 
 
 	@Override
-	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor) {
+	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor, Browser browser) {
 		// browserSize is ignored by this skin
 		
 		if ((this.orientation == SpecificPreferences.ORIENTATION_PORTRAIT || this.orientation == SpecificPreferences.ORIENTATION_PORTRAIT_INVERTED) &&

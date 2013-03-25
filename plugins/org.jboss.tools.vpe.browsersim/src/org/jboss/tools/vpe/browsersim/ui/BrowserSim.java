@@ -113,7 +113,7 @@ public class BrowserSim {
 		initObservers();
 		Device defaultDevice = getSelectedDevice(); 
 		initSkin(BrowserSimUtil.getSkinClass(defaultDevice, specificPreferences.getUseSkins()), specificPreferences.getLocation());
-		setSelectedDevice();
+		setSelectedDevice(null);
 		controlHandler.goToAddress(url);
 		
 		skin.getShell().open();
@@ -399,32 +399,33 @@ public class BrowserSim {
 		commonPreferencesObserver = new Observer() {
 			@Override
 			public void update(Observable o, Object arg) {
-				setSelectedDeviceAsync();
+				setSelectedDeviceAsync(arg);
 			}
 		};
 		commonPreferences.addObserver(commonPreferencesObserver);
 		specificPreferences.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
-				setSelectedDeviceAsync();
+				//arg == false if we change device orientation
+				setSelectedDeviceAsync(arg);
 			}
 		});
 	}
 	
 	private boolean deviceUpdateRequired = false;
-	private void setSelectedDeviceAsync() {
+	private void setSelectedDeviceAsync(final Object arg) {
 		deviceUpdateRequired = true;
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if (deviceUpdateRequired) {
-					setSelectedDevice();
+					setSelectedDevice(arg);
 					deviceUpdateRequired = false;
 				}
 			}
 		});
 	}
 
-	private void setSelectedDevice() {
+	private void setSelectedDevice(Object refreshRequired) {
 		final Device device = getSelectedDevice();
 		Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, specificPreferences.getUseSkins());
 		String oldSkinUrl = null;
@@ -435,14 +436,14 @@ public class BrowserSim {
 			skin.getBrowser().getShell().dispose();
 			initSkin(newSkinClass, currentLocation);
 		}
+		
 		setOrientation(specificPreferences.getOrientationAngle(), device);
-
 		skin.getBrowser().setDefaultUserAgent(device.getUserAgent());
 
 		if (oldSkinUrl != null) {
 			skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
-		} else {
-			skin.getBrowser().refresh(); // only user agent and size of the browser is changed
+		} else if(!Boolean.FALSE.equals(refreshRequired)){
+			skin.getBrowser().refresh(); // only user agent and size of the browser is changed and orientation is not changed
 		}
 
 		skin.getShell().open();
@@ -477,7 +478,7 @@ public class BrowserSim {
 		orientationAngle = ((orientationAngle + 90) % 360) - 90;
 		
 		specificPreferences.setOrientationAngle(orientationAngle);
-		specificPreferences.notifyObservers();
+		specificPreferences.notifyObservers(false);
 	}
 	
 	@SuppressWarnings("nls")
@@ -492,7 +493,7 @@ public class BrowserSim {
 		}
 		
 		Rectangle clientArea = BrowserSimUtil.getMonitorClientArea(skin.getShell().getMonitor());
-		skin.setOrientationAndSize(orientationAngle, browserSize, resizableSkinSizeAdvisor);
+		skin.setOrientationAndSize(orientationAngle, browserSize, resizableSkinSizeAdvisor, skin.getBrowser());
 		BrowserSimUtil.fixShellLocation(skin.getShell(), clientArea);
 		skin.getBrowser().execute("window.orientation = " + orientationAngle + ";"
 				+ "(function(){"

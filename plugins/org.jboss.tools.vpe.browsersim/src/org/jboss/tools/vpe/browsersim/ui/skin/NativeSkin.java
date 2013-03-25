@@ -11,6 +11,7 @@
 package org.jboss.tools.vpe.browsersim.ui.skin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
@@ -231,7 +232,7 @@ public class NativeSkin implements BrowserSimSkin {
 	}
 	
 	@Override
-	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor) {
+	public void setOrientationAndSize(int orientation, Point browserSize, ResizableSkinSizeAdvisor sizeAdvisor, Browser browser) {
 		GridData data = (GridData) browser.getLayoutData();
 		
 		int shellWidthHint = SWT.DEFAULT;
@@ -250,7 +251,7 @@ public class NativeSkin implements BrowserSimSkin {
 //		}
 		Point prefferedShellSize = shell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		
-		Point shellSize = sizeAdvisor.checkWindowSize(orientation, browserSize, prefferedShellSize);
+		Point shellSize = sizeAdvisor.checkWindowSize(orientation, browserSize, prefferedShellSize, browser);
 		shell.setSize(shellSize);
 	}
 	
