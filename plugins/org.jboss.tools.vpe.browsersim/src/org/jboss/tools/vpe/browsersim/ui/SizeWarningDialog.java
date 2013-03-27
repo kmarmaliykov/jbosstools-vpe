@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
@@ -32,7 +32,7 @@ public class SizeWarningDialog extends CustomMessageBox {
 	private Point requiredSize;
 	private String deviceName;
 	private boolean vertical;
-	private TruncateWindow truncateWindow = TruncateWindow.NEVER_TRUNCATE;
+	private FitToScreen fitToScreen = FitToScreen.NEVER_FIT;
 	private boolean rememberDecision = false;
 	
 	public SizeWarningDialog(Shell parent, Point actualSize, Point requiredSize, String deviceName, boolean vertical) {
@@ -41,7 +41,7 @@ public class SizeWarningDialog extends CustomMessageBox {
 		this.requiredSize = requiredSize;
 		this.deviceName = deviceName;
 		this.vertical = vertical;
-		setText(Messages.SizeWarningDialog_DEVICE_SIZE_WILL_BE_TRUNCATED);
+		setText(Messages.SizeWarningDialog_DEVICE_SIZE_WILL_BE_FITTED_TO_SCREEN);
 	}
 	
 	@Override
@@ -87,7 +87,7 @@ public class SizeWarningDialog extends CustomMessageBox {
 		okButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				truncateWindow = TruncateWindow.ALWAYS_TRUNCATE;
+				fitToScreen = FitToScreen.ALWAYS_FIT;
 				getShell().close();
 			}
 		});
@@ -105,8 +105,8 @@ public class SizeWarningDialog extends CustomMessageBox {
 		getShell().pack();
 	}
 	
-	public TruncateWindow getTruncateWindow() {
-		return truncateWindow;
+	public FitToScreen getFitToScreen() {
+		return fitToScreen;
 	}
 	
 	public boolean getRememberDecision() {

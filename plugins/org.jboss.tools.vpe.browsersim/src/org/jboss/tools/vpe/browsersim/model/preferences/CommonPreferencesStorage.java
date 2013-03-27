@@ -27,7 +27,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jboss.tools.vpe.browsersim.model.Device;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 import org.jboss.tools.vpe.browsersim.util.PreferencesUtil;
 import org.jboss.tools.vpe.browsersim.util.ResourcesUtil;
 import org.w3c.dom.Document;
@@ -55,7 +55,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 	private static final String PREFERENCES_WEINRE_SCRIPT_URL = "scriptUrl";
 	private static final String PREFERENCES_WEINRE = "weinre";
 	private static final String PREFERENCES_SCREENSHOTS_FOLDER = "screenshotsFolder";
-	private static final String PREFERENCES_TRUNCATE_WINDOW = "truncateWindow";
+	private static final String PREFERENCES_FIT_TO_SCREEN = "fitToScreen";
 	private static final String PREFERENCES_VERSION = "version";
 
 	
@@ -111,7 +111,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 			Device device = new Device("Default", 1024, 768, 1.0, null, null);
 			List<Device> devices = new ArrayList<Device>();
 			devices.add(device);
-			commonPreferences = new CommonPreferences(devices, TruncateWindow.PROMPT, getDefaultScreenshotsFolderPath(),
+			commonPreferences = new CommonPreferences(devices, FitToScreen.PROMPT, getDefaultScreenshotsFolderPath(),
 					getDefaultWeinreScriptUrl(), getDefaultWeinreClientUrl());
 		}
 
@@ -120,7 +120,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 	
 	private CommonPreferences load(InputStream is) throws IOException{
 		List<Device> devices = null;
-		TruncateWindow truncateWindow = TruncateWindow.PROMPT;
+		FitToScreen fitToScreen = FitToScreen.PROMPT;
 		String screenshotsFolder = getDefaultScreenshotsFolderPath();
 		String weinreScriptUrl = getDefaultWeinreScriptUrl();
 		String weinreClientUrl = getDefaultWeinreClientUrl();
@@ -136,9 +136,9 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 
 			int configVersion = Integer.parseInt(document.getDocumentElement().getAttribute(PREFERENCES_VERSION));
 			if (configVersion == CURRENT_CONFIG_VERSION) {
-				Node node = document.getElementsByTagName(PREFERENCES_TRUNCATE_WINDOW).item(0);
+				Node node = document.getElementsByTagName(PREFERENCES_FIT_TO_SCREEN).item(0);
 				if (!PreferencesUtil.isNullOrEmpty(node)) {
-					truncateWindow = TruncateWindow.valueOf(node.getTextContent());
+					fitToScreen = FitToScreen.valueOf(node.getTextContent());
 				}
 				
 				node = document.getElementsByTagName(PREFERENCES_SCREENSHOTS_FOLDER).item(0);
@@ -202,7 +202,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 		if (devices == null) {
 			return null;
 		} else { 
-			return new CommonPreferences(devices, truncateWindow, screenshotsFolder, weinreScriptUrl, weinreClientUrl);
+			return new CommonPreferences(devices, fitToScreen, screenshotsFolder, weinreScriptUrl, weinreClientUrl);
 		}
 	}
 
@@ -216,9 +216,9 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 			rootElement.setAttribute(PREFERENCES_VERSION, String.valueOf(CURRENT_CONFIG_VERSION));
 			doc.appendChild(rootElement);
 
-			Element truncateWindow = doc.createElement(PREFERENCES_TRUNCATE_WINDOW);
-			truncateWindow.setTextContent(String.valueOf(cp.getTruncateWindow()));
-			rootElement.appendChild(truncateWindow);
+			Element fitToScreen = doc.createElement(PREFERENCES_FIT_TO_SCREEN);
+			fitToScreen.setTextContent(String.valueOf(cp.getFitToScreen()));
+			rootElement.appendChild(fitToScreen);
 
 			Element screenshotsFolder = doc.createElement(PREFERENCES_SCREENSHOTS_FOLDER);
 			screenshotsFolder.setTextContent(cp.getScreenshotsFolder());

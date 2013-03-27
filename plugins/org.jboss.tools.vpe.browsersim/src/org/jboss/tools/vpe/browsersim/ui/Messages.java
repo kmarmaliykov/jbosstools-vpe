@@ -56,7 +56,7 @@ public class Messages {
 	public static String ExceptionNotifier_OK;
 	public static String ExceptionNotifier_ONLY_32_BIT_ECLIPSE_IS_SUPPORTED_ON_WINDOWS;
 	public static String ManageDevicesDialog_ADD;
-	public static String ManageDevicesDialog_ALWAYS_TRUNCATE;
+	public static String ManageDevicesDialog_ALWAYS_FIT;
 	public static String ManageDevicesDialog_BROWSE;
 	public static String ManageDevicesDialog_CANCEL;
 	public static String ManageDevicesDialog_DEFAULT;
@@ -66,7 +66,7 @@ public class Messages {
 	public static String ManageDevicesDialog_LOAD_DEFAULTS;
 	public static String ManageDevicesDialog_LOCATION;
 	public static String ManageDevicesDialog_NAME;
-	public static String ManageDevicesDialog_NEVER_TRUNCATE;
+	public static String ManageDevicesDialog_NEVER_FIT;
 	public static String ManageDevicesDialog_NEW_DEVICE;
 	public static String ManageDevicesDialog_NEW_USER_AGENT;
 	public static String ManageDevicesDialog_NONE;
@@ -80,7 +80,7 @@ public class Messages {
 	public static String ManageDevicesDialog_SELECT_FOLDER;
 	public static String ManageDevicesDialog_SKIN;
 	public static String ManageDevicesDialog_SKINS_OPTIONS;
-	public static String ManageDevicesDialog_TRUNCATE_THE_DEVICE_WINDOW;
+	public static String ManageDevicesDialog_FIT_TO_SCREEN_THE_DEVICE_WINDOW;
 	public static String ManageDevicesDialog_USE_SKINS;
 	public static String ManageDevicesDialog_USER_AGENT;
 	public static String ManageDevicesDialog_WIDTH;
@@ -91,7 +91,7 @@ public class Messages {
 	public static String SizeWarningDialog_CANCEL;
 	public static String SizeWarningDialog_DESKTOP_SIZE_TOO_SMALL_HORIZONTAL;
 	public static String SizeWarningDialog_DESKTOP_SIZE_TOO_SMALL_VERTICAL;
-	public static String SizeWarningDialog_DEVICE_SIZE_WILL_BE_TRUNCATED;
+	public static String SizeWarningDialog_DEVICE_SIZE_WILL_BE_FITTED_TO_SCREEN;
 	public static String SizeWarningDialog_OK;
 	public static String SizeWarningDialog_REMEMBER_MY_DECISION;
 

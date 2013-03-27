@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Observable;
 
 import org.jboss.tools.vpe.browsersim.model.Device;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 
 /**
  * 
@@ -24,15 +24,15 @@ import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
 
 public class CommonPreferences extends Observable {
 	private List<Device> devices;
-	private TruncateWindow truncateWindow;
+	private FitToScreen fitToScreen;
 	private String screenshotsFolder;
 	private String weinreScriptUrl;
 	private String weinreClientUrl;
 
-	public CommonPreferences(List<Device> devices, TruncateWindow truncateWindow, String screenshotsFolder,
+	public CommonPreferences(List<Device> devices, FitToScreen fitToScreen, String screenshotsFolder,
 			String weinreScriptUrl, String weinreClientUrl) {
 		this.devices = devices;
-		this.truncateWindow = truncateWindow;
+		this.fitToScreen = fitToScreen;
 		this.screenshotsFolder = screenshotsFolder;
 		this.weinreScriptUrl = weinreScriptUrl;
 		this.weinreClientUrl = weinreClientUrl;
@@ -49,14 +49,14 @@ public class CommonPreferences extends Observable {
 		}
 	}
 
-	public TruncateWindow getTruncateWindow() {
-		return truncateWindow;
+	public FitToScreen getFitToScreen() {
+		return fitToScreen;
 	}
 
-	public void setTruncateWindow(TruncateWindow truncateWindow) {
-		if ((this.truncateWindow != null && !this.truncateWindow.equals(truncateWindow))
-				|| (this.truncateWindow == null && truncateWindow != null)) {
-			this.truncateWindow = truncateWindow;
+	public void setFitToScreen(FitToScreen fitToScreen) {
+		if ((this.fitToScreen != null && !this.fitToScreen.equals(fitToScreen))
+				|| (this.fitToScreen == null && fitToScreen != null)) {
+			this.fitToScreen = fitToScreen;
 			setChanged();
 		}
 	}
@@ -97,7 +97,7 @@ public class CommonPreferences extends Observable {
 	public void copyProperties(CommonPreferences cp) {
 		setDevices(cp.getDevices());
 		setScreenshotsFolder(cp.getScreenshotsFolder());
-		setTruncateWindow(cp.getTruncateWindow());
+		setFitToScreen(cp.getFitToScreen());
 		setWeinreClientUrl(cp.getWeinreClientUrl());
 		setWeinreScriptUrl(cp.getWeinreScriptUrl());
 	}

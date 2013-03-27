@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <browserSim version="10">
-	<truncateWindow>PROMPT</truncateWindow>
+	<fitToScreen>PROMPT</fitToScreen>
 	<screenshotsFolder></screenshotsFolder>
 	<weinre>
 		<scriptUrl></scriptUrl>

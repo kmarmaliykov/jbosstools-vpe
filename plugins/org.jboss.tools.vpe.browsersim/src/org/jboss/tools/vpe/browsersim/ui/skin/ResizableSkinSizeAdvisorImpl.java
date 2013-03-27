@@ -20,7 +20,7 @@ import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.SizeWarningDialog;
@@ -47,8 +47,8 @@ public class ResizableSkinSizeAdvisorImpl implements ResizableSkinSizeAdvisor{
 			browser.removeLocationListener(zoomAdapter);
 		}
 		
-		TruncateWindow truncateWindow = null;
-		if (commonPreferences.getTruncateWindow() == TruncateWindow.PROMPT) {
+		FitToScreen fitToScreen = null;
+		if (commonPreferences.getFitToScreen() == FitToScreen.PROMPT) {
 			if (prefferedShellSize.x > clientArea.width || prefferedShellSize.y > clientArea.height) { 
 				String deviceName = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceIndex()).getName();
 				
@@ -57,19 +57,19 @@ public class ResizableSkinSizeAdvisorImpl implements ResizableSkinSizeAdvisor{
 						orientation == SpecificPreferences.ORIENTATION_PORTRAIT || orientation == SpecificPreferences.ORIENTATION_PORTRAIT_INVERTED);
 				dialog.open();
 
-				truncateWindow = dialog.getTruncateWindow();
+				fitToScreen = dialog.getFitToScreen();
 				if (dialog.getRememberDecision()) {
-					commonPreferences.setTruncateWindow(truncateWindow);
+					commonPreferences.setFitToScreen(fitToScreen);
 				}
 			}
 		} else {
-			truncateWindow = commonPreferences.getTruncateWindow();
+			fitToScreen = commonPreferences.getFitToScreen();
 		}
 
 		Point size = new Point(prefferedShellSize.x, prefferedShellSize.y);
 		double bsZoom = Math.min((double)clientArea.width/prefferedShellSize.x, (double)clientArea.height/prefferedShellSize.y);
 		
-		if (TruncateWindow.ALWAYS_TRUNCATE.equals(truncateWindow) && bsZoom < 1) {
+		if (FitToScreen.ALWAYS_FIT.equals(fitToScreen) && bsZoom < 1) {
 			size.x = (int) (prefferedShellSize.x * bsZoom);
 			size.y = (int) (prefferedShellSize.y * bsZoom);			
 			

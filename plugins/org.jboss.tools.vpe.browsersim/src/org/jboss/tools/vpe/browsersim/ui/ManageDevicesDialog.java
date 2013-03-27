@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.jboss.tools.vpe.browsersim.model.Device;
-import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
+import org.jboss.tools.vpe.browsersim.model.FitToScreen;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
@@ -55,10 +55,10 @@ public class ManageDevicesDialog extends Dialog {
 	protected CommonPreferences newCommonPreferences;
 	protected SpecificPreferences newSpecificPreferences;
 	protected boolean useSkins;
-	protected TruncateWindow truncateWindow;
-	protected Button askBeforeTruncateRadio;
-	protected Button alwaysTruncateRadio;
-	protected Button neverTruncateRadio;
+	protected FitToScreen fitToScreen;
+	protected Button askBeforeFitRadio;
+	protected Button alwaysFitRadio;
+	protected Button neverFitRadio;
 	protected Button useSkinsCheckbox;
 
 	/**
@@ -75,7 +75,7 @@ public class ManageDevicesDialog extends Dialog {
 		this.devices = new ArrayList<Device>(oldCommonPreferences.getDevices());
 		this.selectedDeviceIndex = oldSpecificPreferences.getSelectedDeviceIndex();
 		this.useSkins = oldSpecificPreferences.getUseSkins();
-		this.truncateWindow = oldCommonPreferences.getTruncateWindow();
+		this.fitToScreen = oldCommonPreferences.getFitToScreen();
 	} 
 
 	/**
@@ -219,37 +219,37 @@ public class ManageDevicesDialog extends Dialog {
 			}
 		});
 		
-		Group truncateWindowGroup = new Group(shell, SWT.NONE);
-		truncateWindowGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		truncateWindowGroup.setText(Messages.ManageDevicesDialog_TRUNCATE_THE_DEVICE_WINDOW);
-		truncateWindowGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+		Group fitToScreenGroup = new Group(shell, SWT.NONE);
+		fitToScreenGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		fitToScreenGroup.setText(Messages.ManageDevicesDialog_FIT_TO_SCREEN_THE_DEVICE_WINDOW);
+		fitToScreenGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 		
 		
-		alwaysTruncateRadio = new Button(truncateWindowGroup, SWT.RADIO);
-		alwaysTruncateRadio.setText(TruncateWindow.ALWAYS_TRUNCATE.getMessage());
-		alwaysTruncateRadio.setData(TruncateWindow.ALWAYS_TRUNCATE);
+		alwaysFitRadio = new Button(fitToScreenGroup, SWT.RADIO);
+		alwaysFitRadio.setText(Messages.ManageDevicesDialog_ALWAYS_FIT);
+		alwaysFitRadio.setData(FitToScreen.ALWAYS_FIT);
 		
-		neverTruncateRadio = new Button(truncateWindowGroup, SWT.RADIO);
-		neverTruncateRadio.setText(TruncateWindow.NEVER_TRUNCATE.getMessage());
-		neverTruncateRadio.setData(TruncateWindow.NEVER_TRUNCATE);
+		neverFitRadio = new Button(fitToScreenGroup, SWT.RADIO);
+		neverFitRadio.setText(Messages.ManageDevicesDialog_NEVER_FIT);
+		neverFitRadio.setData(FitToScreen.NEVER_FIT);
 
-		askBeforeTruncateRadio = new Button(truncateWindowGroup, SWT.RADIO);
-		askBeforeTruncateRadio.setText(TruncateWindow.PROMPT.getMessage());
-		askBeforeTruncateRadio.setData(TruncateWindow.PROMPT);
+		askBeforeFitRadio = new Button(fitToScreenGroup, SWT.RADIO);
+		askBeforeFitRadio.setText(Messages.ManageDevicesDialog_PROMPT);
+		askBeforeFitRadio.setData(FitToScreen.PROMPT);
 		
-		SelectionListener truncateSelectionListener = new SelectionAdapter() {
+		SelectionListener fitSelectionListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Button radio = (Button) e.widget;
 				if (radio.getSelection()) {
-					truncateWindow = (TruncateWindow) radio.getData();
+					fitToScreen = (FitToScreen) radio.getData();
 				}
 			}
 		}; 
 		
-		askBeforeTruncateRadio.addSelectionListener(truncateSelectionListener);
-		alwaysTruncateRadio.addSelectionListener(truncateSelectionListener);
-		neverTruncateRadio.addSelectionListener(truncateSelectionListener);
+		askBeforeFitRadio.addSelectionListener(fitSelectionListener);
+		alwaysFitRadio.addSelectionListener(fitSelectionListener);
+		neverFitRadio.addSelectionListener(fitSelectionListener);
 		
 		Group screnshotGroup = new Group(shell, SWT.NONE);
 		screnshotGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -310,7 +310,7 @@ public class ManageDevicesDialog extends Dialog {
 				devices = cp.getDevices();
 				selectedDeviceIndex = sp.getSelectedDeviceIndex();
 				useSkins = sp.getUseSkins();
-				truncateWindow = cp.getTruncateWindow();
+				fitToScreen = cp.getFitToScreen();
 				screenshotsPath.setText(cp.getScreenshotsFolder());
 				weinreScriptUrlText.setText(cp.getWeinreScriptUrl());
 				weinreClientUrlText.setText(cp.getWeinreClientUrl());
@@ -324,7 +324,7 @@ public class ManageDevicesDialog extends Dialog {
 		shell.setDefaultButton(buttonOk);
 		buttonOk.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				newCommonPreferences = new CommonPreferences(devices, truncateWindow, screenshotsPath.getText(),
+				newCommonPreferences = new CommonPreferences(devices, fitToScreen, screenshotsPath.getText(),
 						weinreScriptUrlText.getText(), weinreClientUrlText.getText());
 				newSpecificPreferences = new SpecificPreferences(selectedDeviceIndex, useSkins,
 						oldSpecificPreferences.getOrientationAngle(), oldSpecificPreferences.getLocation());
@@ -364,8 +364,8 @@ public class ManageDevicesDialog extends Dialog {
 		
 		useSkinsCheckbox.setSelection(useSkins);
 		
-		askBeforeTruncateRadio.setSelection(TruncateWindow.PROMPT.equals(truncateWindow));
-		alwaysTruncateRadio.setSelection(TruncateWindow.ALWAYS_TRUNCATE.equals(truncateWindow));
-		neverTruncateRadio.setSelection(TruncateWindow.NEVER_TRUNCATE.equals(truncateWindow));
+		askBeforeFitRadio.setSelection(FitToScreen.PROMPT.equals(fitToScreen));
+		alwaysFitRadio.setSelection(FitToScreen.ALWAYS_FIT.equals(fitToScreen));
+		neverFitRadio.setSelection(FitToScreen.NEVER_FIT.equals(fitToScreen));
 	}
 }
