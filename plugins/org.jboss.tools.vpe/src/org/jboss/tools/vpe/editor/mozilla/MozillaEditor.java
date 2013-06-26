@@ -1134,6 +1134,8 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 		}
 		if (showTextFormattingAction != null) {
 			showTextFormattingAction.setChecked(prefsShowTextFormatting);
+			if(vpeToolBarManager != null)
+				vpeToolBarManager.setToolbarVisibility(prefsShowTextFormatting);
 		}
 		if (showBundleAsELAction != null) {
 			showBundleAsELAction.setChecked(prefsShowBundlesAsEL);
