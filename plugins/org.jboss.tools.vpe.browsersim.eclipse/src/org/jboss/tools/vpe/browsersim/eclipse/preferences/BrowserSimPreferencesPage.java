@@ -140,12 +140,14 @@ public class BrowserSimPreferencesPage extends PreferencePage implements IWorkbe
 			 * @see https://issues.jboss.org/browse/JBIDE-13988
 			 */
 			String message;
-			if (Platform.OS_WIN32.equals(Platform.getOS())) {
+			String os = Platform.getOS();
+			String arch = PlatformUtil.ARCH_X86.equals(PlatformUtil.getArch()) ? "32-bit" : "64-bit";
+			if (Platform.OS_WIN32.equals(os)) {
 				message = "BrowserSim/CordovaSim require a 32-bit JRE/JDK 6 or JDK 7 to be installed.";
-			} else if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs()) && PlatformUtil.ARCH_X86.equals(PlatformUtil.getArch())) {
+			} else if (PlatformUtil.OS_MACOSX.equals(os) && PlatformUtil.ARCH_X86.equals(PlatformUtil.getArch())) {
 				message = "To run BrowserSim/CordovaSim with Java 7 you must run 64-bit Eclipse or use Java 6.";
 			} else {
-				message = "BrowserSim/CordovaSim require Java 6 and above to be installed.";
+				message = "BrowserSim/CordovaSim require " + arch + "Java 6 and above to be installed.";
 			}
 			setMessage(message, IMessageProvider.ERROR);//$NON-NLS-1$
 			automatically.setSelection(true);
