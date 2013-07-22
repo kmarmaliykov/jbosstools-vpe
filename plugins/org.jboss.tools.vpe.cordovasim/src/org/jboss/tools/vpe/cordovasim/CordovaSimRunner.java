@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.OpenWindowListener;
 import org.eclipse.swt.browser.WindowEvent;
@@ -31,6 +32,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -73,8 +75,16 @@ public class CordovaSimRunner {
 			final Shell shell = new Shell(display);
 			setShellAttributes(shell);
 			shell.setLayout(new FillLayout());
-			final Browser browser = new Browser(shell, SWT.WEBKIT);
-			browser.setUrl("http://localhost:" + port + "/" + cordovaSimArgs.getStartPage() + "?enableripple=true");
+			final Browser browser;
+			try {
+				browser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT);
+				browser.setUrl("http://localhost:" + port + "/" + cordovaSimArgs.getStartPage() + "?enableripple=true");
+			} catch(SWTError e) {
+				e.printStackTrace();
+				ExceptionNotifier.showWebKitLoadError(new Shell(display), e, "CordovaSim");
+				display.dispose();
+				return;
+			}
 			shell.addListener(SWT.Close, new Listener() {
 				@Override
 				public void handleEvent(Event event) {
