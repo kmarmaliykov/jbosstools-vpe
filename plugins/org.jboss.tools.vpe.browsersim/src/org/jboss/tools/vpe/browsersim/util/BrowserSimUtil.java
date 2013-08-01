@@ -61,7 +61,8 @@ public class BrowserSimUtil {
 	}
 	
 	public static Rectangle getMonitorClientArea(Shell shell) {
-		Rectangle clientArea = shell.getMonitor().getClientArea();
+		Shell temp = new Shell();
+		Rectangle clientArea = temp.getMonitor().getClientArea();
 
 		/* on Linux returned monitor client area may be bigger
 		 * than the monitor bounds when multiple monitors are used.
@@ -72,9 +73,10 @@ public class BrowserSimUtil {
 				bounds = monitor.getBounds();
 			}
 		}
-		clientArea.width = Math.min(clientArea.width, bounds.width);
-		clientArea.height = Math.min(clientArea.height, bounds.height);
-
+		clientArea.width = Math.min(clientArea.width, bounds.width - clientArea.x);
+		clientArea.height = Math.min(clientArea.height, bounds.height - clientArea.y);
+		
+		temp.dispose();
 		return clientArea;
 	}
 	
