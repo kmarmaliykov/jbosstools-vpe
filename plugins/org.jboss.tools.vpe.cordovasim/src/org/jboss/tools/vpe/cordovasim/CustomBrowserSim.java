@@ -29,8 +29,8 @@ import org.jboss.tools.vpe.cordovasim.model.preferences.CordovaSimSpecificPrefer
  */
 public class CustomBrowserSim extends BrowserSim {
 
-	public CustomBrowserSim(String homeUrl, Shell parentShell) {
-		super(homeUrl, parentShell);
+	public CustomBrowserSim(String homeUrl, Shell parentShell, CommonPreferences cp, SpecificPreferences sp) {
+		super(homeUrl, parentShell, cp, sp);
 	}
 	
 	@Override

@@ -73,7 +73,7 @@ public class BrowserSim {
 	private static List<BrowserSim> instances;
 	private Shell parentShell; // is needed for CordovaSim in order to have one icon in the taskbar JBIDE-14578 
 	private String homeUrl;
-	private static CommonPreferences commonPreferences;
+	private CommonPreferences commonPreferences;
 	private SpecificPreferences specificPreferences;
 	private ResizableSkinSizeAdvisor resizableSkinSizeAdvisor;
 	protected BrowserSimSkin skin;
@@ -88,34 +88,24 @@ public class BrowserSim {
 	
 	static {
 		instances = new ArrayList<BrowserSim>();
-		if (commonPreferences == null) {
-			commonPreferences = (CommonPreferences) CommonPreferencesStorage.INSTANCE.load();
-			if (commonPreferences == null) {
-				commonPreferences = (CommonPreferences) CommonPreferencesStorage.INSTANCE.loadDefault();
-			}
-		}
 	}
-	
-	public BrowserSim(String homeUrl, Shell parent) {
+		
+	public BrowserSim(String homeUrl, Shell parent, CommonPreferences cp, SpecificPreferences sp) {
 		this.homeUrl = homeUrl;
 		parentShell = parent;
-	}
-	
-	public void open() {
-		SpecificPreferences sp = (SpecificPreferences) getSpecificPreferencesStorage().load();
-		if (sp == null) {
-			sp = (SpecificPreferences) getSpecificPreferencesStorage().loadDefault();
-		}
-		
-		open(sp, null);
+		commonPreferences = cp;
+		specificPreferences = sp;
 	}
 
-	public void open(SpecificPreferences sp, String url) {
+	/**
+	 * 
+	 * @param url URL to open. If <code>null</code>, then home url is opened.
+	 */
+	public void open(String url) {
 		if (url == null) {
 			url = homeUrl;
 		}
-		
-		specificPreferences = sp;
+
 		initObservers();
 		Device defaultDevice = commonPreferences.getDevices().get(specificPreferences.getSelectedDeviceId()); 
 		if (defaultDevice == null) {
@@ -245,7 +235,7 @@ public class BrowserSim {
 				skin.statusTextChanged(event.text);
 			}
 		});
-		
+
 		browser.addLocationListener(createNavButtonsListener());
 
 		browser.addLocationListener(new LocationAdapter() {
@@ -588,6 +578,7 @@ public class BrowserSim {
 	protected SpecificPreferencesStorage getSpecificPreferencesStorage() {
 		return BrowserSimSpecificPreferencesStorage.INSTANCE;
 	}
+	
 	public SpecificPreferences getSpecificPreferences() {
 		return specificPreferences;
 	}

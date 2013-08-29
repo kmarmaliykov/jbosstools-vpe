@@ -100,12 +100,13 @@ public class ToolsMenuCreator {
 	}
 	
 	public static void addSyncronizedWindowItem(Menu menu, final BrowserSimSkin skin,
-			final Map<String, Device> devices, final Boolean useSkins, final Boolean enableLiveReload, final int liveReloadPort, final boolean enableTouchEvents, final int orientationAngle, final String homeUrl) {
+			final CommonPreferences cp, final SpecificPreferences sp, final String homeUrl) {
 		MenuItem syncWindow = new MenuItem(menu, SWT.CASCADE);
 		syncWindow.setText(Messages.BrowserSim_SYNCHRONIZED_WINDOW);
 		Menu subMenu = new Menu(menu);
 		syncWindow.setMenu(subMenu);
 
+		final Map<String, Device> devices = cp.getDevices();
 		for (final Device device : devices.values()) {
 			MenuItem deviceMenuItem = new MenuItem(subMenu, SWT.RADIO);
 			deviceMenuItem.setText(device.getName());
@@ -116,11 +117,11 @@ public class ToolsMenuCreator {
 					MenuItem menuItem = (MenuItem) e.widget;
 					if (menuItem.getSelection()) {
 						Device selected = devices.get(menuItem.getData());
-						SpecificPreferences sp = new BrowserSimSpecificPreferences(selected.getId(), useSkins,
-								enableLiveReload, liveReloadPort, enableTouchEvents, orientationAngle, null);
+						SpecificPreferences sp1 = new BrowserSimSpecificPreferences(selected.getId(), sp.getUseSkins(),
+								sp.isEnableLiveReload(), sp.getLiveReloadPort(), sp.isEnableTouchEvents(), sp.getOrientationAngle(), null);
 
-						BrowserSim browserSim1 = new BrowserSim(homeUrl, BrowserSimUtil.getParentShell(skin));
-						browserSim1.open(sp, skin.getBrowser().getUrl());
+						BrowserSim browserSim1 = new BrowserSim(homeUrl, BrowserSimUtil.getParentShell(skin), cp, sp1);
+						browserSim1.open(skin.getBrowser().getUrl());
 					}
 				};
 			});

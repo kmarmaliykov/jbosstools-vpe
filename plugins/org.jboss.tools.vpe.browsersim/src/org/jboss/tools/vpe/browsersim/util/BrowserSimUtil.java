@@ -24,6 +24,10 @@ import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.SkinMap;
+import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferencesStorage;
+import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
+import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferencesStorage;
+import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.MessageBoxWithLinks;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
@@ -151,5 +155,22 @@ public class BrowserSimUtil {
 			}
 			fixShellLocation(shell);
 		}
+	}
+	
+	public static CommonPreferences loadCommonPreferences() {
+		CommonPreferences commonPreferences = (CommonPreferences) CommonPreferencesStorage.INSTANCE.load();
+		if (commonPreferences == null) {
+			commonPreferences = (CommonPreferences) CommonPreferencesStorage.INSTANCE.loadDefault();
+		}
+		return commonPreferences;
+	}
+	
+	public static SpecificPreferences loadSpecificPreferences() {
+		SpecificPreferences sp = (SpecificPreferences) BrowserSimSpecificPreferencesStorage.INSTANCE.load();
+		if (sp == null) {
+			sp = (SpecificPreferences) BrowserSimSpecificPreferencesStorage.INSTANCE.loadDefault();
+		}
+		
+		return sp;
 	}
 }

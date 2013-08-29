@@ -28,14 +28,16 @@ public class CommonPreferences extends Observable {
 	private String screenshotsFolder;
 	private String weinreScriptUrl;
 	private String weinreClientUrl;
+	private boolean onTop;
 
 	public CommonPreferences(Map<String, Device> devices, TruncateWindow truncateWindow, String screenshotsFolder,
-			String weinreScriptUrl, String weinreClientUrl) {
+			String weinreScriptUrl, String weinreClientUrl, boolean onTop) {
 		this.devices = devices;
 		this.truncateWindow = truncateWindow;
 		this.screenshotsFolder = screenshotsFolder;
 		this.weinreScriptUrl = weinreScriptUrl;
 		this.weinreClientUrl = weinreClientUrl;
+		this.onTop = onTop;
 	}
 
 	public Map<String, Device> getDevices() {
@@ -94,11 +96,23 @@ public class CommonPreferences extends Observable {
 		}
 	}
 	
+	public boolean isOnTop() {
+		return onTop;
+	}
+
+	public void setOnTop(boolean onTop) {
+		if (this.onTop != onTop) {
+			this.onTop = onTop;
+			setChanged();
+		}
+	}
+
 	public void copyProperties(CommonPreferences cp) {
 		setDevices(cp.getDevices());
 		setScreenshotsFolder(cp.getScreenshotsFolder());
 		setTruncateWindow(cp.getTruncateWindow());
 		setWeinreClientUrl(cp.getWeinreClientUrl());
 		setWeinreScriptUrl(cp.getWeinreScriptUrl());
+		setOnTop(cp.isOnTop());
 	}
 }

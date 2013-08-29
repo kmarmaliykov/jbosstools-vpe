@@ -67,6 +67,7 @@ public class ManageDevicesDialog extends Dialog {
 	protected SpecificPreferences newSpecificPreferences;
 	protected boolean useSkins;
 	protected boolean enableLiveReload;
+	protected boolean onTop;
 	protected int liveReloadPort;
 	protected boolean enableTouchEvents;
 	protected TruncateWindow truncateWindow;
@@ -76,6 +77,7 @@ public class ManageDevicesDialog extends Dialog {
 	protected Button useSkinsCheckbox;
 	protected Button liveReloadCheckBox;
 	protected Button touchEventsCheckBox;
+	protected Button onTopCheckBox;
 	protected Label liveReloadPortLabel;
 	protected Text liveReloadPortText;
 
@@ -102,6 +104,7 @@ public class ManageDevicesDialog extends Dialog {
 		this.liveReloadPort = oldSpecificPreferences.getLiveReloadPort();
 		this.enableTouchEvents = oldSpecificPreferences.isEnableTouchEvents();
 		this.truncateWindow = oldCommonPreferences.getTruncateWindow();
+		this.onTop = oldCommonPreferences.isOnTop();
 	} 
 	
 	/**
@@ -368,6 +371,14 @@ public class ManageDevicesDialog extends Dialog {
 		touchEventsCheckBox = new Button(touchEventsGroup, SWT.CHECK);
 		touchEventsCheckBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		touchEventsCheckBox.setText("Emulate Touch Events");
+
+		Group onTopGroup = new Group(settingsComposite, SWT.NONE);
+		onTopGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		onTopGroup.setText("Display options");
+		onTopGroup.setLayout(new GridLayout(2, false));
+		onTopCheckBox = new Button(onTopGroup, SWT.CHECK);
+		onTopCheckBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		onTopCheckBox.setText("Always on Top (restart required)");
 		
 		Group screnshotGroup = new Group(settingsComposite, SWT.NONE);
 		screnshotGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -451,7 +462,7 @@ public class ManageDevicesDialog extends Dialog {
 		buttonOk.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				newCommonPreferences = new CommonPreferences(devices, truncateWindow, screenshotsPath.getText(),
-						weinreScriptUrlText.getText(), weinreClientUrlText.getText());
+						weinreScriptUrlText.getText(), weinreClientUrlText.getText(), onTopCheckBox.getSelection());
 				newSpecificPreferences = create(selectedDeviceId, useSkins, enableLiveReload, getLiveReloadPort(), touchEventsCheckBox.getSelection());
 				shell.close();
 			}
@@ -503,7 +514,8 @@ public class ManageDevicesDialog extends Dialog {
 		liveReloadCheckBox.setSelection(enableLiveReload);
 		enableLiveReloadPort(enableLiveReload);
 		touchEventsCheckBox.setSelection(enableTouchEvents);
-
+		onTopCheckBox.setSelection(onTop);
+		
 		askBeforeTruncateRadio.setSelection(TruncateWindow.PROMPT.equals(truncateWindow));
 		alwaysTruncateRadio.setSelection(TruncateWindow.ALWAYS_TRUNCATE.equals(truncateWindow));
 		neverTruncateRadio.setSelection(TruncateWindow.NEVER_TRUNCATE.equals(truncateWindow));

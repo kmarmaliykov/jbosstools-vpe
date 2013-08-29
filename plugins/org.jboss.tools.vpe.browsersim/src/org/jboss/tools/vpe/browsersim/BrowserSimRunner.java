@@ -19,11 +19,13 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimImageList;
+import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -58,14 +60,21 @@ public class BrowserSimRunner {
 			}
 	
 			Shell parent = null;
+			
+			CommonPreferences cp = BrowserSimUtil.loadCommonPreferences();
+			
 			if (!PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
-				parent = new Shell(Display.getDefault(), SWT.NO_TRIM);
+				if (cp.isOnTop()) {
+					parent = new Shell(Display.getDefault(), SWT.NO_TRIM | SWT.ON_TOP);
+				} else {
+					parent = new Shell(Display.getDefault(), SWT.NO_TRIM);
+				}
 				parent.setSize(0, 0);
 				setShellAttributes(parent);
 				parent.open();
 			}
-			BrowserSim browserSim = new BrowserSim(url, parent);
-			browserSim.open();
+			BrowserSim browserSim = new BrowserSim(url, parent, cp, BrowserSimUtil.loadSpecificPreferences());
+			browserSim.open(null);
 	
 			display = Display.getDefault();
 			while (!display.isDisposed() && BrowserSim.getInstances().size() > 0) {

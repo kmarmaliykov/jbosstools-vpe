@@ -60,6 +60,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 	private static final String PREFERENCES_WEINRE = "weinre";
 	private static final String PREFERENCES_SCREENSHOTS_FOLDER = "screenshotsFolder";
 	private static final String PREFERENCES_TRUNCATE_WINDOW = "truncateWindow";
+	private static final String PREFERENCES_ON_TOP = "onTop";
 	private static final String PREFERENCES_VERSION = "version";
 
 	
@@ -111,7 +112,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 			
 			devices.put(device.getId(), device);
 			commonPreferences = new CommonPreferences(devices, TruncateWindow.PROMPT, getDefaultScreenshotsFolderPath(),
-					getDefaultWeinreScriptUrl(), getDefaultWeinreClientUrl());
+					getDefaultWeinreScriptUrl(), getDefaultWeinreClientUrl(), isOnTopByDefault());
 		}
 
 		return commonPreferences;
@@ -120,6 +121,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 	private CommonPreferences load(InputStream is){
 		Map<String, Device> devices = null;
 		TruncateWindow truncateWindow = TruncateWindow.PROMPT;
+		boolean onTop = isOnTopByDefault();
 		String screenshotsFolder = getDefaultScreenshotsFolderPath();
 		String weinreScriptUrl = getDefaultWeinreScriptUrl();
 		String weinreClientUrl = getDefaultWeinreClientUrl();
@@ -138,6 +140,11 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 				Node node = document.getElementsByTagName(PREFERENCES_TRUNCATE_WINDOW).item(0);
 				if (!PreferencesUtil.isNullOrEmpty(node)) {
 					truncateWindow = TruncateWindow.valueOf(node.getTextContent());
+				}
+				
+				node = document.getElementsByTagName(PREFERENCES_ON_TOP).item(0);
+				if (!PreferencesUtil.isNullOrEmpty(node)) {
+					onTop = Boolean.valueOf(node.getTextContent());
 				}
 				
 				node = document.getElementsByTagName(PREFERENCES_SCREENSHOTS_FOLDER).item(0);
@@ -192,7 +199,7 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 						}
 					}
 				}
-				return new CommonPreferences(devices, truncateWindow, screenshotsFolder, weinreScriptUrl, weinreClientUrl);
+				return new CommonPreferences(devices, truncateWindow, screenshotsFolder, weinreScriptUrl, weinreClientUrl, onTop);
 			}
 		} catch (ParserConfigurationException e) {
 			BrowserSimLogger.logError(e.getMessage(), e);
@@ -230,6 +237,10 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 			Element truncateWindow = doc.createElement(PREFERENCES_TRUNCATE_WINDOW);
 			truncateWindow.setTextContent(String.valueOf(cp.getTruncateWindow()));
 			rootElement.appendChild(truncateWindow);
+			
+			Element onTop = doc.createElement(PREFERENCES_ON_TOP);
+			onTop.setTextContent(String.valueOf(cp.isOnTop()));
+			rootElement.appendChild(onTop);
 
 			Element screenshotsFolder = doc.createElement(PREFERENCES_SCREENSHOTS_FOLDER);
 			screenshotsFolder.setTextContent(cp.getScreenshotsFolder());
@@ -299,5 +310,9 @@ public class CommonPreferencesStorage implements PreferencesStorage{
 	
 	private static String getDefaultWeinreClientUrl() {
 		return DEFAULT_WEINRE_CLIENT_URL;
+	}
+	
+	private static boolean isOnTopByDefault() {
+		return false;
 	}
 }
