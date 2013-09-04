@@ -22,6 +22,10 @@ import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
  * @author Yahor Radtsevich (yradtsevich)
  */
 public class ExceptionNotifier {
+	@Deprecated
+	public static void showWebKitLoadError(Shell parentShell, SWTError error) {
+		showWebKitLoadError(parentShell, error, "BrowserSim");
+	}
 	/**
 	 * Should be used to notify user about WebKit-loading errors
 	 */
