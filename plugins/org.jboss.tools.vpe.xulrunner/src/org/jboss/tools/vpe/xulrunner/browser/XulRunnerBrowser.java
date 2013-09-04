@@ -88,6 +88,7 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	static {
 		Collections.addAll(OFFICIALLY_SUPPORTED_PLATFORM_IDS,
 				"cocoa.macosx.x86",     //$NON-NLS-1$
+				"cocoa.macosx.x86_64",     //$NON-NLS-1$
 				"gtk.linux.x86",    //$NON-NLS-1$
 				"gtk.linux.x86_64", //$NON-NLS-1$
 				"win32.win32.x86", //$NON-NLS-1$
@@ -104,8 +105,8 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 			.append(Platform.getOS());
 		
 		/* XULRunner bundle names do not have
-		 * '.x86' postfix for Mac OS X.	 */
-		if(! Platform.OS_MACOSX.equals(Platform.getOS())) {
+		 * '.x86' postfix for Mac OS X 32-bit.	 */
+		if(! (Platform.OS_MACOSX.equals(Platform.getOS()) && Platform.ARCH_X86.equals(Platform.getOSArch())) ) {
 			buff.append('.').append(Platform.getOSArch());
 		}
 		XULRUNNER_BUNDLE =  buff.toString();

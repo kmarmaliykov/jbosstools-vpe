@@ -27,6 +27,7 @@ import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMKeyEvent;
 import org.mozilla.interfaces.nsIDOMMouseEvent;
+import org.mozilla.interfaces.nsIDOMNSEventTarget;
 import org.mozilla.interfaces.nsIDOMNode;
 import org.mozilla.interfaces.nsIDOMWindow;
 import org.mozilla.interfaces.nsISelection;
@@ -89,37 +90,41 @@ public class MozillaEventAdapter implements nsIDOMEventListener, nsISelectionLis
 		this.document = XPCOM.queryInterface(domWindow.getDocument(), nsIDOMEventTarget.class);
 		this.contentArea = contentArea;
 		
-		if (contentArea != null) {
-			contentArea.addEventListener(MozillaEventAdapter.CLICKEVENTTYPE, this, false); 
-			contentArea.addEventListener(MozillaEventAdapter.MOUSEDOWNEVENTTYPE, this, false); 
-			contentArea.addEventListener(MozillaEventAdapter.MOUSEUPEVENTTYPE, this, false); 
-			contentArea.addEventListener(MozillaEventAdapter.MOUSEMOVEEVENTTYPE, this, false); 
-			contentArea.addEventListener(MozillaEventAdapter.CONTEXTMENUEVENTTYPE, this, false);
-			contentArea.addEventListener(MozillaEventAdapter.DBLCLICK, this, false);
+		nsIDOMNSEventTarget nsContentArea = XPCOM.queryInterface(contentArea, nsIDOMNSEventTarget.class);
+		if (nsContentArea != null) {
+			nsContentArea.addEventListener(MozillaEventAdapter.CLICKEVENTTYPE, this, false, true); 
+			nsContentArea.addEventListener(MozillaEventAdapter.MOUSEDOWNEVENTTYPE, this, false, true); 
+			nsContentArea.addEventListener(MozillaEventAdapter.MOUSEUPEVENTTYPE, this, false, true); 
+			nsContentArea.addEventListener(MozillaEventAdapter.MOUSEMOVEEVENTTYPE, this, false, true); 
+			nsContentArea.addEventListener(MozillaEventAdapter.CONTEXTMENUEVENTTYPE, this, false, true);
+			nsContentArea.addEventListener(MozillaEventAdapter.DBLCLICK, this, false, true);
 			
 			/* yradtsevich: JBIDE-7198: 'dragstart' event has to be added
 			 * just to contentArea, rather than to document. Otherwise
 			 * the event is fired also on the scrollbars. */
-			contentArea.addEventListener(MozillaEventAdapter.DRAGSTART, this, false);
+			nsContentArea.addEventListener(MozillaEventAdapter.DRAGSTART, this, false, true);
 		}
-		if (window != null) {
-			window.addEventListener(MozillaEventAdapter.MOZAFTERPAINT, this, false);
-
+		nsIDOMNSEventTarget nsWindow = XPCOM.queryInterface(domWindow, nsIDOMNSEventTarget.class);
+		if (nsWindow != null) {
+			nsWindow.addEventListener(MozillaEventAdapter.MOZAFTERPAINT, this, false, true);
+		}
+		if (domWindow != null) {
 			nsISelection selection = domWindow.getSelection();
 			selectionPrivate = XPCOM.queryInterface(selection, nsISelectionPrivate.class);
 			selectionPrivate.addSelectionListener(this);
 		}
-		if (document != null) {
-			document.addEventListener(MozillaEventAdapter.DRAGDROPEVENT, this, false);
-			document.addEventListener(MozillaEventAdapter.DRAGENTEREVENT, this, false);
-			document.addEventListener(MozillaEventAdapter.DRAGEND,this, false);
-			document.addEventListener(MozillaEventAdapter.DRAGEXITEVENT,this, false);
-			document.addEventListener(MozillaEventAdapter.DRAGOVEREVENT, this, false);
+		nsIDOMNSEventTarget nsDocument = XPCOM.queryInterface(document, nsIDOMNSEventTarget.class);
+		if (nsDocument != null) {
+			nsDocument.addEventListener(MozillaEventAdapter.DRAGDROPEVENT, this, false, true);
+			nsDocument.addEventListener(MozillaEventAdapter.DRAGENTEREVENT, this, false, true);
+			nsDocument.addEventListener(MozillaEventAdapter.DRAGEND,this, false, true);
+			nsDocument.addEventListener(MozillaEventAdapter.DRAGEXITEVENT,this, false, true);
+			nsDocument.addEventListener(MozillaEventAdapter.DRAGOVEREVENT, this, false, true);
 			
-			document.addEventListener(MozillaEventAdapter.KEYPRESS, this, false);
+			nsDocument.addEventListener(MozillaEventAdapter.KEYPRESS, this, false, true);
 			//as a fix of https://jira.jboss.org/jira/browse/JBIDE-4022
 			//scroll event listener was added for selection border redrawing
-			document.addEventListener(MozillaEventAdapter.SCROLL, this, false);
+			nsDocument.addEventListener(MozillaEventAdapter.SCROLL, this, false, true);
 		}
 	}
 	

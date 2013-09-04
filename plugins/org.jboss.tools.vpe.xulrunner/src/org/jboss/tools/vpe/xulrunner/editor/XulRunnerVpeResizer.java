@@ -24,6 +24,7 @@ import org.mozilla.interfaces.nsIDOMEvent;
 import org.mozilla.interfaces.nsIDOMEventListener;
 import org.mozilla.interfaces.nsIDOMEventTarget;
 import org.mozilla.interfaces.nsIDOMMouseEvent;
+import org.mozilla.interfaces.nsIDOMNSEventTarget;
 import org.mozilla.interfaces.nsIDOMNode;
 
 /**
@@ -516,11 +517,11 @@ public class XulRunnerVpeResizer implements IXulRunnerVpeResizer {
 			return;
 		}
 		
-		nsIDOMEventTarget eventTarget = getDOMEventTarget();  
+		nsIDOMNSEventTarget eventTarget = getDOMNSEventTarget();  
 		
 		if (  eventTarget != null ) {
-			eventTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEMOVE, mouseMotionListener, true);
-			eventTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEUP, mouseListener, true);
+			eventTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEMOVE, mouseMotionListener, true, true);
+			eventTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEUP, mouseListener, true, true);
 		}
 		
 		return;		
@@ -534,7 +535,21 @@ public class XulRunnerVpeResizer implements IXulRunnerVpeResizer {
 		
 		nsIDOMEventTarget eventTarget = queryInterface(domDocument, nsIDOMEventTarget.class);
 		if (eventTarget == null) {
-			throw new RuntimeException("nsIDOMEventTarget is null"); //$NON-NLS-1$
+			throw new RuntimeException("nsIDOMNSEventTarget is null"); //$NON-NLS-1$
+		}
+		
+		return eventTarget;
+	}
+	
+	/**
+	 * getting a nsIDOMEventTarget from nsIDOMDocument
+	 * @return nsIDOMEventTarget from nsIDOMDocument
+	 */
+	private nsIDOMNSEventTarget getDOMNSEventTarget() {
+		
+		nsIDOMNSEventTarget eventTarget = queryInterface(domDocument, nsIDOMNSEventTarget.class);
+		if (eventTarget == null) {
+			throw new RuntimeException("nsIDOMNSEventTarget is null"); //$NON-NLS-1$
 		}
 		
 		return eventTarget;
@@ -621,9 +636,9 @@ public class XulRunnerVpeResizer implements IXulRunnerVpeResizer {
 				domDocument, XulRunnerConstants.HTML_TAG_SPAN, parentNode,
 				XulRunnerConstants.VPE_CLASSNAME_MOZ_RESIZER, false);
 		
-		nsIDOMEventTarget evtTarget = queryInterface(aNewResizer, nsIDOMEventTarget.class);
+		nsIDOMNSEventTarget evtTarget = queryInterface(aNewResizer, nsIDOMNSEventTarget.class);
 		
-		evtTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEDOWN, mouseListener, true);
+		evtTarget.addEventListener(XulRunnerConstants.EVENT_NAME_MOUSEDOWN, mouseListener, true, true);
 
 		aNewResizer.setAttribute(XulRunnerConstants.HTML_ATTR_ANONLOCATION, resizerMarkerString);
 		

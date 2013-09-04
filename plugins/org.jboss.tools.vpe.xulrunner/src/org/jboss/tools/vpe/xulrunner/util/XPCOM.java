@@ -267,7 +267,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.imgIDecoder.class);
 			interfacesList.add(org.mozilla.interfaces.imgIDecoderObserver.class);
 			interfacesList.add(org.mozilla.interfaces.imgIEncoder.class);
-			interfacesList.add(org.mozilla.interfaces.imgILoad.class);
+//			interfacesList.add(org.mozilla.interfaces.imgILoad.class);
 			interfacesList.add(org.mozilla.interfaces.imgILoader.class);
 			interfacesList.add(org.mozilla.interfaces.imgIRequest.class);
 			interfacesList.add(org.mozilla.interfaces.imgITools.class);
@@ -342,11 +342,11 @@ public final class XPCOM {
 //			interfacesList.add(org.mozilla.interfaces.nsIAccessibleTextChangeEvent.class);
 //			interfacesList.add(org.mozilla.interfaces.nsIAccessibleValue.class);
 //			interfacesList.add(org.mozilla.interfaces.nsIAccessNode.class);
-			interfacesList.add(org.mozilla.interfaces.nsIAddonInstallListener.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIAddonInstallListener.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAddonRepository.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAddonSearchResult.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAddonSearchResultsCallback.class);
-			interfacesList.add(org.mozilla.interfaces.nsIAddonUpdateCheckListener.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIAddonUpdateCheckListener.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAlertsService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAnnotationObserver.class);
 			interfacesList.add(org.mozilla.interfaces.nsIAnnotationService.class);
@@ -398,7 +398,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIBrowserDOMWindow.class);
 			interfacesList.add(org.mozilla.interfaces.nsIBrowserHistory.class);
 //			interfacesList.add(org.mozilla.interfaces.nsIBrowserHistory_MOZILLA_1_9_1_ADDITIONS.class);
-			interfacesList.add(org.mozilla.interfaces.nsIBrowserInstance.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIBrowserInstance.class);
 			interfacesList.add(org.mozilla.interfaces.nsIBrowserSearchService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIBufferedInputStream.class);
 			interfacesList.add(org.mozilla.interfaces.nsIBufferedOutputStream.class);
@@ -423,7 +423,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsICertVerificationListener.class);
 			interfacesList.add(org.mozilla.interfaces.nsICertVerificationResult.class);
 			interfacesList.add(org.mozilla.interfaces.nsIChannel.class);
-			interfacesList.add(org.mozilla.interfaces.nsIChannelClassifier.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIChannelClassifier.class);
 			interfacesList.add(org.mozilla.interfaces.nsIChannelEventSink.class);
 			interfacesList.add(org.mozilla.interfaces.nsICharsetConverterManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsICharsetResolver.class);
@@ -491,7 +491,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsICookiePermission.class);
 			interfacesList.add(org.mozilla.interfaces.nsICookiePromptService.class);
 			interfacesList.add(org.mozilla.interfaces.nsICookieService.class);
-			interfacesList.add(org.mozilla.interfaces.nsICrashReporter.class);
+//			interfacesList.add(org.mozilla.interfaces.nsICrashReporter.class);
 			interfacesList.add(org.mozilla.interfaces.nsICRLInfo.class);
 			interfacesList.add(org.mozilla.interfaces.nsICRLManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsICryptoFIPSInfo.class);
@@ -615,7 +615,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLAreaElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLAudioElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLBaseElement.class);
-			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLBaseFontElement.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLBaseFontElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLBodyElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLBRElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLButtonElement.class);
@@ -676,7 +676,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLUListElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLVideoElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMHTMLVoidCallback.class);
-			interfacesList.add(org.mozilla.interfaces.nsIDOMJSNavigator.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIDOMJSNavigator.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMJSWindow.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMKeyEvent.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMLinkStyle.class);
@@ -729,7 +729,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLButtonElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLDocument.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLElement.class);
-			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLFormControlList.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLFormControlList.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLFormElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLFrameElement.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDOMNSHTMLHRElement.class);
@@ -939,7 +939,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIDownloadManagerUI.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDownloadObserver.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDownloadProgressListener.class);
-			interfacesList.add(org.mozilla.interfaces.nsIDragDropHandler.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIDragDropHandler.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDragService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDragSession.class);
 			interfacesList.add(org.mozilla.interfaces.nsIDynamicContainer.class);
@@ -969,7 +969,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIExceptionService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIExpatSink.class);
 			interfacesList.add(org.mozilla.interfaces.nsIExtendedExpatSink.class);
-			interfacesList.add(org.mozilla.interfaces.nsIExtensionManager.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIExtensionManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsIExternalHelperAppService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIExternalProtocolHandler.class);
 			interfacesList.add(org.mozilla.interfaces.nsIExternalProtocolService.class);
@@ -1006,7 +1006,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIFormatConverter.class);
 			interfacesList.add(org.mozilla.interfaces.nsIFormFillController.class);
 			interfacesList.add(org.mozilla.interfaces.nsIFormHistory2.class);
-			interfacesList.add(org.mozilla.interfaces.nsIFormHistoryImporter.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIFormHistoryImporter.class);
 			interfacesList.add(org.mozilla.interfaces.nsIFormSigningDialog.class);
 			interfacesList.add(org.mozilla.interfaces.nsIFormSubmitObserver.class);
 			interfacesList.add(org.mozilla.interfaces.nsIForwardIterator.class);
@@ -1064,7 +1064,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIInputStreamChannel.class);
 			interfacesList.add(org.mozilla.interfaces.nsIInputStreamPump.class);
 			interfacesList.add(org.mozilla.interfaces.nsIInputStreamTee.class);
-			interfacesList.add(org.mozilla.interfaces.nsIInstallLocation.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIInstallLocation.class);
 			interfacesList.add(org.mozilla.interfaces.nsIInterfaceRequestor.class);
 			interfacesList.add(org.mozilla.interfaces.nsIIOService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIIOService2.class);
@@ -1131,13 +1131,13 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsINavHistoryResult.class);
 			interfacesList.add(org.mozilla.interfaces.nsINavHistoryResultNode.class);
 			interfacesList.add(org.mozilla.interfaces.nsINavHistoryResultTreeViewer.class);
-			interfacesList.add(org.mozilla.interfaces.nsINavHistoryResultViewer.class);
+//			interfacesList.add(org.mozilla.interfaces.nsINavHistoryResultViewer.class);
 			interfacesList.add(org.mozilla.interfaces.nsINavHistoryService.class);
 			interfacesList.add(org.mozilla.interfaces.nsINavHistoryVisitResultNode.class);
 			interfacesList.add(org.mozilla.interfaces.nsINestedURI.class);
 			interfacesList.add(org.mozilla.interfaces.nsINetUtil.class);
 			interfacesList.add(org.mozilla.interfaces.nsINetworkLinkService.class);
-			interfacesList.add(org.mozilla.interfaces.nsINonBlockingAlertService.class);
+//			interfacesList.add(org.mozilla.interfaces.nsINonBlockingAlertService.class);
 			interfacesList.add(org.mozilla.interfaces.nsINSSCertCache.class);
 			interfacesList.add(org.mozilla.interfaces.nsINSSErrorsService.class);
 			interfacesList.add(org.mozilla.interfaces.nsIObjectInputStream.class);
@@ -1154,8 +1154,8 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIOutputStream.class);
 			interfacesList.add(org.mozilla.interfaces.nsIOutputStreamCallback.class);
 			interfacesList.add(org.mozilla.interfaces.nsIParentalControlsService.class);
-			interfacesList.add(org.mozilla.interfaces.nsIPasswordManager.class);
-			interfacesList.add(org.mozilla.interfaces.nsIPasswordManagerInternal.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIPasswordManager.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIPasswordManagerInternal.class);
 			interfacesList.add(org.mozilla.interfaces.nsIPermission.class);
 			interfacesList.add(org.mozilla.interfaces.nsIPermissionManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsIPersistentProperties.class);
@@ -1285,7 +1285,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIScrollable.class);
 			interfacesList.add(org.mozilla.interfaces.nsIScrollBoxObject.class);
 			interfacesList.add(org.mozilla.interfaces.nsISearchableInputStream.class);
-			interfacesList.add(org.mozilla.interfaces.nsISearchContext.class);
+//			interfacesList.add(org.mozilla.interfaces.nsISearchContext.class);
 			interfacesList.add(org.mozilla.interfaces.nsISearchEngine.class);
 			interfacesList.add(org.mozilla.interfaces.nsISearchSubmission.class);
 			interfacesList.add(org.mozilla.interfaces.nsISecretDecoderRing.class);
@@ -1424,7 +1424,7 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIUpdate.class);
 			interfacesList.add(org.mozilla.interfaces.nsIUpdateChecker.class);
 			interfacesList.add(org.mozilla.interfaces.nsIUpdateCheckListener.class);
-			interfacesList.add(org.mozilla.interfaces.nsIUpdateItem.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIUpdateItem.class);
 			interfacesList.add(org.mozilla.interfaces.nsIUpdateManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsIUpdatePatch.class);
 			interfacesList.add(org.mozilla.interfaces.nsIUpdatePrompt.class);
@@ -1514,10 +1514,10 @@ public final class XPCOM {
 			interfacesList.add(org.mozilla.interfaces.nsIXPCException.class);
 			interfacesList.add(org.mozilla.interfaces.nsIXPCSecurityManager.class);
 			interfacesList.add(org.mozilla.interfaces.nsIXPCWrappedJSObjectGetter.class);
-			interfacesList.add(org.mozilla.interfaces.nsIXPIDialogService.class);
-			interfacesList.add(org.mozilla.interfaces.nsIXPIInstallInfo.class);
-			interfacesList.add(org.mozilla.interfaces.nsIXPInstallManager.class);
-			interfacesList.add(org.mozilla.interfaces.nsIXPIProgressDialog.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIXPIDialogService.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIXPIInstallInfo.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIXPInstallManager.class);
+//			interfacesList.add(org.mozilla.interfaces.nsIXPIProgressDialog.class);
 			interfacesList.add(org.mozilla.interfaces.nsIXPointerResult.class);
 			interfacesList.add(org.mozilla.interfaces.nsIXPTLoader.class);
 			interfacesList.add(org.mozilla.interfaces.nsIXPTLoaderSink.class);
