@@ -23,11 +23,11 @@ public class CordovaSimArgs {
 	private static String rootFolder;
 	private static String startPage;
 	private static int port;
-	public static boolean standalone;
 
 	public static void parseArgs(String[] args) {
 		List<String> params = new ArrayList<String>(Arrays.asList(args));
-		standalone = !params.contains(BrowserSimArgs.NOT_STANDALONE);
+		boolean standalone = !params.contains(BrowserSimArgs.NOT_STANDALONE);
+		BrowserSimArgs.standalone = standalone;
 		if (!standalone) {
 			params.remove(BrowserSimArgs.NOT_STANDALONE);
 		}
@@ -72,9 +72,5 @@ public class CordovaSimArgs {
 	
 	public static void setPort(int port) {
 		CordovaSimArgs.port = port;
-	}
-
-	public static boolean isStandalone() {
-		return standalone;
 	}
 }
