@@ -10,8 +10,12 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.browsersim;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -37,6 +41,7 @@ public class BrowserSimRunner {
 	public static final String ABOUT_BLANK = "about:blank"; //"http://www.w3schools.com/js/tryit_view.asp?filename=try_nav_useragent"; //$NON-NLS-1$
 	
 	public static void main(String[] args) {
+		addURL();
 		Display display = null;
 		try {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
@@ -100,4 +105,38 @@ public class BrowserSimRunner {
 		shell.setText(Messages.BrowserSim_BROWSER_SIM);
 	}
 
+	public static void addURL() {
+		String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+		File jfxrt = new File(javaHome + File.separator
+				+ "lib" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (jfxrt.exists()) {
+			loadJar(jfxrt);
+		} else {
+			File jfxrt8 = new File(javaHome + File.separator
+					+ "lib" + File.separator + "ext" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			File jfxswt = new File(javaHome + File.separator
+					+ "lib" + File.separator + "jfxswt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (jfxrt8.exists() && jfxswt.exists()) {
+				loadJar(jfxrt8);
+				loadJar(jfxswt);
+			}
+		}
+	}
+	
+	private static void loadJar(File file) {
+		try {
+			URL u = file.toURI().toURL();
+
+			URLClassLoader sysloader = (URLClassLoader) ClassLoader
+					.getSystemClassLoader();
+			@SuppressWarnings("rawtypes")
+			Class sysclass = URLClassLoader.class;
+			@SuppressWarnings("unchecked")
+			Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class }); //$NON-NLS-1$
+			method.setAccessible(true);
+			method.invoke(sysloader, new Object[] { u });
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
+	}
 }
