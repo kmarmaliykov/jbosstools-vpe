@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserSimBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
@@ -87,7 +88,7 @@ public abstract class ResizableSkin implements BrowserSimSkin {
 		browserContainer.setLayout(new FillLayout());
 		innerBrowserContainer = new Composite(browserContainer, SWT.NONE);
 		innerBrowserContainer.setLayout(new FillLayout());
-		browser = browserFactory.createBrowser(innerBrowserContainer, SWT.NONE);
+		browser = browserFactory.createBrowser(innerBrowserContainer, SWT.NONE, BrowserSimArgs.isJavaFx);
 		
 		shell.setSize(/*shell.computeSize(SWT.DEFAULT, SWT.DEFAULT)*/ 384, 727);
 		setShellRegion();		

@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.eclipse.swt.browser.LocationAdapter;
@@ -247,7 +248,7 @@ public class ToolsMenuCreator {
 	}
 	
 	private static IBrowser createWeinreBrowser(Composite browserComposite) {
-		final IBrowser browser = new WebKitBrowserFactory().createBrowser(browserComposite, SWT.WEBKIT);
+		final IBrowser browser = new WebKitBrowserFactory().createBrowser(browserComposite, SWT.WEBKIT, BrowserSimArgs.isJavaFx);
 		GridData browserData = new GridData();
 		browserData.horizontalAlignment = GridData.FILL;
 		browserData.verticalAlignment = GridData.FILL;
