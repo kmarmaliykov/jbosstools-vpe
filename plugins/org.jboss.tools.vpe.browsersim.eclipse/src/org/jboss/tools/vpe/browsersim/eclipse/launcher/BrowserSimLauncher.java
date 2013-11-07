@@ -56,6 +56,16 @@ public class BrowserSimLauncher {
 		bundles.add("org.jboss.tools.vpe.browsersim"); //$NON-NLS-1$
 		bundles.add("org.jboss.tools.vpe.browsersim.browser"); //$NON-NLS-1$
 		
+		bundles.add("org.eclipse.jetty.server"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.servlet"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.websocket"); //$NON-NLS-1$
+		bundles.add("javax.servlet"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.util"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.http"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.io"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.security"); //$NON-NLS-1$
+		bundles.add("org.eclipse.jetty.continuation"); //$NON-NLS-1$
+		
 		//for Win64 we add swt from fragment which mached in resources
 		if (!(PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs())
 				&& PlatformUtil.ARCH_X64.equals(PlatformUtil.getArch()))) {

@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserSimBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
@@ -126,7 +127,7 @@ public class NativeSkin implements BrowserSimSkin {
 		locationText.setLayoutData(data);
 		
 		innerBrowserContainer = new Composite(skinComposite, SWT.NONE);
-		browser = browserFactory.createBrowser(innerBrowserContainer, SWT.NONE);
+		browser = browserFactory.createBrowser(innerBrowserContainer, SWT.NONE, BrowserSimArgs.isJavaFx);
 		StackLayout stackLayout = new StackLayout();
 		innerBrowserContainer.setLayout(stackLayout);
 		stackLayout.topControl = (Control) browser;

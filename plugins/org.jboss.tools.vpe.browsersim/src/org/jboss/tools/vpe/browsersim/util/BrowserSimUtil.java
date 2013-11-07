@@ -10,6 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.browsersim.util;
 
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
@@ -207,6 +212,45 @@ public class BrowserSimUtil {
 				}
 			});
 		};
+	}
+	
+	public static boolean loadJavaFX() {
+		String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+		File jfxrt = new File(javaHome + File.separator
+				+ "lib" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (jfxrt.exists()) {
+			loadJar(jfxrt);
+			return true;
+		} else {
+			//java 8 case
+			File jfxrt8 = new File(javaHome + File.separator
+					+ "lib" + File.separator + "ext" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			File jfxswt = new File(javaHome + File.separator
+					+ "lib" + File.separator + "jfxswt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (jfxrt8.exists() && jfxswt.exists()) {
+				loadJar(jfxrt8);
+				loadJar(jfxswt);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private static void loadJar(File file) {
+		try {
+			URL u = file.toURI().toURL();
+
+			URLClassLoader sysloader = (URLClassLoader) ClassLoader
+					.getSystemClassLoader();
+			@SuppressWarnings("rawtypes")
+			Class sysclass = URLClassLoader.class;
+			@SuppressWarnings("unchecked")
+			Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class }); //$NON-NLS-1$
+			method.setAccessible(true);
+			method.invoke(sysloader, new Object[] { u });
+		} catch (Throwable t) {
+			t.printStackTrace();
+		}
 	}
 	
 }

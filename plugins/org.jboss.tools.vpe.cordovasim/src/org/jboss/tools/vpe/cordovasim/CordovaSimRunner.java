@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedOpenWindowListener;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
@@ -68,6 +69,7 @@ public class CordovaSimRunner {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
 			}
+			BrowserSimArgs.isJavaFx = BrowserSimUtil.loadJavaFX();
 			CordovaSimArgs.parseArgs(args);
 			port = CordovaSimArgs.getPort();
 			File rootFolder = new File(CordovaSimArgs.getRootFolder());
@@ -82,7 +84,7 @@ public class CordovaSimRunner {
 			final Shell shell = new Shell(display);
 			setShellAttributes(shell);
 			shell.setLayout(new FillLayout());
-			final IBrowser rippleToolSuiteBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT);
+			final IBrowser rippleToolSuiteBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT, BrowserSimArgs.isJavaFx);
 			final String homeUrl = "http://localhost:" + port + "/" + CordovaSimArgs.getStartPage(); 
 			rippleToolSuiteBrowser.setUrl(homeUrl + "?enableripple=true");
 			

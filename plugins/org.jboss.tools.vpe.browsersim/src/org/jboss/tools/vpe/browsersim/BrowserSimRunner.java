@@ -24,6 +24,7 @@ import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
 import org.jboss.tools.vpe.browsersim.ui.Messages;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimImageList;
+import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -42,8 +43,10 @@ public class BrowserSimRunner {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
 			}
+			boolean javaFx = BrowserSimUtil.loadJavaFX();
 			BrowserSimArgs browserSimArgs = BrowserSimArgs.parseArgs(args);
-	
+			BrowserSimArgs.isJavaFx = javaFx;
+			
 			String path = browserSimArgs.getPath();
 			String url;
 			if (path != null) {
@@ -99,5 +102,4 @@ public class BrowserSimRunner {
 		shell.setImages(icons);
 		shell.setText(Messages.BrowserSim_BROWSER_SIM);
 	}
-
 }
