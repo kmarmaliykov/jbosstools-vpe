@@ -18,6 +18,7 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedCloseWindowListener;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
@@ -112,7 +113,7 @@ public class InAppBrowserLoader {
 	
 	private static IBrowser createInAppBrowser(Composite browserSimParentComposite, IBrowser browserSimBrowser,
 			Device device) {
-		IBrowser inAppBrowser = new WebKitBrowserFactory().createBrowser(browserSimParentComposite, SWT.NONE);
+		IBrowser inAppBrowser = new WebKitBrowserFactory().createBrowser(browserSimParentComposite, SWT.NONE, BrowserSimArgs.isJavaFx);
 		inAppBrowser.setUserAgent(device.getUserAgent());
 		return inAppBrowser;
 	}
