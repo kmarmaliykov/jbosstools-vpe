@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import java.util.EnumSet;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
@@ -32,6 +33,8 @@ import org.jboss.tools.common.model.ui.editors.dnd.context.IDNDTextEditor;
 import org.jboss.tools.common.model.util.EclipseResourceUtil;
 import org.jboss.tools.jst.web.tld.model.TLDUtil;
 import org.jboss.tools.vpe.VpeDebug;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
 import org.jboss.tools.vpe.dnd.DndUtil.DragTransferData;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
@@ -58,6 +61,7 @@ import org.mozilla.interfaces.nsIDOMNSUIEvent;
 import org.mozilla.interfaces.nsIDOMNode;
 import org.mozilla.interfaces.nsIDOMRange;
 import org.mozilla.interfaces.nsIDOMText;
+import org.mozilla.interfaces.nsIDOMWindow;
 import org.mozilla.interfaces.nsIDragService;
 import org.mozilla.interfaces.nsIFile;
 import org.mozilla.interfaces.nsISelection;
@@ -239,12 +243,12 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 	}
 	
 	private nsISelection getVisualSelection() {
-		return vpeController.getXulRunnerEditor().getWebBrowser()
-				.getContentDOMWindow().getSelection();
+		JavaFXBrowser browser = vpeController.getXulRunnerEditor().getBrowser();
+		return AnyXPCOM.queryInterface("window", nsIDOMWindow.class, browser).getSelection();
 	}
 
 	private boolean isTextSelected(nsISelection selection) {
-		if (selection.getRangeCount() == 0) {
+		if (selection == null || selection.getRangeCount() == 0) {
 			// nothing selected
 			return false;
 		}

@@ -51,7 +51,6 @@ public class JavaFXBrowser extends FXCanvas implements IBrowser {
 	public JavaFXBrowser(Composite parent) {
 		super(parent, SWT.NONE);
 		webView = new WebView();
-
 		this.setScene(new Scene(webView));
 		
 		Debugger debugger = getEngine().impl_getDebugger();
@@ -377,7 +376,7 @@ public class JavaFXBrowser extends FXCanvas implements IBrowser {
 		return true; //XXX
 	}
 	
-	protected WebEngine getEngine() {
+	public WebEngine getEngine() {
 		return webView.getEngine();
 	}
 }

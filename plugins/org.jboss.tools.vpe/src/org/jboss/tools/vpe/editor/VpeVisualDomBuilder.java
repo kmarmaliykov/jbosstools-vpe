@@ -272,7 +272,9 @@ public class VpeVisualDomBuilder extends VpeDomBuilder {
 					 */
 					nsIDOMElement element = null;
 					try {
-						element = queryInterface(visualNewNode, nsIDOMElement.class);
+						if (visualNewNode.getNodeType() == nsIDOMNode.ELEMENT_NODE) {
+							element = queryInterface(visualNewNode, nsIDOMElement.class);
+						}
 					} catch (org.mozilla.xpcom.XPCOMException e) {
 						/*
 						 * Cannot parse node to element, do nothing

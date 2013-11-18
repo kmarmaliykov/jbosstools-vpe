@@ -18,6 +18,7 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.util.SourceDomUtil;
@@ -87,7 +88,7 @@ public class ScrollCoordinator implements IScrollCoordinator {
 		int line = -1;
 		if ((sourceEditor != null) && (visualEditor != null)) {
 			if (visualEditor.getXulRunnerEditor() != null) {
-				nsIDOMWindow domWindow = visualEditor.getXulRunnerEditor().getWebBrowser().getContentDOMWindow();
+				nsIDOMWindow domWindow = AnyXPCOM.queryInterface("window", nsIDOMWindow.class, visualEditor.getXulRunnerEditor().getBrowser());
 				nsIInterfaceRequestor iInterfaceRequestor = (nsIInterfaceRequestor) 
 						domWindow.queryInterface(nsIInterfaceRequestor.NS_IINTERFACEREQUESTOR_IID);
 				nsIDOMWindowInternal windowInternal = org.jboss.tools.vpe.xulrunner.util.XPCOM

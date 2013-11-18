@@ -106,7 +106,11 @@ public class MozillaEventAdapter implements nsIDOMEventListener, nsISelectionLis
 			window.addEventListener(MozillaEventAdapter.MOZAFTERPAINT, this, false);
 
 			nsISelection selection = domWindow.getSelection();
-			selectionPrivate = XPCOM.queryInterface(selection, nsISelectionPrivate.class);
+			if (selection == null) {
+				selectionPrivate = XPCOM.queryInterface(domWindow, nsISelectionPrivate.class);;
+			} else {
+				selectionPrivate = XPCOM.queryInterface(selection, nsISelectionPrivate.class);
+			}
 			selectionPrivate.addSelectionListener(this);
 		}
 		if (document != null) {

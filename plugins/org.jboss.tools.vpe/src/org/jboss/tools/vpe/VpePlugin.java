@@ -18,6 +18,8 @@ import org.eclipse.ui.IStartup;
 import org.jboss.tools.common.log.BaseUIPlugin;
 import org.jboss.tools.common.log.IPluginLog;
 import org.jboss.tools.common.reporting.ProblemReportingHelper;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
+import org.jboss.tools.vpe.anyxpcom.NsiProxy;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 import org.osgi.framework.Bundle;
@@ -49,6 +51,21 @@ public class VpePlugin extends BaseUIPlugin {
 		super.start(context);
 //		moved to vpe.xulrunner plug-in
 //		earlyStartup();
+//		new Thread() {
+//			public void run() {
+//				while (true) {
+//					System.out.format("nanoSum  = %.3fs%n", NsiProxy.nanoSum * 1e-9);
+//					System.out.println("counter  = " + NsiProxy.counter);
+//					System.out.format("nanoSum2 = %.3fs%n", AnyXPCOM.nanoSum2 * 1e-9);
+//					System.out.println("counter2 = " + AnyXPCOM.counter2);
+//					try {
+//						Thread.sleep(1000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//					}
+//				}
+//			}
+//		}.start();
 	}
 
 	/**
