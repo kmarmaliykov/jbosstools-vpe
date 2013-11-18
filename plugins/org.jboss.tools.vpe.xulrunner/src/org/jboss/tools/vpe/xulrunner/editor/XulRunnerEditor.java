@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.xulrunner.BrowserPlugin;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
@@ -81,7 +82,7 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	/**
 	 * xpcom flasher component which used to draw lines
 	 */
-	private Flasher flasher;
+//	private Flasher flasher;
 
 	/**
 	 * RegExp for find expression 'display : none' in style string
@@ -137,9 +138,9 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 					getBrowser().getParent().removePaintListener(paintListener);
 					paintListener = null;
 				}
-				getWebBrowser().removeWebBrowserListener(XulRunnerEditor.this,
-						nsITooltipListener.NS_ITOOLTIPLISTENER_IID);
-				removeProgressListener(XulRunnerEditor.this);
+//				getWebBrowser().removeWebBrowserListener(XulRunnerEditor.this,
+//						nsITooltipListener.NS_ITOOLTIPLISTENER_IID);
+				//removeProgressListener(XulRunnerEditor.this);
 
 				if (resizeListener != null) {
 					getIXulRunnerVpeResizer().removeResizeListener(resizeListener);
@@ -156,7 +157,7 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 					eventListenet = null;
 				}
 				getBrowser().removeDisposeListener(this);
-				onDispose();
+//				onDispose();
 			}
 
 		});
@@ -239,8 +240,7 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	}
 
 	public nsIDOMDocument getDOMDocument() {
-		nsIDOMWindow domWindow = getWebBrowser().getContentDOMWindow();
-		return domWindow.getDocument();
+		return AnyXPCOM.queryInterface("document", nsIDOMDocument.class, getBrowser());
 	}
 
 	public List<nsIDOMNode> getSelectedNodes() {
@@ -258,13 +258,13 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	 * @param scroll
 	 */
 	public void setSelectionRectangle(List<nsIDOMNode> nodes, int resizerConstrains) {
-		getFlasher();
+//		getFlasher();
 		this.selectedNodes = nodes;
 
 		nsIDOMElement element = getSelectedElement();
 		if (element != null) {
 			repaint();
-			scrollToElement(element);
+//			scrollToElement(element);
 		}
 		redrawSelectionRectangle();
 
@@ -288,23 +288,23 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	 */
 	private void repaint() {
 		try {
-			XPCOM.queryInterface(getWebBrowser(), nsIBaseWindow.class).repaint(true);
+			XPCOM.queryInterface(AnyXPCOM.queryInterface("window", nsIDOMWindow.class, getBrowser()), nsIBaseWindow.class).repaint(true);
 		} catch (XPCOMException ex) {
 			// just ignore it
 			BrowserPlugin.getDefault().logInfo("repaint failed", ex); //$NON-NLS-1$
 		}
 	}
 
-	/**
-	 * @return the iFlasher
-	 */
-	private Flasher getFlasher() {
-
-		if (flasher == null) {
-			flasher = new Flasher();
-		}
-		return flasher;
-	}
+//	/**
+//	 * @return the iFlasher
+//	 */
+//	private Flasher getFlasher() {
+//
+//		if (flasher == null) {
+//			flasher = new Flasher();
+//		}
+//		return flasher;
+//	}
 
 	private IXulRunnerVpeResizer getIXulRunnerVpeResizer() {
 
@@ -405,7 +405,7 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 		for (nsIDOMNode domNode : getSelectedNodes()) {
 			flasherDatas.add(prepareFlasherData(domNode));
 		}
-		drawElementOutline(flasherDatas);
+//		drawElementOutline(flasherDatas);
 	}
 	
 	private FlasherData prepareFlasherData(nsIDOMNode domNode){
@@ -437,9 +437,9 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	 * @param element
 	 *            -element to which we should scroll
 	 */
-	private void scrollToElement(nsIDOMElement element) {
-		getFlasher().scrollElementIntoView(element);
-	}
+//	private void scrollToElement(nsIDOMElement element) {
+//		getFlasher().scrollElementIntoView(element);
+//	}
 
 	/**
 	 * Returns the element to be selected for the given {@code node}.
@@ -468,19 +468,19 @@ public class XulRunnerEditor extends XulRunnerBrowser {
 	 *            arround which border will be shown
 	 * 
 	 */
-	private void drawElementOutline(List<FlasherData> flasherData) {
-		getFlasher().drawElementOutline(flasherData);
-	}
+//	private void drawElementOutline(List<FlasherData> flasherData) {
+//		getFlasher().drawElementOutline(flasherData);
+//	}
 
-	@Override
-	protected void onDispose() {
-		selectedNodes = new ArrayList<nsIDOMNode>();
-		if (flasher != null) {
-			flasher.dispose();
-			flasher = null;
-		}
-		super.onDispose();
-	}
+//	//@Override
+//	protected void onDispose() {
+//		selectedNodes = new ArrayList<nsIDOMNode>();
+//		if (flasher != null) {
+//			flasher.dispose();
+//			flasher = null;
+//		}
+////		super.onDispose();
+//	}
 
 	private class VisualPaintListener implements PaintListener {
 

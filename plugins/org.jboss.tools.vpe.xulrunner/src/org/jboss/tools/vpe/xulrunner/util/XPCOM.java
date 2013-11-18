@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.mozilla.interfaces.nsIComponentManager;
 import org.mozilla.interfaces.nsIComponentRegistrar;
 import org.mozilla.interfaces.nsIDOMNode;
@@ -87,7 +88,8 @@ public final class XPCOM {
 	public static <T extends nsISupports> T queryInterface(
 			nsISupports object,	Class<T> type) throws XPCOMException {
 		String interfaceId = getInterfaceId(type);
-		return (T) object.queryInterface(interfaceId);
+		return AnyXPCOM.queryInterface(object, type);
+		//return (T) object.queryInterface(interfaceId);
 	}
 	
 	/**

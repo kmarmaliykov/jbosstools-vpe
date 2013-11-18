@@ -10,13 +10,12 @@
   ******************************************************************************/
 package org.jboss.tools.vpe.dnd;
 
-import static org.jboss.tools.vpe.xulrunner.util.XPCOM.queryInterface;
-
 import org.eclipse.swt.graphics.Rectangle;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.xulrunner.editor.XulRunnerEditor;
 import org.mozilla.interfaces.nsIDOMMouseEvent;
+import org.mozilla.interfaces.nsIDOMWindow;
 import org.mozilla.interfaces.nsIEmbeddingSiteWindow;
-import org.mozilla.interfaces.nsIWebBrowser;
 
 /**
  * The class {@code ScrollingSupport} enables support of window 
@@ -61,8 +60,6 @@ public class ScrollingSupport {
 	 * @param mouseEvent the mouse event
 	 */
 	public void scroll(nsIDOMMouseEvent mouseEvent) {
-		final nsIWebBrowser webBrowser = xulRunnerEditor.getWebBrowser();
-
 		final Rectangle rect = getWindowBounds();
 
 		final int mouseX = mouseEvent.getClientX();
@@ -83,7 +80,7 @@ public class ScrollingSupport {
 		}
 		
 		if (scrollX != 0 || scrollY != 0) {
-			webBrowser.getContentDOMWindow().scrollBy(scrollX, scrollY);
+			AnyXPCOM.queryInterface("window", nsIDOMWindow.class, xulRunnerEditor.getBrowser()).scrollBy(scrollX, scrollY);
 		}
 	}
 	
@@ -93,9 +90,8 @@ public class ScrollingSupport {
 	 * @return bounds of the {@link #xulRunnerEditor}
 	 */
 	private Rectangle getWindowBounds() {
-		nsIEmbeddingSiteWindow window = 
-			queryInterface(xulRunnerEditor.getWebBrowser().getContainerWindow(),
-			nsIEmbeddingSiteWindow.class);
+		
+		nsIEmbeddingSiteWindow window = AnyXPCOM.queryInterface("window", nsIEmbeddingSiteWindow.class, xulRunnerEditor.getBrowser());
 		
 		int[] xArray      = new int[1]; // Left hand corner of the outer area
 		int[] yArray      = new int[1]; // Top corner of the outer area

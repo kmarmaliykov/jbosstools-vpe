@@ -59,13 +59,13 @@ public class XulRunnerEditor2 extends XulRunnerEditor {
 			mozillaEditor.getTooltipListener().onHideTooltip();
 		}
 	}
-	@Override
-	public void onDispose() {
-		if (mozillaEditor != null) {
-			mozillaEditor.tearDownEditor();
-			mozillaEditor.detachMozillaEventAdapter();
-			mozillaEditor = null;
-		}
-		super.onDispose();
-	}
+//	@Override
+//	public void onDispose() {
+//		if (mozillaEditor != null) {
+//			mozillaEditor.tearDownEditor();
+//			mozillaEditor.detachMozillaEventAdapter();
+//			mozillaEditor = null;
+//		}
+//		super.onDispose();
+//	}
 }

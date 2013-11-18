@@ -22,20 +22,21 @@ import java.util.Set;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.xulrunner.PlatformIsNotSupportedException;
 import org.jboss.tools.vpe.xulrunner.VpeXulrunnerMessages;
 import org.jboss.tools.vpe.xulrunner.XulRunnerBundleNotFoundException;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
 import org.jboss.tools.vpe.xulrunner.util.XPCOM;
-import org.mozilla.interfaces.nsIComponentManager;
-import org.mozilla.interfaces.nsIPrefService;
 import org.mozilla.interfaces.nsIRequest;
-import org.mozilla.interfaces.nsIServiceManager;
 import org.mozilla.interfaces.nsISupports;
 import org.mozilla.interfaces.nsITooltipListener;
 import org.mozilla.interfaces.nsIURI;
@@ -46,7 +47,6 @@ import org.mozilla.interfaces.nsIWebProgress;
 import org.mozilla.interfaces.nsIWebProgressListener;
 import org.mozilla.xpcom.GREVersionRange;
 import org.mozilla.xpcom.Mozilla;
-import org.mozilla.xpcom.XPCOMException;
 import org.osgi.framework.Bundle;
 
 /**
@@ -55,7 +55,7 @@ import org.osgi.framework.Bundle;
  *
  */
 
-public class XulRunnerBrowser implements nsIWebBrowserChrome,
+public class XulRunnerBrowser implements 
 		nsIWebProgressListener, nsITooltipListener {
 	private static final String XULRUNNER_LOWER_VERSION = "1.9.1.0"; //$NON-NLS-1$
 	private static final boolean XULRUNNER_LOWER_VERSION_INCLUSIVE = true;
@@ -79,7 +79,7 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	private static boolean EMBEDDED_XULRUNNER_ENABLED = !"false".equals(System.getProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY));  //$NON-NLS-1$
 
 	private Browser browser = null;
-	private nsIWebBrowser webBrowser = null;
+//	private nsIWebBrowser webBrowser = null;
 	private long chrome_flags = nsIWebBrowserChrome.CHROME_ALL; 
 	public static final long NS_ERROR_FAILURE = 0x80004005L;
 	private static final String XULRUNNER_ENTRY = "/xulrunner"; //$NON-NLS-1$
@@ -96,7 +96,6 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	public static final String CURRENT_PLATFORM_ID = Platform.getWS() + '.'
 			+ Platform.getOS() + '.' + Platform.getOSArch();
 	
-	private static final Mozilla mozilla;
 	static {
 		StringBuilder buff = new StringBuilder();
 		buff.append("org.mozilla.xulrunner.") //$NON-NLS-1$
@@ -109,21 +108,39 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 			buff.append('.').append(Platform.getOSArch());
 		}
 		XULRUNNER_BUNDLE =  buff.toString();
-		mozilla = Mozilla.getInstance();
 	}
 
 	public XulRunnerBrowser(Composite parent) throws XulRunnerException {
 		ensureEmbeddedXulRunnerEnabled();
 		getXulRunnerPath();
-	    browser = new Browser(parent, SWT.MOZILLA);
+		
+		//System.setProperty("org.eclipse.swt.browser.XULRunnerPath", "C:\\Users\\kmarmaliykov\\jbosstools-git\\jbosstools-xulrunner\\plugins\\org.mozilla.xulrunner.win32.win32.x86\\xulrunner");
+		
+		try {
+			browser = new Browser(parent, SWT.WEBKIT); // will work with NONE and WEBKIT too!
+		} catch (SWTError e) {
+			System.out.println("Could not instantiate Browser: " + e.getMessage());
+		}		
+		
+		browser.addProgressListener(new ProgressListener() {
+			@Override
+			public void completed(ProgressEvent event) {				
+				AnyXPCOM.initBrowser(browser);
+			}
+			@Override
+			public void changed(ProgressEvent event) {
+				
+			}
+		});
 	    
-	    webBrowser = (nsIWebBrowser) browser.getWebBrowser();
-            if (webBrowser == null) {
-                throw new XulRunnerException(VpeXulrunnerMessages.XulRunnerBrowser_notAvailable); 
-            }
-
-            setBoolRootPref(PREFERENCE_DISABLEOPENDURINGLOAD, true);
-            setBoolRootPref(PREFERENCE_DISABLEWINDOWSTATUSCHANGE, true);
+//	    webBrowser = (nsIWebBrowser) browser.getWebBrowser();
+//            if (webBrowser == null) {
+//                throw new XulRunnerException(VpeXulrunnerMessages.XulRunnerBrowser_notAvailable); 
+//            }
+//
+		//mozilla.initialize(new File("C:\\Users\\kmarmaliykov\\jbosstools-git\\jbosstools-xulrunner\\plugins\\org.mozilla.xulrunner.win32.win32.x86\\xulrunner"));
+//            setBoolRootPref(PREFERENCE_DISABLEOPENDURINGLOAD, true);
+//            setBoolRootPref(PREFERENCE_DISABLEWINDOWSTATUSCHANGE, true);
             
             /* yradtsevich: the following two lines are commented due to JBIDE-6647.
              * By some reason they were preventing of handling of Drag&Drop events. */
@@ -133,13 +150,13 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
             // JBIDE-1329 Solution was contributed by Snjezana Peco
 //             webBrowser.addWebBrowserListener(this,
 //            	nsIWebProgressListener.NS_IWEBPROGRESSLISTENER_IID);
-            nsIServiceManager serviceManager = mozilla.getServiceManager();
-            nsIWebProgress webProgress = (nsIWebProgress) serviceManager
-    		.getServiceByContractID("@mozilla.org/docloaderservice;1", //$NON-NLS-1$
-    			nsIWebProgress.NS_IWEBPROGRESS_IID);
-            webProgress.addProgressListener(this, nsIWebProgress.NOTIFY_STATE_ALL);
-            webBrowser.addWebBrowserListener(this,
-    		nsITooltipListener.NS_ITOOLTIPLISTENER_IID);
+//            nsIServiceManager serviceManager = mozilla.getServiceManager();
+//            nsIWebProgress webProgress = (nsIWebProgress) serviceManager
+//    		.getServiceByContractID("@mozilla.org/docloaderservice;1", //$NON-NLS-1$
+//    			nsIWebProgress.NS_IWEBPROGRESS_IID);
+//            webProgress.addProgressListener(this, nsIWebProgress.NOTIFY_STATE_ALL);
+//            webBrowser.addWebBrowserListener(this,
+//    		nsITooltipListener.NS_ITOOLTIPLISTENER_IID);
         }
 
 	/**
@@ -187,7 +204,7 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	public void dispose() {
 		//added by mareshkau, here we remove listener.
 		//if we hasn't do it, listener will be continue work even after close browser
-		removeProgressListener(this);
+		//removeProgressListener(this);
 		browser.dispose();
 		browser = null;
 	}
@@ -270,86 +287,88 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 					VpeXulrunnerMessages.XulRunnerBrowser_embeddedXulRunnerIsDisabledByOption, LOAD_XULRUNNER_SYSTEM_PROPERTY));
 		}
 	}
-
-	public nsIServiceManager getServiceManager() {
-		return mozilla.getServiceManager();
-	}
-	
-	public nsIComponentManager getComponentManager() {
-		return mozilla.getComponentManager();
-	}
+//
+//	public nsIServiceManager getServiceManager() {
+//		return mozilla.getServiceManager();
+//	}
+//	
+//	public nsIComponentManager getComponentManager() {
+//		return mozilla.getComponentManager();
+//	}
 	
 	public void setURL(String url) {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_NONE, null, null, null);
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		webNavigation.loadURI(url, nsIWebNavigation.LOAD_FLAGS_NONE, null, null, null);
+		browser.setText(url);
+		//browser.setUrl(url);
 	}
-	
-	public String getURL() {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		return webNavigation.getCurrentURI().getSpec();
-	}
-	
-	public void stop() {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		webNavigation.stop(nsIWebNavigation.STOP_ALL);
-	}
-	
-	public void reload() {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		webNavigation.reload(nsIWebNavigation.LOAD_FLAGS_NONE);
-	}
-	
-	public void goBack() {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		webNavigation.goBack();
-	}
-	
-	public void goForward() {
-		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
-		webNavigation.goForward();
-	}
+//	
+//	public String getURL() {
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		return webNavigation.getCurrentURI().getSpec();
+//	}
+//	
+//	public void stop() {
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		webNavigation.stop(nsIWebNavigation.STOP_ALL);
+//	}
+//	
+//	public void reload() {
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		webNavigation.reload(nsIWebNavigation.LOAD_FLAGS_NONE);
+//	}
+//	
+//	public void goBack() {
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		webNavigation.goBack();
+//	}
+//	
+//	public void goForward() {
+//		nsIWebNavigation webNavigation = XPCOM.queryInterface(webBrowser, nsIWebNavigation.class);
+//		webNavigation.goForward();
+//	}
 
 	public void onLoadWindow() {
 	}
 
-	public nsIPrefService getPrefService() {
-		return (nsIPrefService) getServiceManager().getServiceByContractID(XPCOM.NS_PREFSERVICE_CONTRACTID, nsIPrefService.NS_IPREFSERVICE_IID);
-	}
+//	public nsIPrefService getPrefService() {
+//		return (nsIPrefService) getServiceManager().getServiceByContractID(XPCOM.NS_PREFSERVICE_CONTRACTID, nsIPrefService.NS_IPREFSERVICE_IID);
+//	}
 
-	
-	public void setBoolRootPref(String aPrefName, boolean aValue) {
-		getPrefService().getBranch(ROOT_BRANCH_NAME).setBoolPref(aPrefName, aValue ? 1 : 0);
-	}
-	
-	
-	public void setCharRootPref(String aPrefName, String aValue) {
-		getPrefService().getBranch(ROOT_BRANCH_NAME).setCharPref(aPrefName, aValue);
-	}
-	
-	
-	public void setComplexRootValue(String aPrefName, String aType, nsISupports aValue) {
-		getPrefService().getBranch(ROOT_BRANCH_NAME).setComplexValue(aPrefName, aType, aValue);
-	}
-	
-	public void setIntRootPref(String aPrefName, int aValue) {
-		getPrefService().getBranch(ROOT_BRANCH_NAME).setIntPref(aPrefName, aValue);
-	}
-	
-	public boolean getBoolRootPref(String aPrefName) {
-		return getPrefService().getBranch(ROOT_BRANCH_NAME).getBoolPref(aPrefName);
-	}
-
-	public String getCharRootPref(String aPrefName) {
-		return getPrefService().getBranch(ROOT_BRANCH_NAME).getCharPref(aPrefName);
-	}
-
-	public nsISupports getComplextRootPref(String aPrefName, String aType) {
-		return getPrefService().getBranch(ROOT_BRANCH_NAME).getComplexValue(aPrefName, aType);
-	}
-
-	public int getIntRootf(String aPrefName) {
-		return getPrefService().getBranch(ROOT_BRANCH_NAME).getIntPref(aPrefName);
-	}
+//	
+//	public void setBoolRootPref(String aPrefName, boolean aValue) {
+//		getPrefService().getBranch(ROOT_BRANCH_NAME).setBoolPref(aPrefName, aValue ? 1 : 0);
+//	}
+//	
+//	
+//	public void setCharRootPref(String aPrefName, String aValue) {
+//		getPrefService().getBranch(ROOT_BRANCH_NAME).setCharPref(aPrefName, aValue);
+//	}
+//	
+//	
+//	public void setComplexRootValue(String aPrefName, String aType, nsISupports aValue) {
+//		getPrefService().getBranch(ROOT_BRANCH_NAME).setComplexValue(aPrefName, aType, aValue);
+//	}
+//	
+//	public void setIntRootPref(String aPrefName, int aValue) {
+//		getPrefService().getBranch(ROOT_BRANCH_NAME).setIntPref(aPrefName, aValue);
+//	}
+//	
+//	public boolean getBoolRootPref(String aPrefName) {
+//		return getPrefService().getBranch(ROOT_BRANCH_NAME).getBoolPref(aPrefName);
+//	}
+//
+//	public String getCharRootPref(String aPrefName) {
+//		return getPrefService().getBranch(ROOT_BRANCH_NAME).getCharPref(aPrefName);
+//	}
+//
+//	public nsISupports getComplextRootPref(String aPrefName, String aType) {
+//		return getPrefService().getBranch(ROOT_BRANCH_NAME).getComplexValue(aPrefName, aType);
+//	}
+//
+//	public int getIntRootf(String aPrefName) {
+//		return getPrefService().getBranch(ROOT_BRANCH_NAME).getIntPref(aPrefName);
+//	}
 	
 	/*
 	 * nsISupports
@@ -378,10 +397,6 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 		return chrome_flags;
 	}
 
-	public nsIWebBrowser getWebBrowser() {
-		return webBrowser;
-	}
-
 	public boolean isWindowModal() {
 		// TODO Sergey Vasilyev implement
 		return false;
@@ -394,10 +409,6 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	public void setStatus(long arg0, String arg1) {
 		// TODO Sergey Vasilyev implement
 		throw new RuntimeException("Not implemented"); //$NON-NLS-1$
-	}
-
-	public void setWebBrowser(nsIWebBrowser arg0) {
-		webBrowser = arg0;
 	}
 
 	public void showAsModal() {
@@ -466,31 +477,31 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	public Browser getBrowser() {
 		return browser;
 	}
-	
-	protected void onDispose() {
-		webBrowser = null;
-	}
-	
+//	
+//	protected void onDispose() {
+//		webBrowser = null;
+//	}
+//	
 	public void setText(String html) {
-		browser.setText(html);
+		setURL(html);
 	}
 	
-	protected void removeProgressListener(nsIWebProgressListener progressListener){
-		 nsIServiceManager serviceManager = mozilla.getServiceManager();
-	        nsIWebProgress webProgress = (nsIWebProgress) serviceManager
-			.getServiceByContractID("@mozilla.org/docloaderservice;1", //$NON-NLS-1$
-				nsIWebProgress.NS_IWEBPROGRESS_IID);
-	        try {
-	        	webProgress.removeProgressListener(progressListener);
-	        } catch(XPCOMException xpcomException) {
-	        	
-	        	//this exception throws when progress listener already has been deleted, 
-	        	//so just ignore if error code NS_ERROR_FAILURE
-	        	if(xpcomException.errorcode!=XulRunnerBrowser.NS_ERROR_FAILURE) {
-	        		throw xpcomException;
-	        	}
-	        }
-	}
+//	protected void removeProgressListener(nsIWebProgressListener progressListener){
+//		 nsIServiceManager serviceManager = mozilla.getServiceManager();
+//	        nsIWebProgress webProgress = (nsIWebProgress) serviceManager
+//			.getServiceByContractID("@mozilla.org/docloaderservice;1", //$NON-NLS-1$
+//				nsIWebProgress.NS_IWEBPROGRESS_IID);
+//	        try {
+//	        	webProgress.removeProgressListener(progressListener);
+//	        } catch(XPCOMException xpcomException) {
+//	        	
+//	        	//this exception throws when progress listener already has been deleted, 
+//	        	//so just ignore if error code NS_ERROR_FAILURE
+//	        	if(xpcomException.errorcode!=XulRunnerBrowser.NS_ERROR_FAILURE) {
+//	        		throw xpcomException;
+//	        	}
+//	        }
+//	}
 	
 	/**
 	 * Return {@code true} if and only if the current
@@ -503,5 +514,9 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	 */
 	public static boolean isCurrentPlatformOfficiallySupported() {
 		return OFFICIALLY_SUPPORTED_PLATFORM_IDS.contains(CURRENT_PLATFORM_ID);
+	}
+
+	public void setBrowser(Browser browser) {
+		this.browser = browser;
 	}
 }

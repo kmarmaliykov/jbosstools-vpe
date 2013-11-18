@@ -37,6 +37,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.custom.LineStyleEvent;
 import org.eclipse.swt.custom.LineStyleListener;
 import org.eclipse.swt.custom.StyleRange;
@@ -100,6 +101,7 @@ import org.jboss.tools.jst.web.project.WebProject;
 import org.jboss.tools.jst.web.tld.URIConstants;
 import org.jboss.tools.vpe.VpeDebug;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.dnd.VpeDnD;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
@@ -355,12 +357,12 @@ public class VpeController implements INodeAdapter,
 			sourceEditorVerticalScrollBar = textWidget.getVerticalBar();
 			if (sourceEditorVerticalScrollBar != null) {
 				if (visualEditor.getXulRunnerEditor() != null) {
-					nsIWebBrowser webBrowser = visualEditor.getXulRunnerEditor().getWebBrowser();
+					Browser webBrowser = visualEditor.getXulRunnerEditor().getBrowser();
 					if (webBrowser != null) {
 						/*
 						 * Initialize mozilla browser content window
 						 */
-						final nsIDOMWindow domWindow = webBrowser.getContentDOMWindow();
+						final nsIDOMWindow domWindow = AnyXPCOM.queryInterface("window", nsIDOMWindow.class, xulRunnerEditor.getBrowser());
 						final nsIDOMWindowInternal windowInternal = org.jboss.tools.vpe.xulrunner.util.XPCOM
 								.queryInterface(domWindow, nsIDOMWindowInternal.class);
 						/*

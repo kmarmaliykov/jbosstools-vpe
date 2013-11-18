@@ -16,8 +16,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +40,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.browser.ProgressListener;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -71,6 +74,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.i18n.ExternalizeStringsWizard;
 import org.jboss.tools.jst.web.ui.internal.editor.messages.JstUIMessages;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.anyxpcom.AnyXPCOM;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.mozilla.listener.MozillaResizeListener;
@@ -610,7 +614,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				}
 
 				public void completed(ProgressEvent event) {
-					if (MozillaEditor.this.getXulRunnerEditor().getWebBrowser() != null) {
+					if (MozillaEditor.this.getXulRunnerEditor().getBrowser() != null) {
 						//process this code only in case when editor hasn't been disposed,
 						//see https://jira.jboss.org/browse/JBIDE-6373
 						MozillaEditor.this.onLoadWindow();
@@ -665,8 +669,9 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				if (out != null) {
 					out.close();
 					if (tmp != null) {
-						xulRunnerEditor.setURL("file://"	//$NON-NLS-1$
-								+ tmp.getCanonicalPath());
+						//xulRunnerEditor.setURL("file://"	//$NON-NLS-1$
+							//	+ tmp.getCanonicalPath());
+						xulRunnerEditor.setURL(html);
 					}
 				}
 			} catch (IOException e) {
@@ -939,7 +944,8 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	protected void attachMozillaEventAdapter() {
 		if (contentArea != null) {
 //			getContentAreaEventListener().setVisualEditor(xulRunnerEditor);
-			nsIDOMWindow window = xulRunnerEditor.getWebBrowser().getContentDOMWindow();
+			Browser browser = xulRunnerEditor.getBrowser();
+			nsIDOMWindow window = AnyXPCOM.queryInterface("window", nsIDOMWindow.class, browser);
 			mozillaEventAdapter.attach(window, queryInterface(contentArea, nsIDOMEventTarget.class));
 		}
 	}
@@ -1043,14 +1049,14 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	}
 	
 	public void tearDownEditor() {
-		if (editor != null) {
-			nsIEditingSession iEditingSession = (nsIEditingSession) getXulRunnerEditor().
-							getComponentManager().createInstanceByContractID(XPCOM.NS_EDITINGSESSION_CONTRACTID, null, nsIEditingSession.NS_IEDITINGSESSION_IID);
-			nsIDOMWindow window = getXulRunnerEditor().getWebBrowser().getContentDOMWindow();
-			iEditingSession.detachFromWindow(window);
-			iEditingSession.tearDownEditorOnWindow(window);
-			editor = null;
-		}
+//		if (editor != null) {
+//			nsIEditingSession iEditingSession = (nsIEditingSession) getXulRunnerEditor().
+//							getComponentManager().createInstanceByContractID(XPCOM.NS_EDITINGSESSION_CONTRACTID, null, nsIEditingSession.NS_IEDITINGSESSION_IID);
+//			nsIDOMWindow window = getXulRunnerEditor().getWebBrowser().getContentDOMWindow();
+//			iEditingSession.detachFromWindow(window);
+//			iEditingSession.tearDownEditorOnWindow(window);
+//			editor = null;
+//		}
 	}
 
 	/**
@@ -1060,27 +1066,30 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 	public nsIEditor getEditor() {
 		
 		if(editor==null) {
-			//creating editing session
-			nsIEditingSession iEditingSession = (nsIEditingSession) getXulRunnerEditor().
-							getComponentManager().createInstanceByContractID(XPCOM.NS_EDITINGSESSION_CONTRACTID, null, nsIEditingSession.NS_IEDITINGSESSION_IID);
-			//make window editable
-			iEditingSession.makeWindowEditable(getXulRunnerEditor().getWebBrowser().getContentDOMWindow(), "html", true,true,true); //$NON-NLS-1$
-			//here we setup editor for window
-			iEditingSession.setupEditorOnWindow(getXulRunnerEditor().getWebBrowser().getContentDOMWindow());
-			//getting some editor to disable some actions
-			editor = iEditingSession.getEditorForWindow(getXulRunnerEditor().getWebBrowser().getContentDOMWindow());
-			editor.setFlags(nsIPlaintextEditor.eEditorReadonlyMask);
-			//here we hide nsIHTMLObjectResizers
-			nsIHTMLObjectResizer htmlObjectResizer = queryInterface(editor, nsIHTMLObjectResizer.class);
-			//we disable abject resizers
-			htmlObjectResizer.hideResizers();
-			htmlObjectResizer.setObjectResizingEnabled(false);
-			//here we getting position editor and disable it's too
-			nsIHTMLAbsPosEditor htmlAbsPosEditor = queryInterface(editor, nsIHTMLAbsPosEditor.class);
-			htmlAbsPosEditor.setAbsolutePositioningEnabled(false);
-			//here we getting inline table editor and disable it's too
-			nsIHTMLInlineTableEditor inlineTableEditor = queryInterface(editor, nsIHTMLInlineTableEditor.class);
-			inlineTableEditor.setInlineTableEditingEnabled(false);
+//			//creating editing session
+//			nsIEditingSession iEditingSession = (nsIEditingSession) getXulRunnerEditor().
+//							getComponentManager().createInstanceByContractID(XPCOM.NS_EDITINGSESSION_CONTRACTID, null, nsIEditingSession.NS_IEDITINGSESSION_IID);
+//			//make window editable
+//			nsIDOMWindow window = AnyXPCOM.queryInterface("window",nsIDOMWindow.class, getXulRunnerEditor().getBrowser());
+//			iEditingSession.makeWindowEditable(window, "html", true,true,true); //$NON-NLS-1$
+//			//here we setup editor for window
+//			window = AnyXPCOM.queryInterface("window",nsIDOMWindow.class, getXulRunnerEditor().getBrowser());
+//			iEditingSession.setupEditorOnWindow(window);
+//			window = AnyXPCOM.queryInterface("window",nsIDOMWindow.class, getXulRunnerEditor().getBrowser());
+//			//getting some editor to disable some actions
+//			editor = iEditingSession.getEditorForWindow(window);
+//			editor.setFlags(nsIPlaintextEditor.eEditorReadonlyMask);
+//			//here we hide nsIHTMLObjectResizers
+//			nsIHTMLObjectResizer htmlObjectResizer = queryInterface(editor, nsIHTMLObjectResizer.class);
+//			//we disable abject resizers
+//			htmlObjectResizer.hideResizers();
+//			htmlObjectResizer.setObjectResizingEnabled(false);
+//			//here we getting position editor and disable it's too
+//			nsIHTMLAbsPosEditor htmlAbsPosEditor = queryInterface(editor, nsIHTMLAbsPosEditor.class);
+//			htmlAbsPosEditor.setAbsolutePositioningEnabled(false);
+//			//here we getting inline table editor and disable it's too
+//			nsIHTMLInlineTableEditor inlineTableEditor = queryInterface(editor, nsIHTMLInlineTableEditor.class);
+//			inlineTableEditor.setInlineTableEditingEnabled(false);
 			
 		}
 		return editor;

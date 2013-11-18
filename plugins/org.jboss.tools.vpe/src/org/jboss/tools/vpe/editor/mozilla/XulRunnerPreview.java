@@ -42,12 +42,12 @@ public class XulRunnerPreview extends XulRunnerEditor {
 		}
 	}
 	
-	@Override
-	public void onDispose() {
-		if (mozillaPreview != null) {
-			mozillaPreview.detachMozillaEventAdapter();
-			mozillaPreview = null;
-		}
-		super.onDispose();
-	}
+//	@Override
+//	public void onDispose() {
+//		if (mozillaPreview != null) {
+//			mozillaPreview.detachMozillaEventAdapter();
+//			mozillaPreview = null;
+//		}
+//		super.onDispose();
+//	}
 }
