@@ -135,6 +135,9 @@ public class CordovaSimRunner {
 						oldBrowser = browserSim.getBrowser();
 						{
 							try {
+								if (debuggerStarted) {
+									DevToolsDebuggerServer.stopDebugServer();
+								}
 								DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser) oldBrowser).getDebugger());
 							} catch (Exception e) {
 								e.printStackTrace(); // TODO need to log properly
@@ -193,7 +196,7 @@ public class CordovaSimRunner {
 		String message = MessageFormat.format(Messages.ExceptionNotifier_PORT_IN_USE, port);
 		ExceptionNotifier.showErrorMessage(shell, message);
 		display.dispose();
-	}
+	}              
 
 	private static void createBrowserSim(final SpecificPreferences sp, final IBrowser rippleToolSuiteBrowser, final String homeUrl) {
 		Shell parentShell = rippleToolSuiteBrowser.getShell();
