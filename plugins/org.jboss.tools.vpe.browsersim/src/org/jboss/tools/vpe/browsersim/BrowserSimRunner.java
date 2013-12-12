@@ -19,6 +19,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -39,6 +41,7 @@ public class BrowserSimRunner {
 	
 	public static void main(String[] args) {
 		Display display = null;
+		boolean debuggerStarted = false;
 		try {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
@@ -69,6 +72,11 @@ public class BrowserSimRunner {
 			}
 			BrowserSim browserSim = new BrowserSim(url, parent);
 			browserSim.open();
+			
+			if (browserSim.getBrowser() instanceof JavaFXBrowser) {
+				DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser)browserSim.getBrowser()).getDebugger());
+				debuggerStarted = true;
+			}
 	
 			display = Display.getDefault();
 			while (!display.isDisposed() && BrowserSim.getInstances().size() > 0) {
@@ -83,6 +91,13 @@ public class BrowserSimRunner {
 		} finally {
 			if (display != null) {
 				display.dispose();
+			}
+			if (debuggerStarted) {
+				try {
+					DevToolsDebuggerServer.stopDebugServer();
+				} catch (Exception e) {
+					e.printStackTrace(); // TODO need to log properly
+				}
 			}
 		}
 	}
