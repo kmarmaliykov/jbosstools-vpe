@@ -33,6 +33,8 @@ import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
+import org.jboss.tools.vpe.browsersim.devtools.DevToolsDebuggerServer;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.ui.CocoaUIEnhancer;
 import org.jboss.tools.vpe.browsersim.ui.ExceptionNotifier;
@@ -55,7 +57,9 @@ public class CordovaSimRunner {
 	
 	private static CustomBrowserSim browserSim;
 	private static final String[] CORDOVASIM_ICONS = {"icons/cordovasim_36px.png", "icons/cordovasim_48px.png", "icons/cordovasim_72px.png", "icons/cordovasim_96px.png"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	private static boolean debuggerStarted = false;
 
+	
 	/**
 	 * @param args
 	 * @throws Exception
@@ -129,6 +133,17 @@ public class CordovaSimRunner {
 						}					
 						event.browser = browserSim.getBrowser();
 						oldBrowser = browserSim.getBrowser();
+						{
+							try {
+								if (debuggerStarted) {
+									DevToolsDebuggerServer.stopDebugServer();
+								}
+								DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser) oldBrowser).getDebugger());
+							} catch (Exception e) {
+								e.printStackTrace(); // TODO need to log properly
+							}
+							debuggerStarted = true;
+						}
 					}
 				}
 			});
@@ -168,6 +183,9 @@ public class CordovaSimRunner {
 			}
 			if (display != null) {
 				display.dispose();
+			}
+			if (debuggerStarted) {
+				DevToolsDebuggerServer.stopDebugServer();
 			}
 		}
 	}
