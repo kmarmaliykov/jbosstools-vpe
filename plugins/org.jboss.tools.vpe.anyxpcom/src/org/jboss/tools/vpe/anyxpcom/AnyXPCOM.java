@@ -74,7 +74,7 @@ public class AnyXPCOM {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T convertFromNsi(Object param, Class<T> returnType, JavaFXBrowser browser) {
-		if (param == null) {
+		if (param == null || "undefined".equals(param)) {
 			return null;
 		} else if (returnType == Boolean.class || returnType == boolean.class 
 				|| returnType == String.class || returnType == Double.class || returnType == double.class) {
@@ -82,6 +82,9 @@ public class AnyXPCOM {
 		} else if ((returnType == Long.class || returnType == long.class) && param instanceof Double) {
 			Double paramDouble = (Double) param;
 			return (T) ((Long) paramDouble.longValue());
+		} else if ((returnType == Long.class || returnType == long.class) && param instanceof Integer) {
+			Integer paramInteger = (Integer) param;
+			return (T) ((Long) paramInteger.longValue());
 		} else if ((returnType == Integer.class || returnType == int.class) && param instanceof Double) {
 			Double paramDouble = (Double) param;
 			return (T) ((Integer) paramDouble.intValue());

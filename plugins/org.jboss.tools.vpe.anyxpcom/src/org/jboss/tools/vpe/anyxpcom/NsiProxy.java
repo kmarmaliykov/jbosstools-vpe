@@ -47,7 +47,9 @@ public class NsiProxy implements InvocationHandler {
 		// TODO generate correct js method name: without "getN..."
 		String methodName = method.getName();
 //		System.out.println(" methodName = " + methodName);
-		if (methodName.startsWith("get") && methodName.length() > 3 && args == null) {
+		if (methodName.equals("getSelection")) {
+			expression.append("getSelection()");
+		}else if (methodName.startsWith("get") && methodName.length() > 3 && args == null) {
 			char firstLetter = Character.toLowerCase(methodName.charAt(3));
 			String propertyName = firstLetter + methodName.substring(4);
 			expression.append(propertyName);

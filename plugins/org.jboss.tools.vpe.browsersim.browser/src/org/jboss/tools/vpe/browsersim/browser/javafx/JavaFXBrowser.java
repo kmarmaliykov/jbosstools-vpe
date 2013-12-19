@@ -284,7 +284,7 @@ public class JavaFXBrowser extends FXCanvas implements IBrowser {
 	public Object evaluate(String script) {
 		return getEngine().executeScript("(function(){" + script + "}())");
 	}
-
+	
 	@Override
 	public boolean execute(String string) {
 		try {
