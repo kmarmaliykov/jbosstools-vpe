@@ -96,7 +96,7 @@ public class BrowserSimRunner {
 				try {
 					DevToolsDebuggerServer.stopDebugServer();
 				} catch (Exception e) {
-					e.printStackTrace(); // TODO need to log properly
+					BrowserSimLogger.logError(e.getMessage(), e);
 				}
 			}
 		}

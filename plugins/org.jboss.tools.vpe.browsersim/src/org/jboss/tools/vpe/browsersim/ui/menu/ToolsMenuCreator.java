@@ -13,10 +13,9 @@ package org.jboss.tools.vpe.browsersim.ui.menu;
 import java.util.Map;
 import java.util.UUID;
 
+import javafx.application.Platform;
+
 import org.eclipse.swt.SWT;
-import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
-import org.jboss.tools.vpe.browsersim.browser.IBrowser;
-import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.ProgressEvent;
@@ -28,6 +27,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
@@ -35,6 +35,9 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
+import org.jboss.tools.vpe.browsersim.browser.IBrowser;
+import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
@@ -58,6 +61,7 @@ public class ToolsMenuCreator {
 		Menu subMenu = new Menu(debug);
 		addFireBugLiteItem(subMenu, skin);
 		addWeinreItem(subMenu, skin, weinreScriptUrl, weinreClientUrl);
+		addDevToolsItem(subMenu, skin);
 		debug.setMenu(subMenu);
 	}
 	
@@ -88,7 +92,33 @@ public class ToolsMenuCreator {
 					injectUrl(skin.getBrowser(), weinreScriptUrl, id);
 				}
 
-				createWeinreShell(skin, clientUrl + "#" + id, weinreScriptUrl, id).open();
+				createWeinreShell(skin, clientUrl + "#" + id, weinreScriptUrl, id).open(); //$NON-NLS-1$
+			}
+		});
+	}
+	
+	// TODO very rough implementation
+	private static void addDevToolsItem(Menu menu, final BrowserSimSkin skin) {
+		MenuItem devToolsMenuItem = new MenuItem(menu, SWT.CASCADE);
+		devToolsMenuItem.setText(Messages.BrowserSim_DEV_TOOLS);
+
+		Menu subMenu = new Menu(menu);
+		devToolsMenuItem.setMenu(subMenu);
+
+		MenuItem chromeMenuItem = new MenuItem(subMenu, SWT.PUSH);
+		chromeMenuItem.setText("Open in Chrome browser...");
+		MenuItem javaFxPopUpItem = new MenuItem(subMenu, SWT.PUSH);
+		javaFxPopUpItem.setText("Open in JavaFx popUp...");
+
+		chromeMenuItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Program.launch("http://localhost:8087/inspector.html?host=localhost:8087&page=dtdb");
+			}
+		});
+
+		javaFxPopUpItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Platform.runLater(new DevToolsDebugger());
 			}
 		});
 	}
