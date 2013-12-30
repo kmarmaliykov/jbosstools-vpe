@@ -319,11 +319,11 @@ public class VpeVisualDomBuilder extends VpeDomBuilder {
 		//attempt by part org.jboss.tools.jst.jsp.jspeditor.HTMLTextEditor to create itself 
 		//(this is probably, but not necessarily, a bug)
 
-		if(visualEditor.getController().getSelectionManager()!=null) {
-			// reads and dispatch events, this code prevent eclipse
-			//from sleeping during processing big pages
-			VpePageContext.processDisplayEvents();
-		}
+//		if(visualEditor.getController().getSelectionManager()!=null) {
+//			// reads and dispatch events, this code prevent eclipse
+//			//from sleeping during processing big pages
+//			VpePageContext.processDisplayEvents();
+//		}
 		// JBIDE-675, checks if editor was disposed or not
 		if (getPageContext().getSourceBuilder() == null
 				|| includeDocuments == null) {

@@ -194,7 +194,7 @@ public class VpeController implements INodeAdapter,
 	XulRunnerEditor xulRunnerEditor;
 	// TODO Sergey Vasilyev figure out with nsIPressShell
 	// private nsIPresShell presShell;
-	private VpeSelectionController visualSelectionController;
+//	private VpeSelectionController visualSelectionController;
 	VpeDomMapping domMapping;
 	private VpeSourceDomBuilder sourceBuilder;
 	private VpeVisualDomBuilder visualBuilder;
@@ -240,7 +240,7 @@ public class VpeController implements INodeAdapter,
 	/**
 	 * selectionManager is used for management of selection
 	 */
-	private ISelectionManager selectionManager;
+//	private ISelectionManager selectionManager;
 
 	/**
 	 * keyEventHandler is used for management of key events
@@ -318,12 +318,12 @@ public class VpeController implements INodeAdapter,
 		// presShell = browser.getPresShell();
 
 		// initialization visual selection controller
-		visualSelectionController = new VpeSelectionController(visualEditor
-				.getEditor().getSelectionController());
-		visualSelectionController.setSelectionFlags(nsISelectionDisplay.DISPLAY_ALL);
-
-		selectionManager = new SelectionManager(pageContext, sourceEditor,
-				visualSelectionController);
+//		visualSelectionController = new VpeSelectionController(visualEditor
+//				.getEditor().getSelectionController());
+//		visualSelectionController.setSelectionFlags(nsISelectionDisplay.DISPLAY_ALL);
+//
+//		selectionManager = new SelectionManager(pageContext, sourceEditor,
+//				visualSelectionController);
 
 		keyEventHandler = new KeyEventManager(sourceEditor, domMapping,
 				pageContext);
@@ -379,7 +379,7 @@ public class VpeController implements INodeAdapter,
 								int scrollMaxYVisual = windowInternal.getScrollMaxY();
 								if (WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 										IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES)
-										&& !visualScrollEventFlag && !selectionManager.isUpdateSelectionEventPerformed()
+										&& !visualScrollEventFlag //&& !selectionManager.isUpdateSelectionEventPerformed()
 										&& editPart.getVisualMode() == VpeEditorPart.VISUALSOURCE_MODE
 										&& scrollMaxYVisual > 0) { // ignore internal visual scroll event
 									sourceScrollEventFlag = true;
@@ -395,7 +395,7 @@ public class VpeController implements INodeAdapter,
 									}
 								} else {
 									visualScrollEventFlag = false;
-									selectionManager.setUpdateSelectionEventFlag(false);
+//									selectionManager.setUpdateSelectionEventFlag(false);
 								}
 							}
 							@Override
@@ -448,7 +448,7 @@ public class VpeController implements INodeAdapter,
 		/*
 		 * Reset the flag, to enable scroll synchronizing right after init
 		 */
-		selectionManager.setUpdateSelectionEventFlag(false);
+//		selectionManager.setUpdateSelectionEventFlag(false);
 	}
 	
 	private void removeSourceScrollListener() {
@@ -516,10 +516,10 @@ public class VpeController implements INodeAdapter,
 		}
 		if (visualEditor != null) {
 			unregisterEventTargets();
-			if (visualSelectionController != null) {
-				// visualSelectionController.Release();
-				visualSelectionController = null;
-			}
+//			if (visualSelectionController != null) {
+//				// visualSelectionController.Release();
+//				visualSelectionController = null;
+//			}
 			visualEditor = null;
 		}
 
@@ -830,9 +830,9 @@ public class VpeController implements INodeAdapter,
 		if (getChangeEvents().size() > 0) {
 			return;
 		}
-		if (selectionManager != null && !visualSelectionIsAlreadyInProgress) {
-			selectionManager.refreshVisualSelection();
-		}
+//		if (selectionManager != null && !visualSelectionIsAlreadyInProgress) {
+//			selectionManager.refreshVisualSelection();
+//		}
 	}
 
 	public void sourceSelectionToVisualSelection() {
@@ -949,14 +949,14 @@ public class VpeController implements INodeAdapter,
 					if (text == null || text.length() == 0) {
 						focusOffset = anchorOffset;
 					}
-					selectionManager.setSelection(SelectionUtil.getSelectedNode(selection),
-							focusOffset, anchorOffset);
+//					selectionManager.setSelection(SelectionUtil.getSelectedNode(selection),
+//							focusOffset, anchorOffset);
 				}
 			}
-			// enables cursor on selection event
-			visualSelectionController.setCaretEnabled(true);
-			// enables cursor on selection event
-			visualSelectionController.setCaretEnabled(true);
+//			// enables cursor on selection event
+//			visualSelectionController.setCaretEnabled(true);
+//			// enables cursor on selection event
+//			visualSelectionController.setCaretEnabled(true);
 			visualSelectionIsAlreadyInProgress = false;
 		}
 	}
@@ -976,9 +976,9 @@ public class VpeController implements INodeAdapter,
 				int rangeOffset = queryInterface(mouseEvent, nsIDOMNSUIEvent.class).getRangeOffset();
 				
 				// set source selection at the point where mouse is clicked
-				selectionManager.setSelection(
-						VisualDomUtil.getTargetNode(mouseEvent),
-						rangeOffset, rangeOffset);					
+//				selectionManager.setSelection(
+//						VisualDomUtil.getTargetNode(mouseEvent),
+//						rangeOffset, rangeOffset);					
 			}
 		}
 	}
@@ -1007,9 +1007,9 @@ public class VpeController implements INodeAdapter,
 			if (toggledElement != null) {
 				VpeNodeMapping toggledMapping
 						= getDomMapping().getNearNodeMapping(toggledElement);
-				if (toggledMapping != null && toggledMapping.getVisualNode() != null) {
-					selectionManager.setSelection(toggledMapping.getVisualNode(), 0, 0);
-				}
+//				if (toggledMapping != null && toggledMapping.getVisualNode() != null) {
+//					selectionManager.setSelection(toggledMapping.getVisualNode(), 0, 0);
+//				}
 			}
 		}
 	}
@@ -1135,7 +1135,7 @@ public class VpeController implements INodeAdapter,
 		 */
 		if (WebUiPlugin.getDefault().getPreferenceStore().getBoolean(
 				IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES)
-				&& !sourceScrollEventFlag && !selectionManager.isUpdateSelectionEventPerformed()
+				&& !sourceScrollEventFlag //&& !selectionManager.isUpdateSelectionEventPerformed()
 				&& editPart.getVisualMode() == VpeEditorPart.VISUALSOURCE_MODE) { // ignore internal event from source
 			removeSourceScrollListener();
 			visualScrollEventFlag = true;
@@ -1146,7 +1146,7 @@ public class VpeController implements INodeAdapter,
 			addSourceScrollListener();
 		} else {
 			sourceScrollEventFlag = false;
-			selectionManager.setUpdateSelectionEventFlag(false);
+//			selectionManager.setUpdateSelectionEventFlag(false);
 		} // End of fix JBIDE-8701
 	}
 
@@ -1793,7 +1793,7 @@ public class VpeController implements INodeAdapter,
 				visualEditor.reinitDesignMode();
 				visualBuilder.clearSelectionRectangle();
 				// this is required because fullRefresh cannot be interrupded by messages from OS queue
-				selectionManager = null;
+				//selectionManager = null;
 				IDOMModel sourceModel = (IDOMModel) getModel();
 				if (sourceModel != null) {
 					IDOMDocument sourceDocument = sourceModel.getDocument();
@@ -1802,15 +1802,15 @@ public class VpeController implements INodeAdapter,
 					visualBuilder.rebuildDom(null);
 				}
 				// reinits selection controller+ controller
-				visualSelectionController = new VpeSelectionController(
-						visualEditor.getEditor().getSelectionController());	
+//				visualSelectionController = new VpeSelectionController(
+//						visualEditor.getEditor().getSelectionController());	
+//				
+//				visualSelectionController.setSelectionFlags(nsISelectionDisplay.DISPLAY_ALL);
 				
-				visualSelectionController.setSelectionFlags(nsISelectionDisplay.DISPLAY_ALL);
-				
-				selectionManager = new SelectionManager(
-						pageContext, sourceEditor, visualSelectionController);
+//				selectionManager = new SelectionManager(
+//						pageContext, sourceEditor, visualSelectionController);
 				// selection should be restored after full refresh
-				selectionManager.refreshVisualSelection();
+				//selectionManager.refreshVisualSelection();
 	
 				keyEventHandler = new KeyEventManager(sourceEditor, domMapping,
 						pageContext);
@@ -1871,9 +1871,9 @@ public class VpeController implements INodeAdapter,
 	/**
 	 * @return the visualSelectionController
 	 */
-	public VpeSelectionController getVisualSelectionController() {
-		return visualSelectionController;
-	}
+//	public VpeSelectionController getVisualSelectionController() {
+//		return visualSelectionController;
+//	}
 
 	/**
 	 * 
@@ -1909,9 +1909,9 @@ public class VpeController implements INodeAdapter,
 	/**
 	 * @return the selectionManager
 	 */
-	public ISelectionManager getSelectionManager() {
-		return selectionManager;
-	}
+//	public ISelectionManager getSelectionManager() {
+//		return selectionManager;
+//	}
 	
 	public IZoomEventManager getZoomEventManager() {
 		return zoomEventManager;

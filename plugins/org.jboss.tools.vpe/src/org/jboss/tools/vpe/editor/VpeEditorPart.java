@@ -1098,9 +1098,9 @@ public class VpeEditorPart extends EditorPart implements
 			if (controller != null
 					&& !controller.isVisualEditorVisible()) {
 				controller.setVisualEditorVisible(true);
-				if (controller.getSelectionManager()!=null) {
-					controller.getSelectionManager().refreshVisualSelection();
-				}
+//				if (controller.getSelectionManager()!=null) {
+//					controller.getSelectionManager().refreshVisualSelection();
+//				}
 				if (!controller.isSynced()) {
 					controller.visualRefresh();
 				}
