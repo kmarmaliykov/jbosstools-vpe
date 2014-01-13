@@ -18,7 +18,10 @@ import java.util.NoSuchElementException;
 import java.util.Observable;
 import java.util.Observer;
 
+import javafx.application.Platform;
+
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
@@ -47,6 +50,7 @@ import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.IBrowserFunction;
 import org.jboss.tools.vpe.browsersim.browser.IDisposable;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
@@ -103,10 +107,14 @@ public class BrowserSim {
 		parentShell = parent;
 	}
 	
-	public void open() {
+	public void open(boolean isJavaFx) {
 		SpecificPreferences sp = (SpecificPreferences) getSpecificPreferencesStorage().load();
 		if (sp == null) {
 			sp = (SpecificPreferences) getSpecificPreferencesStorage().loadDefault();
+		}
+		
+		if (!isJavaFx) {
+			sp.setJavaFx(false);
 		}
 		
 		open(sp, null);
@@ -154,7 +162,7 @@ public class BrowserSim {
 		
 		Display display = Display.getDefault();
 		
-		skin.createControls(display, location, parentShell);
+		skin.createControls(display, location, parentShell, specificPreferences.isJavaFx());
 		skin.setAddressBarVisible(isAddressBarVisibleByDefault());
 		currentLocation = location;
 		
@@ -254,7 +262,7 @@ public class BrowserSim {
 		browser.addLocationListener(new LocationAdapter() {
 			public void changed(LocationEvent event) {
 				initOrientation(specificPreferences.getOrientationAngle());
-				WebSqlLoader.initWebSql(skin.getBrowser());
+				//WebSqlLoader.initWebSql(skin.getBrowser());
 			}
 		});
 
@@ -266,7 +274,7 @@ public class BrowserSim {
 			@Override
 			public void open(ExtendedWindowEvent event) {
 				if (FireBugLiteLoader.isFireBugPopUp(event)) {
-					FireBugLiteLoader.processFireBugPopUp(event, skin);
+					FireBugLiteLoader.processFireBugPopUp(event, skin, specificPreferences.isJavaFx());
 				} else {
 					event.browser = browser;
 				}
@@ -378,35 +386,51 @@ public class BrowserSim {
 		if (device == null) {
 			skin.getShell().close();
 		} else {
-			Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, specificPreferences.getUseSkins());
-			boolean needToChangeSkin = newSkinClass != skin.getClass();
-			String oldSkinUrl = null;
+			final Class<? extends BrowserSimSkin> newSkinClass = BrowserSimUtil.getSkinClass(device, specificPreferences.getUseSkins());
+			boolean needToChangeSkin = newSkinClass != skin.getClass() 
+													|| (skin.getBrowser() instanceof JavaFXBrowser && !specificPreferences.isJavaFx())
+													|| (!(skin.getBrowser() instanceof JavaFXBrowser) && specificPreferences.isJavaFx());
 			if (needToChangeSkin) {
-				oldSkinUrl = skin.getBrowser().getUrl();
-				Point currentLocation = skin.getShell().getLocation();
+				final String oldSkinUrl = skin.getBrowser().getUrl();
+				final Point currentLocation = skin.getShell().getLocation();
 				skin.getBrowser().removeProgressListener(progressListener);
 				skin.getBrowser().getShell().dispose();
-				initSkin(newSkinClass, currentLocation, parentShell);
-				fireSkinChangeEvent();
-			}
-			setOrientation(specificPreferences.getOrientationAngle(), device);
-			skin.getBrowser().setUserAgent(device.getUserAgent());
-			
-			processLiveReload(specificPreferences.isEnableLiveReload());
-			processTouchEvents(specificPreferences.isEnableTouchEvents());
-			
-			if (needToChangeSkin) {
-				if (oldSkinUrl != null && isUrlResettingNeededAfterSkinChange()) {
-					skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
-				}
+				
+				Platform.runLater(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						initSkin(newSkinClass, currentLocation, parentShell);
+						fireSkinChangeEvent();
+						
+						setOrientation(specificPreferences.getOrientationAngle(), device);
+						skin.getBrowser().setUserAgent(device.getUserAgent());
+						
+						processLiveReload(specificPreferences.isEnableLiveReload());
+						processTouchEvents(specificPreferences.isEnableTouchEvents());
+						
+						if (oldSkinUrl != null && isUrlResettingNeededAfterSkinChange()) {
+							skin.getBrowser().setUrl(oldSkinUrl); // skin (and browser instance) is changed
+						}
+						
+						skin.getShell().open();
+					}
+				});
 			} else {
+				setOrientation(specificPreferences.getOrientationAngle(), device);
+				skin.getBrowser().setUserAgent(device.getUserAgent());
+				
+				processLiveReload(specificPreferences.isEnableLiveReload());
+				processTouchEvents(specificPreferences.isEnableTouchEvents());
+				
 				if (!Boolean.FALSE.equals(refreshRequired)) {
 					getBrowser().refresh(); // only user agent and size of the browser is changed and orientation is not changed
 				}
+				
+				skin.getShell().open();
 			}
 
-	
-			skin.getShell().open();
 		} 
 	} 
 	

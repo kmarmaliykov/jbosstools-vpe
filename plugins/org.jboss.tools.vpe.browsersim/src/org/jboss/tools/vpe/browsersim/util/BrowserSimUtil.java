@@ -16,6 +16,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.events.DisposeEvent;
@@ -30,6 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.jboss.tools.vpe.browsersim.BrowserSimLogger;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.SkinMap;
 import org.jboss.tools.vpe.browsersim.ui.MessageBoxWithLinks;
@@ -161,7 +164,7 @@ public class BrowserSimUtil {
 	}
 	
 	public static void setCustomScrollbarStylesForWindows(IBrowser browser) {
-		if (PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs())) {
+		if (PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs()) && !(browser instanceof JavaFXBrowser)) {
 			browser.addLocationListener(new LocationAdapter() {
 				@SuppressWarnings("nls")
 				@Override
@@ -252,5 +255,11 @@ public class BrowserSimUtil {
 			t.printStackTrace();
 		}
 	}
-	
+
+	public static void loadEngines() {
+		Shell temp1 = new Shell(Display.getDefault());
+		Browser temp = new Browser(temp1, SWT.WEBKIT);
+		temp.dispose();
+		JavaFXBrowser b = new JavaFXBrowser(temp1);	
+	}
 }

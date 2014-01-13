@@ -69,10 +69,13 @@ public class ManageDevicesDialog extends Dialog {
 	protected boolean enableLiveReload;
 	protected int liveReloadPort;
 	protected boolean enableTouchEvents;
+	protected boolean isJavaFx;
 	protected TruncateWindow truncateWindow;
 	protected Button askBeforeTruncateRadio;
 	protected Button alwaysTruncateRadio;
 	protected Button neverTruncateRadio;
+	protected Button javaFXBrowserRadio;
+	protected Button swtBrowserRadio;
 	protected Button useSkinsCheckbox;
 	protected Button liveReloadCheckBox;
 	protected Button touchEventsCheckBox;
@@ -102,6 +105,7 @@ public class ManageDevicesDialog extends Dialog {
 		this.liveReloadPort = oldSpecificPreferences.getLiveReloadPort();
 		this.enableTouchEvents = oldSpecificPreferences.isEnableTouchEvents();
 		this.truncateWindow = oldCommonPreferences.getTruncateWindow();
+		this.isJavaFx = oldSpecificPreferences.isJavaFx();
 	} 
 	
 	/**
@@ -309,12 +313,12 @@ public class ManageDevicesDialog extends Dialog {
 					truncateWindow = (TruncateWindow) radio.getData();
 				}
 			}
-		}; 
+		};
 		
-		askBeforeTruncateRadio.addSelectionListener(truncateSelectionListener);
 		alwaysTruncateRadio.addSelectionListener(truncateSelectionListener);
 		neverTruncateRadio.addSelectionListener(truncateSelectionListener);
-
+		askBeforeTruncateRadio.addSelectionListener(truncateSelectionListener);
+		
 		devicesTab.setControl(devicesComposite);
 		
 		TabItem settingsTab = new TabItem(tabFolder, SWT.NONE);
@@ -368,6 +372,27 @@ public class ManageDevicesDialog extends Dialog {
 		touchEventsCheckBox = new Button(touchEventsGroup, SWT.CHECK);
 		touchEventsCheckBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		touchEventsCheckBox.setText(Messages.ManageDevicesDialog_SIMULATE_TOUCH_EVENTS);
+		
+		Group browserTypeGroup = new Group(settingsComposite, SWT.NONE);
+		browserTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		browserTypeGroup.setText(Messages.ManageDevicesDialog_BROWSER_TYPE);
+		browserTypeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
+		
+		javaFXBrowserRadio = new Button(browserTypeGroup, SWT.RADIO);
+		javaFXBrowserRadio.setText(Messages.ManageDevicesDialog_BROWSER_TYPE_JAVAFX);
+		
+		swtBrowserRadio = new Button(browserTypeGroup, SWT.RADIO);
+		swtBrowserRadio.setText(Messages.ManageDevicesDialog_BROWSER_TYPE_SWT);
+
+		SelectionListener browserTypeSelectionListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				isJavaFx = javaFXBrowserRadio.equals((Button) e.widget);
+			}
+		}; 
+		
+		javaFXBrowserRadio.addSelectionListener(browserTypeSelectionListener);
+		swtBrowserRadio.addSelectionListener(browserTypeSelectionListener);
 		
 		Group screnshotGroup = new Group(settingsComposite, SWT.NONE);
 		screnshotGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -436,6 +461,7 @@ public class ManageDevicesDialog extends Dialog {
 				liveReloadPortText.setText(Integer.toString(sp.getLiveReloadPort()));
 				enableTouchEvents = sp.isEnableTouchEvents();
 				truncateWindow = cp.getTruncateWindow();
+				isJavaFx = sp.isJavaFx();
 				screenshotsPath.setText(cp.getScreenshotsFolder());
 				weinreScriptUrlText.setText(cp.getWeinreScriptUrl());
 				weinreClientUrlText.setText(cp.getWeinreClientUrl());
@@ -452,7 +478,7 @@ public class ManageDevicesDialog extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				newCommonPreferences = new CommonPreferences(devices, truncateWindow, screenshotsPath.getText(),
 						weinreScriptUrlText.getText(), weinreClientUrlText.getText());
-				newSpecificPreferences = create(selectedDeviceId, useSkins, enableLiveReload, getLiveReloadPort(), touchEventsCheckBox.getSelection());
+				newSpecificPreferences = create(selectedDeviceId, useSkins, enableLiveReload, getLiveReloadPort(), touchEventsCheckBox.getSelection(), isJavaFx);
 				shell.close();
 			}
 		});
@@ -507,6 +533,9 @@ public class ManageDevicesDialog extends Dialog {
 		askBeforeTruncateRadio.setSelection(TruncateWindow.PROMPT.equals(truncateWindow));
 		alwaysTruncateRadio.setSelection(TruncateWindow.ALWAYS_TRUNCATE.equals(truncateWindow));
 		neverTruncateRadio.setSelection(TruncateWindow.NEVER_TRUNCATE.equals(truncateWindow));
+		
+		javaFXBrowserRadio.setSelection(isJavaFx);
+		swtBrowserRadio.setSelection(!isJavaFx);
 	}
 	
 	private void enableLiveReloadPort(boolean enableLiveReload) {
@@ -528,8 +557,8 @@ public class ManageDevicesDialog extends Dialog {
 		return BrowserSimSpecificPreferencesStorage.INSTANCE;
 	}
 	
-	protected SpecificPreferences create(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, boolean enableTouchEvents) {
+	protected SpecificPreferences create(String selectedDeviceId, boolean useSkins, boolean enableLiveReload, int liveReloadPort, boolean enableTouchEvents, boolean isJavaFx) {
 		return new BrowserSimSpecificPreferences(selectedDeviceId, useSkins, enableLiveReload, liveReloadPort, enableTouchEvents,
-				oldSpecificPreferences.getOrientationAngle(), oldSpecificPreferences.getLocation());
+				oldSpecificPreferences.getOrientationAngle(), oldSpecificPreferences.getLocation(), isJavaFx);
 	}
 }

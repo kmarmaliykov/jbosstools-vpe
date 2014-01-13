@@ -21,7 +21,6 @@ public class BrowserSimArgs {
 	public static final String NOT_STANDALONE = "-not-standalone"; //$NON-NLS-1$
 	private String path;
 	public static boolean standalone;
-	public static boolean isJavaFx;
 	
 	private BrowserSimArgs(String path, boolean isStandalone) {
 		this.path = path;

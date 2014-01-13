@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedOpenWindowListener;
 import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
@@ -58,122 +57,33 @@ public class CordovaSimRunner {
 	private static CustomBrowserSim browserSim;
 	private static final String[] CORDOVASIM_ICONS = {"icons/cordovasim_36px.png", "icons/cordovasim_48px.png", "icons/cordovasim_72px.png", "icons/cordovasim_96px.png"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	private static boolean debuggerStarted = false;
-
+	public static boolean restartRequired = false;
+	
+	private static Server server;
 	
 	/**
 	 * @param args
 	 * @throws Exception
 	 */
-	@SuppressWarnings("nls")
 	public static void main(String[] args) throws Exception {
-		int port = 0;
-		Server server = null;
-		Display display = null;
+		Display display = Display.getDefault();
+		CordovaSimArgs.parseArgs(args);
+		run(display);
+	}
+	
+	private static void run(Display display) throws Exception {
 		try {
-			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
-				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
-			}
-			BrowserSimArgs.isJavaFx = BrowserSimUtil.loadJavaFX();
-			CordovaSimArgs.parseArgs(args);
-			port = CordovaSimArgs.getPort();
-			File rootFolder = new File(CordovaSimArgs.getRootFolder());
+			Shell shell = x(display);
 			
-			server = ServerCreator.createServer(rootFolder.getAbsolutePath(), port);// XXX
-			server.start();
-			Connector connector = server.getConnectors()[0];
-			port = connector.getLocalPort(); // for the case if port equals 0 is requested (any free port)
-			CordovaSimArgs.setPort(port);
-
-			display = Display.getDefault();
-			final Shell shell = new Shell(display);
-			setShellAttributes(shell);
-			shell.setLayout(new FillLayout());
-			final IBrowser rippleToolSuiteBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT, BrowserSimArgs.isJavaFx);
-			final String homeUrl = "http://localhost:" + port + "/" + CordovaSimArgs.getStartPage(); 
-			rippleToolSuiteBrowser.setUrl(homeUrl + "?enableripple=true");
-			
-			shell.addListener(SWT.Close, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					browserSim.getBrowser().getShell().close();
-				}
-			});
-			
-			final CordovaSimSpecificPreferences sp = loadPreferences();
-			
-			if (sp.getCordovaBrowserSize() != null) {
-				shell.setSize(sp.getCordovaBrowserSize());
-			} else {
-				sp.setCordovaBrowserSize(shell.getSize());
-			}
-			
-			Point location = sp.getCordovaBrowserLocation();
-			if (location != null) {
-				BrowserSimUtil.setShellLocation(shell, shell.getSize(), location);
-			} else {
-				sp.setCordovaBrowserLocation(shell.getLocation());
-			}
-			
-			rippleToolSuiteBrowser.addOpenWindowListener(new ExtendedOpenWindowListener() {
-				private IBrowser oldBrowser;
-
-				@Override
-				public void open(ExtendedWindowEvent event) {
-					if (InAppBrowserLoader.isInAppBrowserEvent(event) && (browserSim != null)) {
-						InAppBrowserLoader.processInAppBrowser(rippleToolSuiteBrowser, browserSim, event);
-					} else {
-						if (browserSim == null || browserSim.getBrowser().isDisposed()
-							|| browserSim.getBrowser().getShell().isDisposed()) {
-							createBrowserSim(sp, rippleToolSuiteBrowser, homeUrl);
-						} else if (oldBrowser == browserSim.getBrowser()) {
-							browserSim.reinitSkin();
-							browserSim.getBrowser().addLocationListener(new RippleInjector());
-						} else if (oldBrowser != browserSim.getBrowser()) {
-							browserSim.getBrowser().addLocationListener(new RippleInjector());
-						}					
-						event.browser = browserSim.getBrowser();
-						oldBrowser = browserSim.getBrowser();
-						{
-							try {
-								if (debuggerStarted) {
-									DevToolsDebuggerServer.stopDebugServer();
-								}
-								DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser) oldBrowser).getDebugger());
-							} catch (Exception e) {
-								e.printStackTrace(); // TODO need to log properly
-							}
-							debuggerStarted = true;
-						}
-					}
-				}
-			});
-			shell.addControlListener(new ControlAdapter() {
-				@Override
-				public void controlMoved(ControlEvent e) {
-					if (browserSim != null) {
-						browserSim.getSpecificPreferences().setCordovaBrowserLocation(shell.getLocation());
-					}
-					super.controlMoved(e);
-				}
-			});
-			shell.addListener(SWT.Resize, new Listener() {
-				public void handleEvent(Event e) {
-					if (browserSim != null) {
-						browserSim.getSpecificPreferences().setCordovaBrowserSize(shell.getSize());
-					}
-				}
-			});
-
-			shell.open();
-			
+			restartRequired = false;
 			while (!shell.isDisposed()) {
-				if (!display.readAndDispatch())
-					display.sleep();
+				if (!shell.getDisplay().readAndDispatch())
+					shell.getDisplay().sleep();
 			}
 		} catch (SWTError e) {
 			ExceptionNotifier.showBrowserSimLoadError(new Shell(display), e, Messages.CordovaSim_CORDOVA_SIM);
 		} catch (BindException e) {
-			showPortInUseMessage(port);
+			showPortInUseMessage(CordovaSimArgs.getPort());
 		} catch (Throwable t) {
 			CordovaSimLogger.logError(t.getMessage(), t);
 		} finally {
@@ -184,10 +94,14 @@ public class CordovaSimRunner {
 			if (display != null) {
 				display.dispose();
 			}
-			if (debuggerStarted) {
-				DevToolsDebuggerServer.stopDebugServer();
+			if (restartRequired) {
+				run(display);
 			}
+//			if (debuggerStarted) {
+//				DevToolsDebuggerServer.stopDebugServer();
+//			}
 		}
+		
 	}
 	
 	private static void showPortInUseMessage(int port) throws Exception {
@@ -231,7 +145,6 @@ public class CordovaSimRunner {
 		return icons;
 	}
 
-
 	private static CordovaSimSpecificPreferences loadPreferences() {
 		CordovaSimSpecificPreferences sp = (CordovaSimSpecificPreferences) CordavaSimSpecificPreferencesStorage.INSTANCE.load();
 		if (sp == null) {
@@ -240,10 +153,117 @@ public class CordovaSimRunner {
 		return sp;
 	}
 
-
 	private static void setShellAttributes(Shell shell) {
 		Image[] icons = initImages(shell);
 		shell.setImages(icons);
 		shell.setText(Messages.CordovaSim_CORDOVA_SIM);
+	}
+	
+	private static Shell x(Display display) throws Exception {
+		if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
+			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
+		}
+		
+		BrowserSimUtil.loadEngines();
+		File rootFolder = new File(CordovaSimArgs.getRootFolder());
+		
+		boolean isJavaFx = BrowserSimUtil.loadJavaFX();
+
+		server = ServerCreator.createServer(rootFolder.getAbsolutePath(), CordovaSimArgs.getPort());// XXX
+		server.start();
+		Connector connector = server.getConnectors()[0];
+		int port = connector.getLocalPort(); // for the case if port equals 0 is requested (any free port)
+		CordovaSimArgs.setPort(port);
+
+		final CordovaSimSpecificPreferences sp = loadPreferences();
+		if (!isJavaFx) {
+			sp.setJavaFx(false);
+		}
+		
+		if (display.isDisposed()) {
+			display = Display.getDefault();
+		}
+		final Shell shell = new Shell(display);
+		setShellAttributes(shell);
+		shell.setLayout(new FillLayout());
+		
+		
+		final IBrowser rippleToolSuiteBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT, sp.isJavaFx());
+		final String homeUrl = "http://localhost:" + port + "/" + CordovaSimArgs.getStartPage(); 
+		rippleToolSuiteBrowser.setUrl(homeUrl + "?enableripple=true");
+		
+		shell.addListener(SWT.Close, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				browserSim.getBrowser().getShell().close();
+			}
+		});
+		
+		if (sp.getCordovaBrowserSize() != null) {
+			shell.setSize(sp.getCordovaBrowserSize());
+		} else {
+			sp.setCordovaBrowserSize(shell.getSize());
+		}
+		
+		Point location = sp.getCordovaBrowserLocation();
+		if (location != null) {
+			BrowserSimUtil.setShellLocation(shell, shell.getSize(), location);
+		} else {
+			sp.setCordovaBrowserLocation(shell.getLocation());
+		}
+		
+		rippleToolSuiteBrowser.addOpenWindowListener(new ExtendedOpenWindowListener() {
+			private IBrowser oldBrowser;
+
+			@Override
+			public void open(ExtendedWindowEvent event) {
+				if (InAppBrowserLoader.isInAppBrowserEvent(event) && (browserSim != null)) {
+					InAppBrowserLoader.processInAppBrowser(rippleToolSuiteBrowser, browserSim, event);
+				} else {
+					if (browserSim == null || browserSim.getBrowser().isDisposed()
+						|| browserSim.getBrowser().getShell().isDisposed()) {
+						createBrowserSim(sp, rippleToolSuiteBrowser, homeUrl);
+					} else if (oldBrowser == browserSim.getBrowser()) {
+						browserSim.reinitSkin();
+						browserSim.getBrowser().addLocationListener(new RippleInjector());
+					} else if (oldBrowser != browserSim.getBrowser()) {
+						browserSim.getBrowser().addLocationListener(new RippleInjector());
+					}					
+					event.browser = browserSim.getBrowser();
+					oldBrowser = browserSim.getBrowser();
+					{
+						try {
+//							if (debuggerStarted) {
+//								DevToolsDebuggerServer.stopDebugServer();
+//							}
+//							DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser) oldBrowser).getDebugger());
+						} catch (Exception e) {
+							e.printStackTrace(); // TODO need to log properly
+						}
+						debuggerStarted = true;
+					}
+				}
+			}
+		});
+		shell.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlMoved(ControlEvent e) {
+				if (browserSim != null) {
+					browserSim.getSpecificPreferences().setCordovaBrowserLocation(shell.getLocation());
+				}
+				super.controlMoved(e);
+			}
+		});
+		shell.addListener(SWT.Resize, new Listener() {
+			public void handleEvent(Event e) {
+				if (browserSim != null) {
+					browserSim.getSpecificPreferences().setCordovaBrowserSize(shell.getSize());
+				}
+			}
+		});
+		
+		shell.open();
+
+		return shell;
 	}
 }

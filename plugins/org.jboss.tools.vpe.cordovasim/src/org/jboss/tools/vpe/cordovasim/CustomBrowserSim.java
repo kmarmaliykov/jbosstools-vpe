@@ -9,21 +9,35 @@
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim;
+import javafx.application.Platform;
+
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.LocationAdapter;
 import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.browser.LocationListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedOpenWindowListener;
+import org.jboss.tools.vpe.browsersim.browser.ExtendedWindowEvent;
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
+import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
+import org.jboss.tools.vpe.browsersim.browser.javafx.JavaFXBrowser;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.ui.BrowserSim;
 import org.jboss.tools.vpe.browsersim.ui.ControlHandler;
+import org.jboss.tools.vpe.browsersim.ui.events.ExitListener;
+import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeEvent;
+import org.jboss.tools.vpe.browsersim.ui.events.SkinChangeListener;
 import org.jboss.tools.vpe.browsersim.ui.menu.BrowserSimMenuCreator;
 import org.jboss.tools.vpe.browsersim.ui.skin.BrowserSimSkin;
+import org.jboss.tools.vpe.cordovasim.events.RippleInjector;
 import org.jboss.tools.vpe.cordovasim.model.preferences.CordavaSimSpecificPreferencesStorage;
 import org.jboss.tools.vpe.cordovasim.model.preferences.CordovaSimSpecificPreferences;
+import org.jboss.tools.vpe.cordovasim.plugins.inappbrowser.InAppBrowserLoader;
 
 /**
  * @author Ilya Buziuk (ibuziuk)
@@ -57,21 +71,29 @@ public class CustomBrowserSim extends BrowserSim {
 	
 	@Override
 	@SuppressWarnings("nls")
-	protected void setSelectedDevice(Boolean refreshRequired) {
-		String currentOs = PlatformUtil.getOs();
-		
-		// JBIDE-16060 this solution works for mac os and linux (both ubuntu and fedora)
-		if (!PlatformUtil.OS_WIN32.equals(currentOs) && inAppBrowser != null && refreshRequired == null) {
-			rippleToolSuiteBrowser.execute("(function(){ripple('platform/cordova/3.0.0/bridge/inappbrowser').close();})()"); 
+	protected void setSelectedDevice(final Boolean refreshRequired) {
+		if ((skin.getBrowser() instanceof JavaFXBrowser && !getSpecificPreferences().isJavaFx())
+		|| (!(skin.getBrowser() instanceof JavaFXBrowser) && getSpecificPreferences().isJavaFx())) {
+			final Shell shell = rippleToolSuiteBrowser.getShell();
+			CordovaSimRunner.restartRequired = true;
+			shell.close();
+			shell.dispose();
+		} else {
+			String currentOs = PlatformUtil.getOs();
+			
+			// JBIDE-16060 this solution works for mac os and linux (both ubuntu and fedora)
+			if (!PlatformUtil.OS_WIN32.equals(currentOs) && inAppBrowser != null && refreshRequired == null) {
+				rippleToolSuiteBrowser.execute("(function(){ripple('platform/cordova/3.0.0/bridge/inappbrowser').close();})()"); 
+			}
+			
+			super.setSelectedDevice(refreshRequired);
+			
+			// workaround for windows - preventing permanent crashes after skin changing 
+			if (PlatformUtil.OS_WIN32.equals(currentOs) && inAppBrowser != null && refreshRequired == null) {
+				this.inAppBrowser = null;
+				rippleToolSuiteBrowser.refresh();
+			}
 		}
-		
-		super.setSelectedDevice(refreshRequired);
-		
-		// workaround for windows - preventing permanent crashes after skin changing 
-		if (PlatformUtil.OS_WIN32.equals(currentOs) && inAppBrowser != null && refreshRequired == null) {
-			this.inAppBrowser = null;
-			rippleToolSuiteBrowser.refresh();
-		}		
 	}
 	
 	@Override

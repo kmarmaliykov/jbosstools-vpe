@@ -15,6 +15,7 @@ import java.net.URISyntaxException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -48,7 +49,6 @@ public class BrowserSimRunner {
 			}
 			boolean javaFx = BrowserSimUtil.loadJavaFX();
 			BrowserSimArgs browserSimArgs = BrowserSimArgs.parseArgs(args);
-			BrowserSimArgs.isJavaFx = javaFx;
 			
 			String path = browserSimArgs.getPath();
 			String url;
@@ -70,8 +70,11 @@ public class BrowserSimRunner {
 				setShellAttributes(parent);
 				parent.open();
 			}
+			
+			BrowserSimUtil.loadEngines();
+			
 			BrowserSim browserSim = new BrowserSim(url, parent);
-			browserSim.open();
+			browserSim.open(javaFx);
 			
 			if (browserSim.getBrowser() instanceof JavaFXBrowser) {
 				DevToolsDebuggerServer.startDebugServer(((JavaFXBrowser)browserSim.getBrowser()).getDebugger());

@@ -79,14 +79,14 @@ public class FireBugLiteLoader {
 		return Boolean.TRUE.equals(parentBrowser.evaluate("return !!window._fireBugLiteLoading")); //$NON-NLS-1$
 	}
 	
-	public static void processFireBugPopUp(ExtendedWindowEvent openWindowEvent, BrowserSimSkin skin) {
+	public static void processFireBugPopUp(ExtendedWindowEvent openWindowEvent, BrowserSimSkin skin, boolean isJavaFx) {
 		final IBrowser parentBrowser = (IBrowser) openWindowEvent.widget;
 		parentBrowser.execute("window._fireBugLiteLoading = false;"); //$NON-NLS-1$
 		
 		Shell shell = new Shell(BrowserSimUtil.getParentShell(skin), SWT.SHELL_TRIM);
 		shell.setLayout(new FillLayout());
 		
-		final IBrowser fireBugBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT, BrowserSimArgs.isJavaFx);
+		final IBrowser fireBugBrowser = new WebKitBrowserFactory().createBrowser(shell, SWT.WEBKIT, isJavaFx);
 		openWindowEvent.browser = fireBugBrowser;
 		
 		fireBugBrowser.addVisibilityWindowListener(new ExtendedVisibilityWindowListener() {
