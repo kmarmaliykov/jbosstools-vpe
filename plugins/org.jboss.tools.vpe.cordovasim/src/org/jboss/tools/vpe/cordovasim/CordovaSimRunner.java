@@ -60,20 +60,24 @@ public class CordovaSimRunner {
 	public static boolean restartRequired = false;
 	
 	private static Server server;
+	private static Display display;
 	
 	/**
 	 * @param args
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		Display display = Display.getDefault();
+		if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
+			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
+		}
+		display = Display.getDefault();
 		CordovaSimArgs.parseArgs(args);
-		run(display);
+		run();
 	}
 	
-	private static void run(Display display) throws Exception {
+	private static void run() throws Exception {
 		try {
-			Shell shell = x(display);
+			Shell shell = x();
 			
 			restartRequired = false;
 			while (!shell.isDisposed()) {
@@ -91,11 +95,10 @@ public class CordovaSimRunner {
 				server.stop();
 				server.join();
 			}
-			if (display != null) {
-				display.dispose();
-			}
 			if (restartRequired) {
-				run(display);
+				run();
+			} else if (display != null) {
+				display.dispose();
 			}
 //			if (debuggerStarted) {
 //				DevToolsDebuggerServer.stopDebugServer();
@@ -159,10 +162,8 @@ public class CordovaSimRunner {
 		shell.setText(Messages.CordovaSim_CORDOVA_SIM);
 	}
 	
-	private static Shell x(Display display) throws Exception {
-		if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
-			CocoaUIEnhancer.initializeMacOSMenuBar(Messages.CordovaSim_CORDOVA_SIM);
-		}
+	private static Shell x() throws Exception {
+		
 		
 		BrowserSimUtil.loadEngines();
 		File rootFolder = new File(CordovaSimArgs.getRootFolder());

@@ -35,10 +35,6 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-<<<<<<< HEAD
-import org.jboss.tools.vpe.browsersim.BrowserSimArgs;
-=======
->>>>>>> 1a7919b... Adding switcher between javafx and SWT.Webkit fro BrowserSim and CordovaSim
 import org.jboss.tools.vpe.browsersim.browser.IBrowser;
 import org.jboss.tools.vpe.browsersim.browser.WebKitBrowserFactory;
 import org.jboss.tools.vpe.browsersim.model.Device;
