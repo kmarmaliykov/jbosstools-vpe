@@ -44,6 +44,10 @@
                 </repository>
 
 
+                        <url>${jbosstools-xulrunner-site}</url>
+                </repository>
+
+
 		<!-- To resolve parent artifact -->
 		<repository>
 			<id>jboss-public-repository-group</id>
