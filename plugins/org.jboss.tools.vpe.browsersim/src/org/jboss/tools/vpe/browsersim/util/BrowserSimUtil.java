@@ -239,6 +239,21 @@ public class BrowserSimUtil {
 		return false;
 	}
 	
+	public static boolean isJavaFxAvailable() {
+		String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+		File jfxrt7 = new File(javaHome + File.separator
+				+ "lib" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+		File jfxrt8 = new File(javaHome + File.separator
+				+ "lib" + File.separator + "ext" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		File jfxswt8 = new File(javaHome + File.separator
+				+ "lib" + File.separator + "jfxswt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+		if (jfxrt7.exists() || (jfxrt8.exists() && jfxswt8.exists())) {
+			return true;
+		}
+		return false;
+	}
+	
 	private static void loadJar(File file) {
 		try {
 			URL u = file.toURI().toURL();

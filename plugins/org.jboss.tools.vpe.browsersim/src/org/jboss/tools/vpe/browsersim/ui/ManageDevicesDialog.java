@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.model.Device;
 import org.jboss.tools.vpe.browsersim.model.TruncateWindow;
 import org.jboss.tools.vpe.browsersim.model.preferences.BrowserSimSpecificPreferences;
@@ -50,6 +51,7 @@ import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.CommonPreferencesStorage;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferences;
 import org.jboss.tools.vpe.browsersim.model.preferences.SpecificPreferencesStorage;
+import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
@@ -375,7 +377,7 @@ public class ManageDevicesDialog extends Dialog {
 		
 		Group browserTypeGroup = new Group(settingsComposite, SWT.NONE);
 		browserTypeGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		browserTypeGroup.setText(Messages.ManageDevicesDialog_BROWSER_TYPE);
+		browserTypeGroup.setText(Messages.ManageDevicesDialog_BROWSER_ENGINE);
 		browserTypeGroup.setLayout(new RowLayout(SWT.HORIZONTAL));
 		
 		javaFXBrowserRadio = new Button(browserTypeGroup, SWT.RADIO);
@@ -393,6 +395,8 @@ public class ManageDevicesDialog extends Dialog {
 		
 		javaFXBrowserRadio.addSelectionListener(browserTypeSelectionListener);
 		swtBrowserRadio.addSelectionListener(browserTypeSelectionListener);
+		
+		disableWebEngineSwitcherIfJavaFxNotAvailable(javaFXBrowserRadio, browserTypeGroup); 
 		
 		Group screnshotGroup = new Group(settingsComposite, SWT.NONE);
 		screnshotGroup.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -495,6 +499,27 @@ public class ManageDevicesDialog extends Dialog {
 		});
 		
 		updateDevices();
+	}
+	
+	private void disableWebEngineSwitcherIfJavaFxNotAvailable(Button javaFXBrowserRadio, Group browserTypeGroup) {
+		String message = "";
+		// JavaFx is compiled against gtk 2, which makes it unusable on Linux - https://bugs.eclipse.org/bugs/show_bug.cgi?id=420182
+		if (PlatformUtil.OS_LINUX.equals(PlatformUtil.getOs())) {
+			message = Messages.ManageDevicesDialog_BROWSER_ENGINE_WARNING_ON_LINUX;
+		} else if (!BrowserSimUtil.isJavaFxAvailable()) {
+			message = Messages.ManageDevicesDialog_BROWSER_ENGINE_WARNING;
+	    }	
+		
+		if (!message.isEmpty()) {
+			disableSwitcher(javaFXBrowserRadio, browserTypeGroup, message);
+		}
+	}
+
+	private void disableSwitcher(Button javaFXBrowserRadio, Group browserTypeGroup, String message) {
+		javaFXBrowserRadio.setEnabled(false);
+		Label label = new Label(browserTypeGroup, SWT.NONE);
+		label.setText(message);
+		label.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 	}
 	
 	public void updateDevices() {
