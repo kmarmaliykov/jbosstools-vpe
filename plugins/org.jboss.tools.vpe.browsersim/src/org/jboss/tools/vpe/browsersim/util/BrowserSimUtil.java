@@ -272,7 +272,7 @@ public class BrowserSimUtil {
 	}
 
 	/**
-	 * Load SWT.WEBKIT and JavaFX WebKit 
+	 * Load SWT.WEBKIT and JavaFX WebKit - TODO need to do this better
 	 */
 	public static void loadEngines() {
 		Shell tempShell = new Shell(Display.getDefault());

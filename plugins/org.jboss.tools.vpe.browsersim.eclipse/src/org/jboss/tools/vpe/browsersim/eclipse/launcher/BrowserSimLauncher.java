@@ -19,6 +19,7 @@ import org.jboss.tools.vpe.browsersim.eclipse.callbacks.LogCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.Messages;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
+import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
@@ -56,6 +57,11 @@ public class BrowserSimLauncher {
 		bundles.add("org.jboss.tools.vpe.browsersim"); //$NON-NLS-1$
 		bundles.add("org.jboss.tools.vpe.browsersim.browser"); //$NON-NLS-1$
 		
+		// loading mock bundle only if javafx libs not available
+		if (!BrowserSimUtil.isJavaFxAvailable()) {
+			bundles.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
+		}
+		
 		bundles.add("org.eclipse.jetty.server"); //$NON-NLS-1$
 		bundles.add("org.eclipse.jetty.servlet"); //$NON-NLS-1$
 		bundles.add("org.eclipse.jetty.websocket"); //$NON-NLS-1$
@@ -66,7 +72,7 @@ public class BrowserSimLauncher {
 		bundles.add("org.eclipse.jetty.security"); //$NON-NLS-1$
 		bundles.add("org.eclipse.jetty.continuation"); //$NON-NLS-1$
 		
-		//for Win64 we add swt from fragment which mached in resources
+		// for Win64 we add swt from fragment which mached in resources
 		if (!(PlatformUtil.OS_WIN32.equals(PlatformUtil.getOs())
 				&& PlatformUtil.ARCH_X64.equals(PlatformUtil.getArch()))) {
 			bundles.add("org.eclipse.swt"); //$NON-NLS-1$

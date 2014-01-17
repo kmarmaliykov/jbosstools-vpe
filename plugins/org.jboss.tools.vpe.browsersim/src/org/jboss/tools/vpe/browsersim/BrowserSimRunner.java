@@ -43,7 +43,7 @@ public class BrowserSimRunner {
 			if (PlatformUtil.OS_MACOSX.equals(PlatformUtil.getOs())) {
 				CocoaUIEnhancer.initializeMacOSMenuBar(Messages.BrowserSim_BROWSER_SIM);
 			}
-			boolean javaFx = BrowserSimUtil.loadJavaFX();
+			boolean isJavaFxAvailable = BrowserSimUtil.loadJavaFX();
 			BrowserSimArgs browserSimArgs = BrowserSimArgs.parseArgs(args);
 			
 			String path = browserSimArgs.getPath();
@@ -67,10 +67,12 @@ public class BrowserSimRunner {
 				parent.open();
 			}
 			
-			BrowserSimUtil.loadEngines();
+			if (isJavaFxAvailable) {
+				BrowserSimUtil.loadEngines();
+			}
 			
 			BrowserSim browserSim = new BrowserSim(url, parent);
-			browserSim.open(javaFx);
+			browserSim.open(isJavaFxAvailable);
 
 			display = Display.getDefault();
 			while (!display.isDisposed() && BrowserSim.getInstances().size() > 0) {

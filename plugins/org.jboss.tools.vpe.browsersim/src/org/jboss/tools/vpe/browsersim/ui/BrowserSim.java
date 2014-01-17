@@ -106,13 +106,13 @@ public class BrowserSim {
 		parentShell = parent;
 	}
 	
-	public void open(boolean isJavaFx) {
+	public void open(boolean isJavaFxAvailable) {
 		SpecificPreferences sp = (SpecificPreferences) getSpecificPreferencesStorage().load();
 		if (sp == null) {
 			sp = (SpecificPreferences) getSpecificPreferencesStorage().loadDefault();
 		}
 		
-		if (!isJavaFx) {
+		if (!isJavaFxAvailable) {
 			sp.setJavaFx(false);
 		}
 		
