@@ -241,6 +241,10 @@ public class BrowserSimUtil {
 	
 	public static boolean isJavaFxAvailable() {
 		String javaHome = System.getProperty("java.home"); //$NON-NLS-1$
+		return isJavaFxAvailable(javaHome);
+	}
+	
+	public static boolean isJavaFxAvailable(String javaHome) {
 		File jfxrt7 = new File(javaHome + File.separator
 				+ "lib" + File.separator + "jfxrt.jar"); //$NON-NLS-1$ //$NON-NLS-2$
 		File jfxrt8 = new File(javaHome + File.separator

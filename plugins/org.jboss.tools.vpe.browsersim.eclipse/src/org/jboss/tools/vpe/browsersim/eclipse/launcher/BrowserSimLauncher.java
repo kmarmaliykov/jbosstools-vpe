@@ -10,15 +10,21 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.browsersim.eclipse.launcher;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.jboss.tools.vpe.browsersim.browser.PlatformUtil;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.LogCallback;
+import org.jboss.tools.vpe.browsersim.eclipse.Activator;
 import org.jboss.tools.vpe.browsersim.eclipse.Messages;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.OpenFileCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.callbacks.ViewSourceCallback;
+import org.jboss.tools.vpe.browsersim.eclipse.preferences.BrowserSimPreferencesPage;
+import org.jboss.tools.vpe.browsersim.eclipse.preferences.PreferencesUtil;
 import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
@@ -48,19 +54,34 @@ public class BrowserSimLauncher {
 			parameters.add(initialUrl);
 		}
 		
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		IVMInstall jvm = null;
+		if (IPreferenceStore.FALSE.equals(store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_AUTOMATICALLY))) {
+			// path to browserSim jvm is located in preferences
+			String jvmId = store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_ID);
+				jvm = PreferencesUtil.getJVM(jvmId);
+		} else {
+			// detect jvm automatically
+			List<IVMInstall> jvms = PreferencesUtil.getSuitableJvms(1);
+			if (!jvms.isEmpty()) {
+				jvm = jvms.get(0);
+			}
+		}
+		
+		String jvmPath = jvm.getInstallLocation().getAbsolutePath();
+		String jrePath = jvm.getInstallLocation().getAbsolutePath() + File.separator + "jre";
+		if (!BrowserSimUtil.isJavaFxAvailable(jvmPath) && !BrowserSimUtil.isJavaFxAvailable(jrePath)) {
+			BUNDLES.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
+		}
+		
 		ExternalProcessLauncher.launchAsExternalProcess(BUNDLES, RESOURCES_BUNDLES,
-				BROWSERSIM_CALLBACKS, BROWSERSIM_CLASS_NAME, parameters, Messages.BrowserSim);
+				BROWSERSIM_CALLBACKS, BROWSERSIM_CLASS_NAME, parameters, Messages.BrowserSim, jvm);
 	}
 	
 	private static List<String> getBundles() {
 		List<String> bundles = new ArrayList<String>();
 		bundles.add("org.jboss.tools.vpe.browsersim"); //$NON-NLS-1$
 		bundles.add("org.jboss.tools.vpe.browsersim.browser"); //$NON-NLS-1$
-		
-		// loading mock bundle only if javafx libs not available
-		if (!BrowserSimUtil.isJavaFxAvailable()) {
-			bundles.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
-		}
 		
 		bundles.add("org.eclipse.jetty.server"); //$NON-NLS-1$
 		bundles.add("org.eclipse.jetty.servlet"); //$NON-NLS-1$
