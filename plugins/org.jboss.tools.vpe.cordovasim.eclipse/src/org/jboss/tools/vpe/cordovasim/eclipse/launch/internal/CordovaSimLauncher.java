@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.cordovasim.eclipse.launch.internal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,12 +19,14 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.BrowserSimLauncher;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessCallback;
 import org.jboss.tools.vpe.browsersim.eclipse.launcher.ExternalProcessLauncher;
+import org.jboss.tools.vpe.browsersim.util.BrowserSimUtil;
 
 /**
  * @author "Yahor Radtsevich (yradtsevich)"
@@ -94,8 +97,16 @@ public class CordovaSimLauncher {
 				parameters.add(String.valueOf(port));
 			}
 
+			IVMInstall jvm = BrowserSimLauncher.getSelectedVM();
+			
+			String jvmPath = jvm.getInstallLocation().getAbsolutePath();
+			String jrePath = jvm.getInstallLocation().getAbsolutePath() + File.separator + "jre";
+			if (!BrowserSimUtil.isJavaFxAvailable(jvmPath) && !BrowserSimUtil.isJavaFxAvailable(jrePath)) {
+				BUNDLES.add("org.jboss.tools.vpe.browsersim.javafx.mock"); //$NON-NLS-1$
+			}
+			
 			ExternalProcessLauncher.launchAsExternalProcess(BUNDLES, RESOURCES_BUNDLES,
-					CORDOVASIM_CALLBACKS, CORDOVASIM_CLASS_NAME, parameters, Messages.CordovaSimLauncher_CORDOVASIM);
+					CORDOVASIM_CALLBACKS, CORDOVASIM_CLASS_NAME, parameters, Messages.CordovaSimLauncher_CORDOVASIM, jvm);
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override

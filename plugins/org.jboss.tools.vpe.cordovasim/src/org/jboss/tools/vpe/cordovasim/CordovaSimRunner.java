@@ -72,7 +72,9 @@ public class CordovaSimRunner {
 		
 		CordovaSimArgs.parseArgs(args);
 		javaFxAvailable = BrowserSimUtil.loadJavaFX();
-		BrowserSimUtil.loadEngines();
+		if (javaFxAvailable) {
+			BrowserSimUtil.loadEngines();
+		}
 		
 		run();
 	}

@@ -54,19 +54,7 @@ public class BrowserSimLauncher {
 			parameters.add(initialUrl);
 		}
 		
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		IVMInstall jvm = null;
-		if (IPreferenceStore.FALSE.equals(store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_AUTOMATICALLY))) {
-			// path to browserSim jvm is located in preferences
-			String jvmId = store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_ID);
-				jvm = PreferencesUtil.getJVM(jvmId);
-		} else {
-			// detect jvm automatically
-			List<IVMInstall> jvms = PreferencesUtil.getSuitableJvms(1);
-			if (!jvms.isEmpty()) {
-				jvm = jvms.get(0);
-			}
-		}
+		IVMInstall jvm = getSelectedVM();
 		
 		String jvmPath = jvm.getInstallLocation().getAbsolutePath();
 		String jrePath = jvm.getInstallLocation().getAbsolutePath() + File.separator + "jre";
@@ -100,5 +88,22 @@ public class BrowserSimLauncher {
 			bundles.add("org.eclipse.swt."+ PlatformUtil.CURRENT_PLATFORM); //$NON-NLS-1$
 		}
 		return bundles;
+	}
+	
+	public static IVMInstall getSelectedVM() {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		IVMInstall jvm = null;
+		if (IPreferenceStore.FALSE.equals(store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_AUTOMATICALLY))) {
+			// path to browserSim jvm is located in preferences
+			String jvmId = store.getString(BrowserSimPreferencesPage.BROWSERSIM_JVM_ID);
+				jvm = PreferencesUtil.getJVM(jvmId);
+		} else {
+			// detect jvm automatically
+			List<IVMInstall> jvms = PreferencesUtil.getSuitableJvms(1);
+			if (!jvms.isEmpty()) {
+				jvm = jvms.get(0);
+			}
+		}
+		return jvm;
 	}
 }
