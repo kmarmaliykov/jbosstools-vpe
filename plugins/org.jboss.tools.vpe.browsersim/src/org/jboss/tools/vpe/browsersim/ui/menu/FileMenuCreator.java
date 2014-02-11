@@ -141,8 +141,7 @@ public class FileMenuCreator {
 				if (parentShell == null) {
 					parentShell = Display.getDefault().getShells()[0]; // Hot fix for gtk3
 				}
-				PreferencesWrapper pw = new ManageDevicesDialog(parentShell, SWT.APPLICATION_MODAL
-						| SWT.SHELL_TRIM, commonPreferences, specificPreferences).open();
+				PreferencesWrapper pw = openDialog(parentShell, commonPreferences, specificPreferences);
 				if (pw != null) {
 					commonPreferences.copyProperties(pw.getCommonPreferences());
 					specificPreferences.copyProperties(pw.getSpecificPreferences());
@@ -151,5 +150,10 @@ public class FileMenuCreator {
 				}
 			}
 		});
+	}
+	
+	protected PreferencesWrapper openDialog(Shell parentShell, CommonPreferences commonPreferences, SpecificPreferences specificPreferences) {
+		return new ManageDevicesDialog(parentShell, SWT.APPLICATION_MODAL
+				| SWT.SHELL_TRIM, commonPreferences, specificPreferences).open();
 	}
 }
