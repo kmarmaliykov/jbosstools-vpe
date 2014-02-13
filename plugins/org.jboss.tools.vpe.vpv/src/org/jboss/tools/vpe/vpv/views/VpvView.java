@@ -12,7 +12,11 @@ import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
+import javax.xml.transform.TransformerException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,8 +53,6 @@ import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.INodeAdapter;
-import org.eclipse.wst.sse.core.internal.provisional.INodeNotifier;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
 import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
@@ -154,7 +156,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		this.modelHolderId = modelHolderId;
 	}
 	
-	
 	public IEditorPart getCurrentEditor() {
 		return currentEditor;
 	}
@@ -199,6 +200,45 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		}
 	}
 	
+	private Node getCommonNode(Node firstNode, Node secondNode) {
+		if (firstNode == secondNode) {
+			return firstNode;
+		} else {
+			Set<Node> firstNodeParents = getParentNodes(firstNode);	
+			firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
+			
+			Node commonNode = null;
+			Node secondNodeParent = secondNode;
+			while (secondNodeParent != null && commonNode == null) {
+				if (firstNodeParents.contains(secondNodeParent)) {
+					commonNode = secondNodeParent;
+				}
+				secondNodeParent = secondNodeParent.getParentNode();
+			}
+
+			if (commonNode == null) {
+				commonNode = getRootNode(firstNode);
+			}
+			
+			return commonNode;
+		}
+	}
+	
+	private Node getRootNode(Node node) {
+		return node.getOwnerDocument().getDocumentElement();
+	}
+	
+	private Set<Node> getParentNodes(Node firstSelectedNode) {
+			Set<Node> allParentNodes = new HashSet<Node>();
+			Node parentNode = firstSelectedNode.getParentNode();
+			while (parentNode != null) {
+				allParentNodes.add(parentNode);
+				parentNode = parentNode.getParentNode();
+			}
+	
+			return allParentNodes;
+		}
+	
 	private IDocumentListener getDocumentListener() {
 		if (documentListener == null) {
 			documentListener = new IDocumentListener() {
@@ -210,65 +250,19 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
+					
+					
 					if (!disableAutomaticRefresh) { 
 						if (currentJob == null || currentJob.getState() != Job.WAITING) {
 							if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
 								currentJob.cancel();
 							}
-							currentJob = createPreviewUpdateJob();
+							currentJob = createPreviewUpdateJob(event);
 						}
 
 						currentJob.schedule(500);
-					
-//					IDocument document = event.getDocument();
-//					if (document != null) 	{
-//						int startSelectionPosition = event.getOffset();
-//						int endSelectionPosition = startSelectionPosition + event.getText().length();
-//
-//						Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
-//						Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
-//
-//						processNodes(firstSelectedNode, lastSelectedNode);
-//					}
 					}
 				}
-				
-
-				
-//				private void processNodes(Node firstSelectedNode, Node lastSelectedNode) {
-//					if ((firstSelectedNode == null) || (lastSelectedNode == null)) {;
-//						sourceDomChanged(getRootNode(firstSelectedNode)); // rebuild the whole document
-//					} else {
-//						Node commonNode = getCommonNode(firstSelectedNode, lastSelectedNode);
-//						if (commonNode != null){
-//							sourceDomChanged(commonNode);
-//						}
-//					}
-//				}
-
-//				private Node getCommonNode(Node firstNode, Node secondNode) {
-//					if (firstNode == secondNode) {
-//						return firstNode;
-//					} else {
-//						Set<Node> firstNodeParents = getParentNodes(firstNode);	
-//						firstNodeParents.add(firstNode); // firstSelectedNode could be parent node for lastSelectedNode
-//						
-//						Node commonNode = null;
-//						Node secondNodeParent = secondNode;
-//						while (secondNodeParent != null && commonNode == null) {
-//							if (firstNodeParents.contains(secondNodeParent)) {
-//								commonNode = secondNodeParent;
-//							}
-//							secondNodeParent = getParentNode(secondNodeParent);
-//						}
-//	
-//						if (commonNode == null) {
-//							commonNode = getRootNode(firstNode);
-//						}
-//						
-//						return commonNode;
-//					}
-//				}
 
 			};
 		}
@@ -330,12 +324,12 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	}
 	   	
-	private Job createPreviewUpdateJob() {
+	private Job createPreviewUpdateJob(final DocumentEvent event) {
 		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (!browser.isDisposed()) {
-					refresh(browser);
+					preRefresh(event);
 				}
 				return Status.OK_STATUS;
 			}
@@ -343,7 +337,48 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return job;
 	}
 	
+	private void preRefresh(DocumentEvent event) {
+		IDocument document = event.getDocument();
+		int startSelectionPosition = event.getOffset();
+		int endSelectionPosition = startSelectionPosition + event.getText().length();
+
+		Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
+		Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
+		VpvDomBuilder domBuilder = Activator.getDefault().getDomBuilder();
+		Document sourceDocument = firstSelectedNode.getOwnerDocument();
+		if (domBuilder != null) {
+			Node commonParent = getCommonNode(firstSelectedNode, lastSelectedNode);
+			final VisualMutation mutation = domBuilder.rebuildSubtree(visualModel, sourceDocument, commonParent);
+			try {
+				final String newParentHtml = DomUtil
+						.nodeToString(mutation.getNewParentNode())
+						.replace("\\", "\\\\").replace("\n", "\\n")
+						.replace("\r", "\\r").replace("\"", "\\\"")
+						.replace("\'", "\\\'");
+				browser.getDisplay().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						browser.execute("var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');"
+								+ "oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');"
+								+ "oldElement.parentElement.removeChild(oldElement);");
+					}
+				});
+			} catch (TransformerException e) {
+				Activator.logError(e);
+			}
+		}
+	}
+	
 	private void refresh(Browser browser){
+//		Node sourceParent = getNodeBySourcePosition((IDocument) this.currentEditor.getAdapter(IDocument.class), 8820);
+//		VisualMutation mutation = Activator.getDefault().getDomBuilder().rebuildSubtree(visualModel, getEditorDomDocument(), sourceParent);
+//		System.out.println(browser.execute(
+//				"(function(){" + //$NON-NLS-1$
+//						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//						//"selectedElement.parentNode.replaceChild(" + mutation.getNewParentNode() + ", selectedElement);" + //$NON-NLS-1$
+//				"})()"   //$NON-NLS-1$
+//		));
+		
 		browser.setUrl(browser.getUrl());
 	}
 
@@ -497,7 +532,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return editorDocument;
 	}
 	
-	@SuppressWarnings("restriction")
 	private Node getNodeBySourcePosition(IDocument document, int position) {
 		IStructuredModel model = null;
 		Node node = null;
