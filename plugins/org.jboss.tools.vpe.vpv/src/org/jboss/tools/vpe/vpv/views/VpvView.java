@@ -105,7 +105,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	
 	public void createPartControl(Composite parent) {
 		parent.setLayout(new FillLayout());	
-		browser = new Browser(parent, SWT.NONE);
+		browser = new Browser(parent, SWT.WEBKIT);
 		browser.setUrl(ABOUT_BLANK);
 		browser.addProgressListener(new ProgressAdapter() {
 			@Override
@@ -348,7 +348,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		Document sourceDocument = firstSelectedNode.getOwnerDocument();
 		if (domBuilder != null) {
 			Node commonParent = getCommonNode(firstSelectedNode, lastSelectedNode);
-			final VisualMutation mutation = domBuilder.rebuildSubtree(visualModel, sourceDocument, commonParent);
+			final VisualMutation mutation = domBuilder.rebuildSubtree(browser, visualModel, sourceDocument, commonParent);
 			try {
 				final String newParentHtml = DomUtil
 						.nodeToString(mutation.getNewParentNode())

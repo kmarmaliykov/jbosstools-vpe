@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.eclipse.swt.browser.Browser;
 import org.jboss.tools.vpe.vpv.mapping.NodeData;
 import org.jboss.tools.vpe.vpv.mapping.VpeElementData;
 import org.jboss.tools.vpe.vpv.template.VpeChildrenInfo;
@@ -43,7 +44,7 @@ public class VpvDomBuilder {
 		return visualModel;
 	}
 	
-	public VisualMutation rebuildSubtree(VpvVisualModel visualModel, Document sourceDocument, Node sourceParent) {
+	public VisualMutation rebuildSubtree(Browser browser, VpvVisualModel visualModel, Document sourceDocument, Node sourceParent) {
 		/*  mappedParent = sourceParent;
 		 * 	if mappedParent not contained in sourceVisualMap {
 		 * 		mappedParent = find an ascendant which is contained
@@ -71,13 +72,18 @@ public class VpvDomBuilder {
 			mappedSourceParent = DomUtil.getParentNode(mappedSourceParent);
 		}		
 		
+		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
+		long newParentId = -1; 
+		
+		Object e = browser.evaluate("document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]');");
+		
 		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
 		
 		Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
 				visualModel.getVisualDocument(), sourceVisualMapping);
 		
-		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
-		long newParentId = -1; 
+		
+
 		if (newMappedVisualParent != null) {
 			DomUtil.getParentNode(oldMappedVisualParent).replaceChild(newMappedVisualParent, oldMappedVisualParent);
 			newParentId = markSubtree(newMappedVisualParent);
