@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.BrowserFunction;
 import org.jboss.tools.vpe.vpv.mapping.NodeData;
 import org.jboss.tools.vpe.vpv.mapping.VpeElementData;
 import org.jboss.tools.vpe.vpv.template.VpeChildrenInfo;
@@ -71,12 +72,21 @@ public class VpvDomBuilder {
 				
 			mappedSourceParent = DomUtil.getParentNode(mappedSourceParent);
 		}		
-		
+
 		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
 		long newParentId = -1; 
+
+		new CustomFunction(browser, "qqq");
 		
-		Object e = browser.evaluate("document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]');");
-		
+		String qs = "var elem1 = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]').parentNode;";
+		boolean b = browser.execute(
+				"(function() {" + //$NON-NLS-1$
+						qs +
+						"alert(elem1);" +
+						//"alert(document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]').parentNode)" +
+						"qqq(elem1);" +
+				"})();"); //$NON-NLS-1$
+				
 		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
 		
 		Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
