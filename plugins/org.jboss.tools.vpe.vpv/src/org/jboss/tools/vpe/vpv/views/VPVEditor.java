@@ -1,9 +1,5 @@
 package org.jboss.tools.vpe.vpv.views;
 
-/**
- * @author Yahor Radtsevich (yradtsevich)
- */
-
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.ABOUT_BLANK;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
 import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
@@ -36,8 +32,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -47,12 +41,10 @@ import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
@@ -65,7 +57,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 import org.eclipse.wst.sse.core.StructuredModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
@@ -73,9 +64,6 @@ import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
-import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
-import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
-import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.vpe.vpv.Activator;
 import org.jboss.tools.vpe.vpv.transform.DomUtil;
 import org.jboss.tools.vpe.vpv.transform.VisualMutation;
@@ -86,7 +74,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class VpvView extends ViewPart implements VpvVisualModelHolder, IVisualEditor {
+public class VPVEditor extends EditorPart implements VpvVisualModelHolder{
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
 
@@ -108,17 +96,8 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder, IVisualEd
 
 	private IDocumentListener documentListener;
 	
-	private int visualMode;
-	private EditorPart multiPageEditor;
-	private BundleMap bundleMap;
-	private StructuredTextEditor sourceEditor;
 	
-	public VpvView(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
-		this.sourceEditor = textEditor;
-		this.visualMode = visualMode;
-		this.bundleMap = bundleMap;
-		this.multiPageEditor = multiPageEditor;
-		
+	public VPVEditor() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 	}
 	
@@ -147,10 +126,16 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder, IVisualEd
 		makeActions();
 		contributeToActionBars();
 	}
+
+	public void setInput(IEditorInput input) {
+		boolean isVisualRefreshRequired = (getEditorInput() != null && getEditorInput() != input);
+		super.setInput(input);
+		if(isVisualRefreshRequired) refresh(browser);
+	}
 	
 	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
-		fillLocalToolBar(bars.getToolBarManager());
+//		IActionBars bars = getViewSite().getActionBars();
+//		fillLocalToolBar(bars.getToolBarManager());
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
@@ -708,113 +693,37 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder, IVisualEd
 	}
 
 	@Override
-	public void setInput(IEditorInput input) {
+	public void doSave(IProgressMonitor monitor) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public IEditorInput getEditorInput() {
+	public void doSaveAs() {
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IEditorSite getEditorSite() {
-		// TODO Auto-generated method stub
-		return null;
+		
 	}
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		if (sourceEditor != null) {
-			sourceEditor.doSave(monitor);
-		}
-	}
-
-	@Override
-	public void doSaveAs() {
-		if (sourceEditor != null) {
-			sourceEditor.doSaveAs();
-			setInput(sourceEditor.getEditorInput());
-		}
+		super.setSite(site);
+		super.setInput(input);
 	}
 
 	@Override
 	public boolean isDirty() {
-		if (sourceEditor != null) {
-			return sourceEditor.isSaveAsAllowed();
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		if (sourceEditor != null) {
-			return sourceEditor.isSaveAsAllowed();
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public boolean isSaveOnCloseNeeded() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public void setVisualMode(int mode) {
+	public boolean isSaveAsAllowed() {
 		// TODO Auto-generated method stub
-		
+		return false;
 	}
-
-	@Override
+	
 	public IVisualController getController() {
-		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public Object getPreviewWebBrowser() {
-		return browser;
-	}
-
-	@Override
-	public void createPreviewBrowser() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Object getVisualEditor() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void createVisualEditor() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void maximizeSource() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void maximizeVisual() {
-		// TODO Auto-generated method stub
-		
 	}
 }

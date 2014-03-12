@@ -165,7 +165,7 @@ public class VpeController implements INodeAdapter,
 		IVisualController, MozillaMouseListener, MozillaKeyListener,
 		MozillaTooltipListener, MozillaSelectionListener,
 		MozillaContextMenuListener, MozillaResizeListener,
-		MozillaAfterPaintListener, MozillaScrollListener {
+		MozillaAfterPaintListener, MozillaScrollListener, org.jboss.tools.vpe.vpv.views.IVisualController {
 
 	/*
 	 * https://issues.jboss.org/browse/JBIDE-8701
@@ -1327,7 +1327,7 @@ public class VpeController implements INodeAdapter,
 		}
 	}
 
-	void refreshTemplates() {
+	public void refreshTemplates() {
 		if (includeList.includesRefresh()) {
 			visualRefresh();
 		}

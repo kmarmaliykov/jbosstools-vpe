@@ -74,34 +74,28 @@ public class VpvDomBuilder {
 		}		
 
 		long oldParentId = getNodeMarkerId(oldMappedVisualParent);
-		long newParentId = -1; 
 
-		new CustomFunction(browser, "qqq");
+		boolean isPartRefresh = (Boolean) browser.evaluate(
+				"var parent = document.querySelector('["+ ATTR_VPV_ID + "=\"" + oldParentId + "\"]').parentNode;" +
+				"return parent.hasAttribute('" + ATTR_VPV_ID + "');");
 		
-		String qs = "var elem1 = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]').parentNode;";
-		boolean b = browser.execute(
-				"(function() {" + //$NON-NLS-1$
-						qs +
-						"alert(elem1);" +
-						//"alert(document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + oldParentId + "\"]').parentNode)" +
-						"qqq(elem1);" +
-				"})();"); //$NON-NLS-1$
-				
-		removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
-		
-		Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
-				visualModel.getVisualDocument(), sourceVisualMapping);
-		
-		
-
-		if (newMappedVisualParent != null) {
-			DomUtil.getParentNode(oldMappedVisualParent).replaceChild(newMappedVisualParent, oldMappedVisualParent);
-			newParentId = markSubtree(newMappedVisualParent);
+		if (isPartRefresh) {
+			removeSubtreeFromMapping(mappedSourceParent, sourceVisualMapping);
+			
+			Node newMappedVisualParent = convertNode(sourceDocument, mappedSourceParent, 
+					visualModel.getVisualDocument(), sourceVisualMapping);
+	
+			if (newMappedVisualParent != null) {
+				DomUtil.getParentNode(oldMappedVisualParent).replaceChild(newMappedVisualParent, oldMappedVisualParent);
+				markSubtree(newMappedVisualParent);
+			} else {
+				DomUtil.getParentNode(oldMappedVisualParent).removeChild(oldMappedVisualParent);
+			}
+	
+			return new VisualMutation(oldParentId, newMappedVisualParent);
 		} else {
-			DomUtil.getParentNode(oldMappedVisualParent).removeChild(oldMappedVisualParent);
+			return null;
 		}
-
-		return new VisualMutation(oldParentId, newMappedVisualParent);
 	}
 	
 	private long getNodeMarkerId(Node oldMappedVisualParent) {

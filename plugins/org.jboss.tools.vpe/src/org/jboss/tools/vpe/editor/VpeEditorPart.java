@@ -83,6 +83,7 @@ import org.jboss.tools.vpe.editor.xpl.CustomSashForm;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm.ICustomSashFormListener;
 import org.jboss.tools.vpe.editor.xpl.EditorSettings;
 import org.jboss.tools.vpe.editor.xpl.SashSetting;
+import org.jboss.tools.vpe.vpv.views.VPVEditor;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 
 @SuppressWarnings("restriction")
@@ -96,7 +97,7 @@ public class VpeEditorPart extends EditorPart implements
 	private CustomSashForm container;
 	protected EditorSettings editorSettings;
 	private StructuredTextEditor sourceEditor;
-	private MozillaEditor visualEditor;
+	private VPVEditor visualEditor;
 	private BundleMap bundleMap;
 	private IEditorPart activeEditor;
 	private ControlListener controlListener;
@@ -793,7 +794,7 @@ public class VpeEditorPart extends EditorPart implements
 	    }
 
 	public void createVisualEditor() {
-		visualEditor = new MozillaEditor();
+		visualEditor = new VPVEditor();
 		try {
 			visualEditor.init(getEditorSite(), getEditorInput());
 		} catch (PartInitException e) {
