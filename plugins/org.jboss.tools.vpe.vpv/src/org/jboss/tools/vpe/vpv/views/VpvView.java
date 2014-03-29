@@ -18,6 +18,11 @@ import java.util.Set;
 
 import javax.xml.transform.TransformerException;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +54,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
@@ -68,6 +74,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
@@ -75,8 +82,11 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private Browser browser;
 	private IAction refreshAction;
 	private IAction openInDefaultBrowserAction;
-	private IAction disableAutomaticRefreshAction;
-	private boolean disableAutomaticRefresh = false;
+	private IAction enableAutomaticRefreshAction;
+	private IAction enableRefreshOnSaveAction;
+	private IAction enablePartRefreshAction;
+	private boolean enableAutomaticRefresh = false;
+	private boolean enablePartRefresh = false;
 	
 	private Job currentJob;
 	
@@ -89,10 +99,14 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private IEditorPart currentEditor;
 
 	private IDocumentListener documentListener;
-	
+
+	private Command saveCommand;
 	
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
+		
+		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+		saveCommand = commandService.getCommand("org.eclipse.ui.file.save");
 	}
 	
 	@Override
@@ -129,7 +143,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(refreshAction);
 		manager.add(openInDefaultBrowserAction);
-		manager.add(disableAutomaticRefreshAction);
+		manager.add(enableAutomaticRefreshAction);
+		manager.add(enableRefreshOnSaveAction);
+		manager.add(enablePartRefreshAction);
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
@@ -252,12 +268,12 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 				public void documentChanged(DocumentEvent event) {
 					
 					
-					if (!disableAutomaticRefresh) { 
+					if (enableAutomaticRefresh) { 
 						if (currentJob == null || currentJob.getState() != Job.WAITING) {
 							if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
 								currentJob.cancel();
 							}
-							currentJob = createPreviewUpdateJob(event);
+							currentJob = enablePartRefresh ? createPreviewPartUpdateJob(event) : createPreviewUpdateJob();
 						}
 
 						currentJob.schedule(500);
@@ -273,25 +289,88 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private void makeActions() {
 		makeRefreshAction();
 		makeOpenInDefaultBrowserAction();
-		makeDisableAutomaticRefreshAction();
-
+		makeEnableAutomaticRefreshAction();
+		makeEnableRefreshOnSaveAction();
+		makeEnablePartRefreshAction();
 	}
 
-	private void makeDisableAutomaticRefreshAction() {
-		disableAutomaticRefreshAction = new Action(Messages.VpvView_DISABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
+	private void makeEnableAutomaticRefreshAction() {
+		enableAutomaticRefreshAction = new Action(Messages.VpvView_ENABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
-				if (disableAutomaticRefreshAction.isChecked()) {
-					disableAutomaticRefresh = true;
-				} else {
-					disableAutomaticRefresh = false;
+				if (enableAutomaticRefreshAction.isChecked()) {
+					enableAutomaticRefresh = true;
 					refresh(browser);
+				} else {
+					enableAutomaticRefresh = false;
 				}
 			}
 		};
 
-		disableAutomaticRefreshAction.setChecked(false);
-		disableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.gif"));
+		enableAutomaticRefreshAction.setChecked(false);
+		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.png"));
+	}
+	
+	private void makeEnableRefreshOnSaveAction() {
+		enableRefreshOnSaveAction = new Action(Messages.VpvView_ENABLE_REFRESH_ON_SAVE, IAction.AS_CHECK_BOX) {
+			IExecutionListener saveListener;
+			
+			@Override
+			public void run() {
+				if (enableRefreshOnSaveAction.isChecked()) {
+					saveListener = new IExecutionListener() {
+						
+						@Override
+						public void postExecuteSuccess(String arg0, Object arg1) {
+							if (currentJob == null || currentJob.getState() != Job.WAITING) {
+								if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
+									currentJob.cancel();
+								}
+								currentJob = createPreviewUpdateJob();
+							}
+
+							currentJob.schedule(500);
+						}
+
+						@Override
+						public void notHandled(String arg0, NotHandledException arg1) {
+						}
+
+						@Override
+						public void postExecuteFailure(String arg0,	ExecutionException arg1) {
+						}
+
+						@Override
+						public void preExecute(String arg0, ExecutionEvent arg1) {
+						}
+						
+					};
+					
+					saveCommand.addExecutionListener(saveListener);
+				} else {
+					saveCommand.removeExecutionListener(saveListener);
+				}
+			}
+		};
+
+		enableRefreshOnSaveAction.setChecked(false);
+		enableRefreshOnSaveAction.setImageDescriptor(Activator.getImageDescriptor("icons/automatic_refresh.png"));
+	}
+	
+	private void makeEnablePartRefreshAction() {
+		enablePartRefreshAction = new Action(Messages.VpvView_ENABLE_PART_REFRESH, IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				if (enablePartRefreshAction.isChecked()) {
+					enablePartRefresh = true;
+				} else {
+					enablePartRefresh = false;
+				}
+			}
+		};
+
+		enablePartRefreshAction.setChecked(false);
+		enablePartRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/part_refresh.gif"));
 	}
 
 	private void makeOpenInDefaultBrowserAction() {
@@ -324,12 +403,25 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 	}
 	   	
-	private Job createPreviewUpdateJob(final DocumentEvent event) {
-		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
+	private Job createPreviewPartUpdateJob(final DocumentEvent event) {
+		Job job = new UIJob("Part Preview Update") { //$NON-NLS-1$
 			@Override
 			public IStatus runInUIThread(IProgressMonitor monitor) {
 				if (!browser.isDisposed()) {
 					preRefresh(event);
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		return job;
+	}
+	
+	private Job createPreviewUpdateJob() {
+		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (!browser.isDisposed()) {
+					refresh(browser);
 				}
 				return Status.OK_STATUS;
 			}
@@ -370,15 +462,6 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	}
 	
 	private void refresh(Browser browser){
-//		Node sourceParent = getNodeBySourcePosition((IDocument) this.currentEditor.getAdapter(IDocument.class), 8820);
-//		VisualMutation mutation = Activator.getDefault().getDomBuilder().rebuildSubtree(visualModel, getEditorDomDocument(), sourceParent);
-//		System.out.println(browser.execute(
-//				"(function(){" + //$NON-NLS-1$
-//						"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//						//"selectedElement.parentNode.replaceChild(" + mutation.getNewParentNode() + ", selectedElement);" + //$NON-NLS-1$
-//				"})()"   //$NON-NLS-1$
-//		));
-		
 		browser.setUrl(browser.getUrl());
 	}
 
