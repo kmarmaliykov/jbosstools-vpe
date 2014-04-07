@@ -194,7 +194,7 @@ class VpeDragAnyCommand extends DragNodeCommand2 {
 			Node dragNode = null;
 			IVisualContext pageContext = editor.getVPEController().getPageContext();
 			if (pageContext instanceof VpePageContext) {
-				dragNode = DndUtil.getNodeFromDragSession((VpePageContext) pageContext);
+				dragNode = DndUtil.getNodeFromDragSession(editor.getVPEController());
 			}
 			if(dragNode != null && editor instanceof IJSPTextEditor) {
 				int offset = 0;

@@ -28,6 +28,7 @@ import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.dnd.VpeDnDHelper;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
 import org.jboss.tools.vpe.editor.VpeSourceInnerDragInfo;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.NodeData;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
@@ -919,7 +920,7 @@ public abstract class VpeAbstractTemplate implements VpeTemplate {
 	 * 
 	 * @return <code>true</code> The element can be dragged
 	 */
-	public boolean canInnerDrag(VpePageContext pageContext, Element sourceElement) {
+	public boolean canInnerDrag(Element sourceElement) {
 		if (getDragger() != null) {
 			return getDragger().isDragEnabled();
 		} else {
@@ -936,12 +937,12 @@ public abstract class VpeAbstractTemplate implements VpeTemplate {
 	 * 
 	 * @return <code>true</code> The node can be dropped
 	 */
-	public boolean canInnerDrop(VpePageContext pageContext, Node container,
+	public boolean canInnerDrop(AbstractPageContext pageContext, Node container,
 			Node sourceDragNode) {
 
 		if (dragger != null) {
 			return dragger
-					.isDropEnabled(pageContext, container, sourceDragNode);
+					.isDropEnabled(container, sourceDragNode);
 		} else {
 			return false;
 		}

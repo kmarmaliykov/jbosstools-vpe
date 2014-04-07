@@ -15,6 +15,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
@@ -42,7 +43,7 @@ public class VpeMenuUtil {
 	private boolean sourceEditorInitialized = false;
 	private VpeDomMapping domMapping;
 	private boolean domMappingInitialized = false;
-	private VpePageContext pageContext;
+	private AbstractPageContext pageContext;
 	private boolean pageContextInitialized = false;
 	private Node selectedNode;
 	private boolean selectedNodeInitialized = false;
@@ -93,7 +94,7 @@ public class VpeMenuUtil {
 					.getController().getPageContext();
 			pageContextInitialized = true;
 		}
-		return pageContext;
+		return (VpePageContext)pageContext;
 	}
 	/**
 	 * Returns active source selection

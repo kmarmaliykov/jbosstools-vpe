@@ -20,12 +20,13 @@ import org.eclipse.wst.sse.ui.internal.StructuredTextViewer;
 import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.document.TextImpl;
 import org.w3c.dom.Node;
-
 import org.jboss.tools.common.reporting.ProblemReportingHelper;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelectionBuilder;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectedNodeInfo;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.editor.VPVController;
+import org.jboss.tools.vpe.editor.VisualController;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
 import org.jboss.tools.vpe.editor.mapping.VpeElementMapping;
@@ -43,7 +44,7 @@ import org.jboss.tools.vpe.editor.toolbar.format.handler.IFormatHandler;
  */
 public class FormatControllerManager {
 
-	private VpeController vpeController = null;
+	private VisualController vpeController = null;
 	private List formatControllers = new ArrayList();
 	private HandlerFactory handlerFactory;
 
@@ -65,7 +66,7 @@ public class FormatControllerManager {
 	/**
 	 * @param vpeController
 	 */
-	public void setVpeController(VpeController vpeController) {
+	public void setVpeController(VisualController vpeController) {
 		this.vpeController = vpeController;
 	}
 
@@ -83,7 +84,7 @@ public class FormatControllerManager {
 					 ElementImpl elementImpl = (ElementImpl)newNode;
 					 int startOffset = elementImpl.getStartOffset();
 					 int startEndOffset = elementImpl.getStartEndOffset();
-					 StructuredTextViewer viewer = getVpeController().getPageContext().getSourceBuilder().getStructuredTextViewer();
+					 StructuredTextViewer viewer = getVpeController().getSourceEditor().getTextViewer();//getPageContext().getSourceBuilder().getStructuredTextViewer();
 					 try {
 						String newSelectedTagValue = viewer.getDocument().get(startOffset, startEndOffset-startOffset);
 						if(currentSelectedTagValue!=null && currentSelectedTagValue.equals(newSelectedTagValue)) {
@@ -215,22 +216,22 @@ public class FormatControllerManager {
 	 * @return
 	 */
 	public TextFormatingData getFormatTemplateForTag(Node node) {
-		VpeDomMapping domMapping = vpeController.getDomMapping();
-		if(node==null) {
-			return null;
-		}
-
-		VpeNodeMapping nodeMapping = domMapping.getNodeMapping(node);
-		if(nodeMapping instanceof VpeElementMapping) {
-			VpeElementMapping elementMapping = (VpeElementMapping)nodeMapping;
-
-			VpeTemplate template = elementMapping.getTemplate();
-			if(template!=null) {
-				return template.getTextFormattingData();
-			}
-		} else {
-			// Selected node is text.
-		}
+//		VpeDomMapping domMapping = vpeController.getDomMapping();
+//		if(node==null) {
+//			return null;
+//		}
+//
+//		VpeNodeMapping nodeMapping = domMapping.getNodeMapping(node);
+//		if(nodeMapping instanceof VpeElementMapping) {
+//			VpeElementMapping elementMapping = (VpeElementMapping)nodeMapping;
+//
+//			VpeTemplate template = elementMapping.getTemplate();
+//			if(template!=null) {
+//				return template.getTextFormattingData();
+//			}
+//		} else {
+//			// Selected node is text.
+//		}
 		return null;
 	}
 
@@ -303,7 +304,7 @@ public class FormatControllerManager {
 	/**
 	 * @return
 	 */
-	public VpeController getVpeController() {
+	public VisualController getVpeController() {
 		return vpeController;
 	}
 

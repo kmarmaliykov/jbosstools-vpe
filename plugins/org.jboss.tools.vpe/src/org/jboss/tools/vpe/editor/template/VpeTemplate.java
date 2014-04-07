@@ -16,6 +16,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.editor.ITextFormatter;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SourceSelection;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
 import org.jboss.tools.vpe.editor.VpeSourceInnerDragInfo;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.NodeData;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
@@ -224,7 +225,7 @@ public interface VpeTemplate {
 	 *
 	 * @return <code>true</code> The element can be dragged
 	 */
-	boolean canInnerDrag(VpePageContext pageContext, Element sourceElement);
+	boolean canInnerDrag(Element sourceElement);
 
 	/**
 	 * Checks a capability to drop an element in the container
@@ -237,7 +238,7 @@ public interface VpeTemplate {
 	 *            Node for drop
 	 * @return <code>true</code> The node can be dropped
 	 */
-	boolean canInnerDrop(VpePageContext pageContext, Node container,
+	boolean canInnerDrop(AbstractPageContext pageContext, Node container,
 			Node sourceDragNode);
 
 	/**

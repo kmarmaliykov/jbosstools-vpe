@@ -30,6 +30,7 @@ import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.editor.VisualController;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 
@@ -147,18 +148,15 @@ public class RotateEditorsHandler extends VisualPartAbstractHandler{
 	}
 
 	private void rotateEditor(IEditorPart editor, String orientation) {
-
 		if (!(editor instanceof JSPMultiPageEditor)) {
 			return;
 		}
 
 		JSPMultiPageEditor jspEditor = (JSPMultiPageEditor) editor;
-		VpeController vpeController = (VpeController) jspEditor
-				.getVisualEditor().getController();
+		VisualController vpeController = (VisualController) jspEditor.getVisualEditor().getController();
 		// if called in initialization time, vpe controller is null
 		// added by Maksim Areshkau
 		if (vpeController != null)
-			vpeController.getPageContext().getEditPart()
-					.fillContainer(true, orientation);
+			vpeController.getPageContext().getEditPart().fillContainer(true, orientation);
 	}
 }

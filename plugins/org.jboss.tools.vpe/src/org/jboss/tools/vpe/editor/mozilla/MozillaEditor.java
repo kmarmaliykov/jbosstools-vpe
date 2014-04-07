@@ -72,6 +72,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.messages.JstUIMessages;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
+import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.mozilla.listener.MozillaResizeListener;
 import org.jboss.tools.vpe.editor.mozilla.listener.MozillaTooltipListener;
@@ -335,7 +336,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				 * Call <code>filContainer()</code> from VpeEditorPart
 				 * to redraw CustomSashForm with new layout.
 				 */
-				getController().getPageContext().getEditPart().fillContainer(true, newOrientation);
+				((VpeEditorPart)getController().getPageContext().getEditPart()).fillContainer(true, newOrientation);
 				WebUiPlugin.getDefault().getPreferenceStore().
 					setValue(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING, newOrientation);
 			}
@@ -495,7 +496,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				/*
 				 * Update Selection Bar 
 				 */
-				controller.getPageContext().getEditPart().updateSelectionBar(this.isChecked());
+				((VpeEditorPart)controller.getPageContext().getEditPart()).updateSelectionBar(this.isChecked());
 				WebUiPlugin.getDefault().getPreferenceStore().
 					setValue(IVpePreferencesPage.SHOW_SELECTION_TAG_BAR, this.isChecked());
 			}

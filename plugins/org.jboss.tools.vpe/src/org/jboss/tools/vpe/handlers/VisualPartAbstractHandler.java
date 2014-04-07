@@ -40,7 +40,7 @@ public abstract class VisualPartAbstractHandler extends AbstractHandler
 			if(activeEditor instanceof JSPMultiPageEditor){
 				JSPMultiPageEditor jspEditor = (JSPMultiPageEditor) activeEditor;
 				if(jspEditor.getVisualEditor().getController()!=null)
-				enabled=((VpeController)(jspEditor.getVisualEditor().getController())).isVisualEditorVisible();
+				enabled = jspEditor.getVisualEditor().getController().isVisualEditorVisible();
 			}
 		}
 		

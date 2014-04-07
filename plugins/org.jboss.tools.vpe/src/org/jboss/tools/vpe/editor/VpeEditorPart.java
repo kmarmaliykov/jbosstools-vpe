@@ -42,7 +42,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
@@ -85,9 +84,8 @@ import org.jboss.tools.vpe.editor.xpl.EditorSettings;
 import org.jboss.tools.vpe.editor.xpl.SashSetting;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 
-@SuppressWarnings("restriction")
 public class VpeEditorPart extends EditorPart implements 
-		ITextEditorExtension, IReusableEditor, IVisualEditor {
+		ITextEditorExtension, IVisualEditor2 {
 	private IContextActivation fContextActivation;
 	private IHandlerActivation sourceActivation,visualActivation, jumpingActivation;
 	private IHandler sourceMaxmin,visualMaxmin, jumping;

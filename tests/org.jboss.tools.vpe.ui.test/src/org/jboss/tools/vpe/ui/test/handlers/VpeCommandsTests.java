@@ -39,6 +39,8 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditorPa
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.base.test.TestUtil;
 import org.jboss.tools.vpe.base.test.VpeTest;
+import org.jboss.tools.vpe.editor.IVisualEditor2;
+import org.jboss.tools.vpe.editor.VisualController;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.VpeVisualDomBuilder;
@@ -157,9 +159,9 @@ public class VpeCommandsTests extends VpeTest {
 	public void testRotateEditors() throws Throwable {
 
 		JSPMultiPageEditor multiPageEditor = openInputUserNameJsp();
-		VpeController vpeController = (VpeController) multiPageEditor
+		VisualController vpeController = (VisualController) multiPageEditor
 				.getVisualEditor().getController();
-		VpeEditorPart editPart = vpeController.getPageContext().getEditPart();
+		IVisualEditor2 editPart = vpeController.getPageContext().getEditPart();
 		int oldVisualOrientation = editPart.getContainer().getOrientation();
 		int prevVisualOrientation = oldVisualOrientation;
 

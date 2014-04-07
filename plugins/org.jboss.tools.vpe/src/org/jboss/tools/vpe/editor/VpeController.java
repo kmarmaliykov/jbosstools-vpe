@@ -31,7 +31,6 @@ import org.eclipse.jface.bindings.keys.KeySequence;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -73,7 +72,6 @@ import org.eclipse.wst.sse.ui.internal.view.events.INodeSelectionListener;
 import org.eclipse.wst.sse.ui.internal.view.events.ITextSelectionListener;
 import org.eclipse.wst.sse.ui.internal.view.events.NodeSelectionChangedEvent;
 import org.eclipse.wst.sse.ui.internal.view.events.TextSelectionChangedEvent;
-import org.eclipse.wst.xml.core.internal.document.ElementImpl;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.common.el.core.ELReferenceList;
@@ -87,6 +85,9 @@ import org.jboss.tools.common.model.util.EclipseResourceUtil;
 import org.jboss.tools.common.model.util.XModelTreeListenerSWTSync;
 import org.jboss.tools.common.resref.core.ResourceReferenceListListener;
 import org.jboss.tools.common.util.SwtUtil;
+import org.jboss.tools.jst.web.model.helpers.WebAppHelper;
+import org.jboss.tools.jst.web.project.WebProject;
+import org.jboss.tools.jst.web.tld.URIConstants;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IJSPTextEditor;
@@ -95,9 +96,6 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.dnd.JSPPaletteInsert
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.VpePreference;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectionHelper;
-import org.jboss.tools.jst.web.model.helpers.WebAppHelper;
-import org.jboss.tools.jst.web.project.WebProject;
-import org.jboss.tools.jst.web.tld.URIConstants;
 import org.jboss.tools.vpe.VpeDebug;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.dnd.VpeDnD;
@@ -157,7 +155,7 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class VpeController implements INodeAdapter,
+public class VpeController extends VisualController implements INodeAdapter,
 		IModelLifecycleListener, INodeSelectionListener,
 		ITextSelectionListener, SelectionListener,
 		VpeTemplateListener, XModelTreeListener,

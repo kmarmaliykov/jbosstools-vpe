@@ -14,6 +14,7 @@ import java.util.HashSet;
 
 import org.jboss.tools.vpe.editor.VpeSourceInnerDragInfo;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.template.VpeTemplateManager;
 import org.w3c.dom.Document;
@@ -96,7 +97,7 @@ public class VpeDnDHelper {
 		return dragEnabled;
 	}
 	
-	public boolean isDropEnabled(VpePageContext pageContext, Node container, Node node){
+	public boolean isDropEnabled(Node container, Node node){
 		if(!VpePageContext.isAbsolutePosition() && isAncestor(container, node)) return false;
 		if(isContainer){
 			if(enabledTags != null && enabledTags.size() > 0){
@@ -178,7 +179,7 @@ public class VpeDnDHelper {
 		}
 	}
 	
-	public void drop(VpePageContext pageContext, VpeSourceInnerDragInfo dragInfo, VpeSourceDropInfo dropInfo){
+	public void drop(VpeSourceInnerDragInfo dragInfo, VpeSourceDropInfo dropInfo){
 		Node container = dropInfo.getContainer();
 		int offset = dropInfo.getOffset();
 		Node node = dragInfo.getNode();

@@ -20,6 +20,7 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.vpe.editor.VpeController;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.VpeElementMapping;
 import org.jboss.tools.vpe.editor.menu.action.SetupTemplateAction;
@@ -54,7 +55,7 @@ public class SetupTemplateContributionItem extends ActionContributionItem {
 		 */
 		this.vpeController = ((VpeEditorPart) editor.getVisualEditor()).getController();
 		if (null != vpeController) {
-			this.pageContext = vpeController.getPageContext();
+			this.pageContext = (VpePageContext) vpeController.getPageContext();
 		} else {
 			this.pageContext = null;
 		}
