@@ -296,7 +296,7 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 	}
 
 	private DropResolver getDropResolverForInternalDrop() {
-		Node node = DndUtil.getNodeFromDragSession(vpeController.getPageContext());
+		Node node = DndUtil.getNodeFromDragSession(vpeController);
 		if (node != null) {
 				return getDropResolverForNode(node);
 		} else {
@@ -569,7 +569,6 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 			VpeElementMapping elementMapping = (VpeElementMapping) domMapping;
 			if (elementMapping.getSourceNode() instanceof Element) {
 				return elementMapping.getTemplate().canInnerDrag(
-						vpeController.getPageContext(),
 						(Element) elementMapping.getSourceNode());
 			}
 		}
@@ -598,7 +597,7 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 			
 			dropAny(DndUtil.kUnicodeMime, text);
 		} else {
-			Node node = DndUtil.getNodeFromDragSession(vpeController.getPageContext());
+			Node node = DndUtil.getNodeFromDragSession(vpeController);//vpeController.getPageContext());
 			if (node != null) {
 				VpeSourceDropInfo sourceDropInfo = getDropInfo();
 				if (sourceDropInfo.getContainer() != null) {
@@ -614,8 +613,7 @@ public class VpeDnD implements MozillaDndListener, MozillaSelectionListener, IVp
 					if (sourceDropInfo.canDrop()) {
 						VpeDnDHelper dropper = new VpeDnDHelper();
 						dropper.setDndData(false, true);
-						dropper.drop(vpeController.getPageContext(),
-								new VpeSourceInnerDragInfo(node, 0, 0), sourceDropInfo);
+						dropper.drop(new VpeSourceInnerDragInfo(node, 0, 0), sourceDropInfo);
 	
 						// select dropped node, JBIDE-6239
 						setSelectedNode(node);

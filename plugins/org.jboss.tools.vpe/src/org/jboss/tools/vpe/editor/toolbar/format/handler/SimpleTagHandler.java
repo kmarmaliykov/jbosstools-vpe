@@ -34,7 +34,7 @@ public abstract class SimpleTagHandler extends FormatHandler implements IFormatI
 	 * @see org.jboss.tools.vpe.editor.toolbar.format.handler.FormatHandler#run()
 	 */
 	protected void run() {
-		StructuredTextViewer viewer = manager.getVpeController().getPageContext().getSourceBuilder().getStructuredTextViewer();
+		StructuredTextViewer viewer = manager.getVpeController().getSourceEditor().getTextViewer();//getPageContext().getSourceBuilder().getStructuredTextViewer();
 		Node parentNode = null;
 		Node selectedNode = manager.getCurrentSelectedNodeInfo().getNode();
 		if(selectedNode==null) {

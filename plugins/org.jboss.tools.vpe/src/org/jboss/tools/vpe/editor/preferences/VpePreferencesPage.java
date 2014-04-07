@@ -32,7 +32,6 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBarHandler;
 import org.jboss.tools.vpe.VpePlugin;
-import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.handlers.ScrollLockSourceVisualHandler;
 import org.jboss.tools.vpe.handlers.ShowBorderHandler;
 import org.jboss.tools.vpe.handlers.ShowBundleAsELHandler;
@@ -178,12 +177,12 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 					&& (editorPart instanceof JSPMultiPageEditor)) {
 				JSPMultiPageEditor mpe = (JSPMultiPageEditor) editorPart;
 				IVisualEditor visualEditor = (mpe).getVisualEditor();
-				if (visualEditor instanceof VpeEditorPart) {
-					VpeEditorPart vep = (VpeEditorPart) visualEditor;
+				//if (visualEditor instanceof VpeEditorPart) {
+				//	VpeEditorPart vep = (VpeEditorPart) visualEditor;
 					/*
 					 * Update visual editor
 					 */
-					vep.updatePartAccordingToPreferences();
+				visualEditor.updatePartAccordingToPreferences();
 					/*
 					 * Change selected tab Commented to fix
 					 * https://jira.jboss.org/jira/browse/JBIDE-4941 Do not
@@ -214,7 +213,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 					setCommandToggleState(ShowTextFormattingHandler.COMMAND_ID, prefsShowTextFormattingBar);
 					setCommandToggleState(ShowBundleAsELHandler.COMMAND_ID, prefsShowBundlesAsEL);
 					setCommandToggleState(ScrollLockSourceVisualHandler.COMMAND_ID, prefsSynchronizeScrolling);
-				}
+				//}
 			}
 		}
 		return true;

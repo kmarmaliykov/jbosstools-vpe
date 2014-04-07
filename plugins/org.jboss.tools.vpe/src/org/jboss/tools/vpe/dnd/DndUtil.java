@@ -20,9 +20,13 @@ import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.swt.events.TypedEvent;
+import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.common.model.ui.editors.dnd.context.DropContext;
 import org.jboss.tools.common.model.ui.editors.dnd.context.IDNDTextEditor;
 import org.jboss.tools.jst.web.kb.PageContextFactory;
+import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
+import org.jboss.tools.vpe.editor.VisualController;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.util.HTML;
 import org.jboss.tools.vpe.editor.util.SourceDomUtil;
@@ -274,11 +278,12 @@ public class DndUtil {
 		return element;
 	}
 	
-	public static Node getNodeFromDragSession(VpePageContext pageContext) {
+	public static Node getNodeFromDragSession(IVisualController controller) {
+	//public static Node getNodeFromDragSession(AbstractPageContext pageContext) {
 		String xPath = DndUtil.getDragTransferDataAsString(VPE_XPATH_FLAVOR);
 		if (xPath != null) {
 			return SourceDomUtil.getNodeByXPath(
-					pageContext.getSourceBuilder().getSourceDocument(), xPath);
+					((IDOMModel)controller.getModel()).getDocument(), xPath);
 		} else {
 			return null;
 		}

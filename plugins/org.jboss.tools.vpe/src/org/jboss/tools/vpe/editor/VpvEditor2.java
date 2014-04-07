@@ -15,111 +15,152 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.compare.Splitter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.LocationEvent;
-import org.eclipse.swt.browser.LocationListener;
-import org.eclipse.swt.browser.ProgressAdapter;
-import org.eclipse.swt.browser.ProgressEvent;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.IStorageEditorInput;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.progress.UIJob;
-import org.eclipse.wst.sse.core.StructuredModelManager;
-import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
-import org.eclipse.wst.sse.core.internal.provisional.IndexedRegion;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IStatusField;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
-import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.common.model.ui.editor.IModelObjectEditorInput;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
+import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
+import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.StorageRevisionEditorInputAdapter;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
+import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBar;
 import org.jboss.tools.vpe.IVpeHelpContextIds;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
+import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
+import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
+import org.jboss.tools.vpe.editor.util.VpeStyleUtil;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm.ICustomSashFormListener;
+import org.jboss.tools.vpe.editor.xpl.EditorSettings;
+import org.jboss.tools.vpe.editor.xpl.SashSetting;
 import org.jboss.tools.vpe.preview.core.transform.DomUtil;
 import org.jboss.tools.vpe.preview.core.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVisualEditor {
+public class VpvEditor2 extends EditorPart implements IVisualEditor2 {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
-
-	private Browser browser;
-	
 	private Job currentJob;
-	
-	private VpvVisualModel visualModel;
-	private int modelHolderId;
 
+	protected EditorSettings editorSettings;
 //	private EditorListener editorListener;
-	private SelectionListener selectionListener;
-	
-	private IEditorPart sourceEditor;
-	private EditorPart multiPageEditor;//parent editor
+//	private SelectionListener selectionListener;
+	private SelectionBar selectionBar; // should be get from o.j.t.jst.jsp plugin
+	private StructuredTextEditor sourceEditor;
 	private int visualMode;
 	private CustomSashForm container;
+	private EditorPart multiPageEditor;
+	private BundleMap bundleMap;
+	//private IHandler sourceMaxmin,visualMaxmin, jumping;	
+	private Composite cmpEd;
+	private Composite cmpEdTl;
+	private ControlListener controlListener;
 	/*
 	 * VPE visual components.
 	 */
 	private Composite sourceContent = null;
 	private Composite visualContent = null;
 	private Composite previewContent = null;
-
+	private Splitter verticalToolbarSplitter = null;
+	private Composite verticalToolbarEmpty = null;
+	private ToolBar toolBar = null;
+	
 	IEditorPart activeEditor;
 	
-	private IDocumentListener documentListener;
-
+	private VpvEditor visualEditor;
 	
-	public VpvEditor2(EditorPart multiPageEditor,
-			StructuredTextEditor textEditor, int visualMode) {
-		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
+	public VpvEditor2(EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
 		this.sourceEditor = textEditor;
 		this.visualMode = visualMode;
 		this.multiPageEditor = multiPageEditor;
+		this.bundleMap = bundleMap;
+	}
+	
+	public void addRulerContextMenuListener(IMenuListener listener) {
+		if (sourceEditor != null)
+			sourceEditor.addRulerContextMenuListener(listener);
+	}
+
+	public boolean isEditorInputReadOnly() {
+		if (sourceEditor != null)
+			return sourceEditor.isEditorInputReadOnly();
+		else {
+			return false;
+		}
+	}
+
+	public void removeRulerContextMenuListener(IMenuListener listener) {
+		if (sourceEditor != null)
+			sourceEditor.removeRulerContextMenuListener(listener);
+	}
+	
+	public void setStatusField(IStatusField field, String category) {
+			sourceEditor.setStatusField(field, category);
+	}
+	
+	public void doSave(IProgressMonitor monitor) {
+		if (sourceEditor != null) {
+			sourceEditor.doSave(monitor);
+		}
+	}
+
+	public void doSaveAs() {
+		if (sourceEditor != null) {
+			sourceEditor.doSaveAs();
+			setInput(sourceEditor.getEditorInput());
+		}
+	}	
+	
+	public void init(IEditorSite site, IEditorInput input)
+			throws PartInitException {
+		setSite(site);
+		setInput(input);
+		if (editorSettings == null) {
+			editorSettings = EditorSettings.getEditorSetting(this);
+		} else if (input instanceof FileEditorInput) {
+			editorSettings.setInput((FileEditorInput) input);
+		}
+
 	}
 	
 	@Override
@@ -127,12 +168,159 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		super.setInput(input);
 	}
 	
-	@Override
-	public void dispose() {
-//		getSite().getPage().removePartListener(editorListener);
-		getSite().getPage().removeSelectionListener(selectionListener);
-		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
-		super.dispose();
+	public boolean isDirty() {
+		if (sourceEditor != null) {
+			return sourceEditor.isDirty();
+		} else {
+			return false;
+		}
+	}
+
+	public boolean isSaveAsAllowed() {
+		if (sourceEditor != null) {
+			return sourceEditor.isSaveAsAllowed();
+		} else {
+			return false;
+		}
+	}
+	
+	public void setVisualMode(int type) {
+		switch (type) {
+		case VISUALSOURCE_MODE:
+			/*
+			 * https://jira.jboss.org/browse/JBIDE-6832
+			 * Restore the state after switching from Preview, for example.
+			 */
+//			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
+//			setVerticalToolbarVisible(true);
+			setVerticalToolbarVisible(WebUiPlugin.getDefault().getPreferenceStore()
+					.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR));
+			/*
+			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
+			 * author Denis Maliarevich.
+			 */
+			container.setMaximizedControl(null);
+			if (sourceContent != null) {
+				sourceContent.setVisible(true);
+				if (sourceEditor != null) {
+                    activeEditor = sourceEditor;
+                }
+			}
+			if (visualContent != null)
+				visualContent.setVisible(true);
+			if (previewContent != null) {
+				previewContent.setVisible(false);
+			}
+			break;
+
+//		case VISUAL_MODE:
+//			selectionBar.showBar(showSelectionBar);
+//			if (sourceContent != null)
+//				sourceContent.setVisible(false);
+//			if (visualContent != null)
+//				visualContent.setVisible(true);
+//			if (previewContent != null) {
+//				previewContent.setVisible(false);
+//			}
+//			break;
+
+		case SOURCE_MODE:
+//			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
+			setVerticalToolbarVisible(false);
+			if (sourceContent != null) {
+				sourceContent.setVisible(true);
+				if (sourceEditor != null) {
+                    activeEditor = sourceEditor;
+                }
+				/*
+				 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
+				 * author Denis Maliarevich.
+				 */
+				container.setMaximizedControl(sourceContent);
+				
+				//Added by Max Areshkau
+				//was fixed bug(border which drawed by iflasher doesn't hide on MACOS when we swith
+				// to souce view)
+//				if(Platform.getOS().equals(Platform.OS_MACOSX)&&controller!=null) {
+//					
+//				visualEditor.getController().visualRefresh();
+//				}
+			}
+			/*
+			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
+			 * author Denis Maliarevich.
+			 */
+//			if (visualContent != null)
+//				visualContent.setVisible(false);
+//			if (previewContent != null) {
+//				previewContent.setVisible(false);
+//			}
+			break;
+
+		case PREVIEW_MODE:
+//			if (selectionBar != null) {
+//				selectionBar.setVisible(false);
+//			}
+			setVerticalToolbarVisible(false);
+			/*
+			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
+			 * author Denis Maliarevich.
+			 */
+//			if (sourceContent != null) {
+//				sourceContent.setVisible(false);
+//			}
+//
+//			if (visualContent != null) {
+//				visualContent.setVisible(false);
+//			}
+
+			if (visualContent != null) {
+				visualContent.setVisible(true);
+                if (visualEditor != null) {
+                    activeEditor = visualEditor;
+                }
+				container.setMaximizedControl(visualContent);
+			}
+			break;
+		}
+		if(visualEditor!=null&&visualEditor.getController()!=null){
+			visualEditor.getController().refreshCommands();
+		}
+		container.layout();
+		if (visualMode == SOURCE_MODE && type != SOURCE_MODE) {
+			visualMode = type;
+			if (visualEditor != null && visualEditor.getController() != null) {
+				visualEditor.getController().visualRefresh();
+				if(type!=PREVIEW_MODE) {
+				visualEditor.getController().sourceSelectionChanged();
+				}
+			}
+		}
+		visualMode = type;
+	}
+
+	public int getVisualMode() {
+		return visualMode;
+	}
+	
+	/**
+	 * Sets the visibility of the vertical toolbar for visual editor part.
+	 * 
+	 * @param visible if visible
+	 */
+	public void setVerticalToolbarVisible(boolean visible) {
+		if ((null == verticalToolbarSplitter) || (null == verticalToolbarEmpty)
+				|| (null == toolBar)) {
+			return;
+		}
+		if (visible) {
+			verticalToolbarSplitter.setVisible(toolBar, true);
+			verticalToolbarSplitter.setVisible(verticalToolbarEmpty, false);
+		} else {
+			verticalToolbarSplitter.setVisible(toolBar, false);
+			verticalToolbarSplitter.setVisible(verticalToolbarEmpty, true);
+		}
+		verticalToolbarSplitter.getParent().layout(true, true);
 	}
 	
 	public void createPartControl(final Composite parent) {
@@ -147,7 +335,7 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		 *  P. S.: Reproducible under Win x64 on Eclipse 32
 		 *  see https://bugs.eclipse.org/bugs/show_bug.cgi?id=302950
 		 */
-		Composite cmpEdTl =  parent;
+		cmpEdTl =  parent;
 		GridLayout layoutEdTl = new GridLayout(2, false);
 		layoutEdTl.verticalSpacing = 0;
 		layoutEdTl.marginHeight = 0;
@@ -157,9 +345,35 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		cmpEdTl.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		/*
+		 * https://jira.jboss.org/jira/browse/JBIDE-4429
+		 *  Composite for the left vertical toolbar
+		 */
+		verticalToolbarSplitter = new Splitter(cmpEdTl, SWT.NONE);
+		GridLayout layout = new GridLayout(1,false);
+		layout.marginHeight = 2;
+		layout.marginWidth = 0;
+		layout.verticalSpacing = 0;		
+		layout.horizontalSpacing = 0;		
+		verticalToolbarSplitter.setLayout(layout);
+		verticalToolbarSplitter.setLayoutData(new GridData(SWT.CENTER, SWT.TOP | SWT.FILL, false, true, 1, 2));
+		
+		/*
+		 * The empty vertical toolbar component
+		 */
+		verticalToolbarEmpty = new Composite(verticalToolbarSplitter, SWT.NONE) {
+			public Point computeSize(int wHint, int hHint, boolean changed) {
+				Point point = super.computeSize(wHint, hHint, changed);
+				point.x = 1;
+				return point;
+			}
+		};
+		verticalToolbarEmpty.setLayoutData(new GridData(GridData.FILL_VERTICAL));
+		verticalToolbarEmpty.setVisible(true);
+
+		/*
 		 * The Visual Page Editor itself
 		 */
-		Composite cmpEd = new Composite(cmpEdTl, SWT.BORDER);
+		cmpEd = new Composite(cmpEdTl, SWT.BORDER);
 		GridLayout layoutEd = new GridLayout(1, false);
 		layoutEd.marginBottom = 0;
 		layoutEd.marginHeight = 1;
@@ -184,25 +398,27 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		container = new CustomSashForm(cmpEd, CustomSashForm
 			.getSplittingDirection(WebUiPlugin.getDefault().getPreferenceStore()
 					.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING)));
-
+		if (editorSettings != null) {
+		    editorSettings.addSetting(new SashSetting(container));
+		}		
+		
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (CustomSashForm.isSourceEditorFirst(WebUiPlugin.getDefault().getPreferenceStore()
 				.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING))) {
 		    sourceContent = new Composite(container, SWT.NONE);
 		    visualContent = new Composite(container, SWT.NONE);
 		} else {
-		    visualContent = new Composite(container, SWT.NONE);
+			visualContent = new Composite(container, SWT.NONE);
 		    sourceContent = new Composite(container, SWT.NONE);
 		}
 		sourceContent.setLayout(new FillLayout());
 		visualContent.setLayout(new FillLayout());
-
-
-		// Create a preview content
-		previewContent = new Composite(container, SWT.NONE);
-		//previewContent.setLayout(new FillLayout());
-		previewContent.setLayout(new GridLayout());
-
+				
+//		// Create a preview content
+//		previewContent = new Composite(container, SWT.NONE);
+//		//previewContent.setLayout(new FillLayout());
+//		previewContent.setLayout(new GridLayout());
+		
 		if (sourceEditor == null)
 			sourceEditor = new StructuredTextEditor() {
 				public void safelySanityCheckState(IEditorInput input) {
@@ -211,7 +427,7 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 			};
 		container.setSashBorders(new boolean[] { true, true, true });
 
-		final ControlListener controlListener = new ControlListener() {
+		controlListener = new ControlListener() {
 			public void controlMoved(ControlEvent event) {}
 			public void controlResized(ControlEvent event) {
 				container.layout();
@@ -249,6 +465,14 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		// createPreviewBrowser();
 
 		try {
+			sourceEditor.addPropertyListener(new IPropertyListener() {
+				public void propertyChanged(Object source, int propId) {
+					if (propId == IWorkbenchPartConstants.PROP_TITLE) {
+						VpvEditor2.this.setPartName(sourceEditor.getTitle());
+					}
+					VpvEditor2.this.firePropertyChange(propId);
+				}
+			});
 			IEditorInput input = getEditorInput();
 			if (!( input instanceof IModelObjectEditorInput) && input instanceof IStorageEditorInput) {
 				input = new StorageRevisionEditorInputAdapter((IStorageEditorInput) input);
@@ -271,6 +495,23 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 			
 			activeEditor = sourceEditor;
 
+			visualContent.addListener(SWT.Activate, new Listener() {
+				public void handleEvent(Event event) {
+					if (event.type == SWT.Activate) {
+						if (visualEditor != null
+								&& activeEditor != visualEditor) {
+							activeEditor = visualEditor;
+							setFocus();
+						}
+					}
+				}
+			});
+			
+			//TODO: что это за хуйня
+//			IWorkbenchWindow window = getSite().getWorkbenchWindow();
+//			window.getPartService().addPartListener(activationListener);
+//			window.getShell().addShellListener(activationListener);
+			
 		} catch (CoreException e) {
 			VpePlugin.reportProblem(e);
 		}
@@ -280,36 +521,76 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 
 		// ///////////////////////////////////////
 		
-		browser = new Browser(visualContent, SWT.WEBKIT);
-		browser.setUrl(ABOUT_BLANK);
-		browser.addProgressListener(new ProgressAdapter() {
-			@Override
-			public void completed(ProgressEvent event) {
-				ISelection currentSelection = getCurrentSelection();
-				updateSelectionAndScrollToIt(currentSelection);
-			}
-		});
 		
-		browser.addLocationListener(new LocationListener() {
-			
-			@Override
-			public void changing(LocationEvent arg0) {
-				System.out.println("Location changing"); //$NON-NLS-1$
-			}
-			
-			@Override
-			public void changed(LocationEvent arg0) {
-				System.out.println("location changed"); //$NON-NLS-1$
-			}
-		});
-		
-		inizializeSelectionListener();	
-		editorChanged(activeEditor);
+		//editorChanged(activeEditor);
+
 //		inizializeEditorListener(browser, modelHolderId);
 //		
 //		setCurrentEditor(activeEditor);
+		if (editorSettings != null)
+			editorSettings.apply();
 		
 		cmpEd.layout();
+		
+//		sourceMaxmin = new AbstractHandler() {
+//			public Object execute(ExecutionEvent event)
+//					throws ExecutionException {
+//				if (getVisualMode() == IVisualEditor.VISUALSOURCE_MODE) {
+//					Point p = visualContent.getSize();
+//					if (p.x == 0 || p.y == 0) {
+//						container.upClicked();
+//					} else {
+//						container.maxDown();
+//					}
+//				}
+//				return null;
+//			}
+//		};
+//		visualMaxmin = new AbstractHandler() {
+//			public Object execute(ExecutionEvent event)
+//					throws ExecutionException {
+//				if (getVisualMode() == IVisualEditor.VISUALSOURCE_MODE) {
+//					Point p = sourceContent.getSize();
+//					if (p.x == 0 || p.y == 0) {
+//						container.downClicked();
+//					} else {
+//						container.maxUp();
+//					}
+//				}
+//				return null;
+//			}
+//		};
+//		jumping = new AbstractHandler() {
+//			public Object execute(ExecutionEvent event)
+//					throws ExecutionException {
+//				if (getVisualMode() == IVisualEditor.VISUALSOURCE_MODE) {
+//					StructuredTextEditor editor = getSourceEditor();
+//					if (editor == null)
+//						return null;
+//					StructuredTextViewer viewer = editor.getTextViewer();
+//					if (viewer == null)
+//						return null;
+//					StyledText widget = viewer.getTextWidget();
+//					if (widget == null || widget.isDisposed())
+//						return null;
+//					if (widget.isFocusControl()) {
+//						if (visualEditor != null
+//								&& activeEditor != visualEditor) {
+//							activeEditor = visualEditor;
+//							setFocus();
+//							//visualContent.setFocus();
+//						}
+//					} else {
+//						if (activeEditor != sourceEditor) {
+//							activeEditor = sourceEditor;
+//							setFocus();
+//						}
+//					}
+//
+//				}
+//				return null;
+//			}
+//		};
 		
 		container.addCustomSashFormListener(new ICustomSashFormListener() {
 			public void dividerMoved(int firstControlWeight, int secondControlWeight) {
@@ -321,572 +602,247 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 		
 	}
 
-//	private void inizializeEditorListener(Browser browser, int modelHolderId ) {
-//		editorListener = new EditorListener();
-//		getSite().getPage().addPartListener(editorListener);
-//		editorListener.showBootstrapPart();
-//	}
-
-	private void inizializeSelectionListener() {
-		selectionListener = new SelectionListener();
-		getSite().getPage().addSelectionListener(selectionListener);	
-	}
-
-	public void setFocus() {
-		browser.setFocus();
-	}
-
-	@Override
-	public void setVisualModel(VpvVisualModel visualModel) {
-		this.visualModel = visualModel;
-	}
-
-	public void setModelHolderId(int modelHolderId) {
-		this.modelHolderId = modelHolderId;
-	}
-	
-	public IEditorPart getCurrentEditor() {
-		return sourceEditor;
-	}
-	
-	public void editorChanged(IEditorPart editor) {
-/*		if (sourceEditor == editor) {
-//			// do nothing
-//		} else*/ if (editor == null) {
-			browser.setUrl(ABOUT_BLANK);
-			setCurrentEditor(null);
-		} else if (isImportant(editor)) {
-			formRequestToServer(editor);
-			setCurrentEditor(editor);
+	/**
+	 * Re-fills the VPE container according to new settings.
+	 * 
+	 * @param useCurrentEditorSettings
+	 *            if <code>true</code> VPE will hold its current state 
+	 *            otherwise values from preference page will be used,
+	 * @param currentOrientation
+	 *            current source-visual editors splitting value
+	 */
+	public void fillContainer(boolean useCurrentEditorSettings, String currentOrientation) {
+		/*
+		 * https://jira.jboss.org/jira/browse/JBIDE-4152
+		 * 
+		 * To re-layout editors new sash form will be created. Source, visual
+		 * and preview content will stay the same, cause there are no changes to
+		 * the model.
+		 * 
+		 * Content should be added to a new container.
+		 */
+		String splitting;
+		if (useCurrentEditorSettings) {
+			splitting = currentOrientation;
 		} else {
-			browser.setUrl(ABOUT_BLANK);
-			setCurrentEditor(null);
+			splitting = WebUiPlugin.getDefault().getPreferenceStore()
+					.getString(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING);
 		}
-	}
-	
-	private boolean isImportant(IEditorPart editor) {
-		if (editor.getAdapter(StructuredTextEditor.class) != null){
-			return true; // TODO check DOM model support
-		}
-		return false;
-	}
+		CustomSashForm newContainer = new CustomSashForm(cmpEd,	CustomSashForm.getSplittingDirection(splitting));
 
-	private void setCurrentEditor(IEditorPart currentEditor) {
-		if (this.sourceEditor != null) {
-			IDocument document = (IDocument) this.sourceEditor.getAdapter(IDocument.class);
-			if (document != null) {
-				document.removeDocumentListener(getDocumentListener());
+		/*
+		 * Reset editor's settings.
+		 */
+		if (editorSettings != null) {
+			editorSettings.clearOldSettings();
+			editorSettings.addSetting(new SashSetting(newContainer));
+		}
+		newContainer
+				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		if (CustomSashForm.isSourceEditorFirst(splitting)) {
+			sourceContent.setParent(newContainer);
+			visualContent.setParent(newContainer);
+		} else {
+			visualContent.setParent(newContainer);
+			sourceContent.setParent(newContainer);
+		}
+		// previewContent.setParent(newContainer);
+
+		/*
+		 * https://jira.jboss.org/jira/browse/JBIDE-4513 New container should
+		 * have all properties from the old container set.
+		 */
+		if (null != container.getMaximizedControl()) {
+			newContainer.setMaximizedControl(container.getMaximizedControl());
+		}
+		/*
+		 * Dispose the old container: it'll be excluded from parent composite's
+		 * layout.
+		 */
+		if (null != container) {
+			container.dispose();
+		}
+
+		/*
+		 * Reset the container.
+		 */
+		container = newContainer;
+
+		/*
+		 * Set up new sash weights
+		 */
+		int defaultWeight = WebUiPlugin.getDefault().getPreferenceStore()
+				.getInt(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_WEIGHTS);
+		int[] weights = container.getWeights();
+		if (useCurrentEditorSettings) {
+			newContainer.setWeights(weights);
+		} else {
+			if (defaultWeight == 0) {
+				if (CustomSashForm.isSourceEditorFirst(splitting)) {
+					container.maxDown();
+				} else {
+					container.maxUp();
+				}
+			} else if (defaultWeight == 1000) {
+				if (CustomSashForm.isSourceEditorFirst(splitting)) {
+					container.maxUp();
+				} else {
+					container.maxDown();
+				}
+			} else {
+				if (CustomSashForm.isSourceEditorFirst(splitting)) {
+					weights[0] = 1000 - defaultWeight;
+					weights[1] = defaultWeight;
+				} else {
+					weights[0] = defaultWeight;
+					weights[1] = 1000 - defaultWeight;
+				}
+				if ((weights != null) && !container.isDisposed()) {
+					container.setWeights(weights);
+				}
 			}
 		}
-		
-		this.sourceEditor = currentEditor;
-		
-		if (this.sourceEditor != null) {
-			IDocument document = (IDocument) this.sourceEditor.getAdapter(IDocument.class);
-			if (document != null) {
-				document.addDocumentListener(getDocumentListener());
+
+		container.setSashBorders(new boolean[] { true, true, true });
+
+		/*
+		 * Reinit listeners on the new container.
+		 */
+		if (controlListener != null) {
+			if (cmpEdTl != null && !cmpEdTl.isDisposed()) {
+				cmpEdTl.getParent().removeControlListener(controlListener);
 			}
 		}
-	}
-	
-	private IDocumentListener getDocumentListener() {
-		if (documentListener == null) {
-			documentListener = new IDocumentListener() {
+		controlListener = new ControlListener() {
+			public void controlMoved(ControlEvent event) {
+			}
 
-				@Override
-				public void documentAboutToBeChanged(DocumentEvent event) {
-					// Don't handle this event
-				}
-
-				@Override
-				public void documentChanged(DocumentEvent event) {
-					if (currentJob == null || currentJob.getState() != Job.WAITING) {
-						if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
-							currentJob.cancel();
-						}
-						currentJob = createPreviewUpdateJob(event);
-					}
-
-					currentJob.schedule(500);
-				}
-
-			};
-		}
-
-		return documentListener;
-	}
-	   	
-	private Job createPreviewUpdateJob(final DocumentEvent event) {
-		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				if (!browser.isDisposed()) {
-//					preRefresh(event);
-					refresh(browser);
-				}
-				return Status.OK_STATUS;
+			public void controlResized(ControlEvent event) {
+				container.layout();
 			}
 		};
-		return job;
-	}
-	
-//	private void preRefresh(DocumentEvent event) {
-//		IDocument document = event.getDocument();
-//		int startSelectionPosition = event.getOffset();
-//		int endSelectionPosition = startSelectionPosition + event.getText().length();
-//
-//		Node firstSelectedNode = getNodeBySourcePosition(document, startSelectionPosition);
-//		Node lastSelectedNode = getNodeBySourcePosition(document, endSelectionPosition);
-//		VpvDomBuilder domBuilder = Activator.getDefault().getDomBuilder();
-//		Document sourceDocument = firstSelectedNode.getOwnerDocument();
-//		if (domBuilder != null) {
-//			Node commonParent = getCommonNode(firstSelectedNode, lastSelectedNode);
-//			final VisualMutation mutation = domBuilder.rebuildSubtree(browser, visualModel, sourceDocument, commonParent);
-//			try {
-//				final String newParentHtml = DomUtil
-//						.nodeToString(mutation.getNewParentNode())
-//						.replace("\\", "\\\\").replace("\n", "\\n")
-//						.replace("\r", "\\r").replace("\"", "\\\"")
-//						.replace("\'", "\\\'");
-//				browser.getDisplay().asyncExec(new Runnable() {
-//					@Override
-//					public void run() {
-//						browser.execute("var oldElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + mutation.getOldParentId() + "\"]');"
-//								+ "oldElement.insertAdjacentHTML('beforebegin', '" + newParentHtml + "');"
-//								+ "oldElement.parentElement.removeChild(oldElement);");
-//					}
-//				});
-//			} catch (TransformerException e) {
-//				Activator.logError(e);
-//			}
-//		}
-//	}
-	
-	private void refresh(Browser browser){
-		formRequestToServer(activeEditor);
-//		browser.refresh();//setUrl(browser.getUrl());
-	}
 
-	private boolean isCurrentEditor(IEditorPart editorPart) {
-		if (sourceEditor == editorPart) {
-			return true;
+		if (cmpEdTl != null && !cmpEdTl.isDisposed()) {
+			cmpEdTl.getParent().addControlListener(controlListener);
 		}
-		return false;
+		/*
+		 * Layout the parent container for CustomSashForm, Selection Bar.
+		 */
+		cmpEdTl.layout(true, true);
 	}
 	
-	private String formUrl(IFile ifile) {
-		String projectName = ifile.getProject().getName();
-		String projectRelativePath = ifile.getProjectRelativePath().toString();
-		int port = Activator.getDefault().getServer().getPort();
-		String url = HTTP + LOCALHOST + ":" + port + "/" + projectRelativePath + "?" + PROJECT_NAME + "=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				+ projectName + "&" + VIEW_ID + "=" + modelHolderId; //$NON-NLS-1$ //$NON-NLS-2$
-
-		return url;
-	}
-
-	private IFile getFileOpenedInEditor(IEditorPart editorPart) {
-		IFile file = null;
-		if (editorPart != null && editorPart.getEditorInput() instanceof IFileEditorInput) {
-			IFileEditorInput fileEditorInput = (IFileEditorInput) editorPart.getEditorInput();
-			file = fileEditorInput.getFile();
+	@Override
+	public void createVisualEditor() {
+		visualEditor = new VpvEditor(sourceEditor);
+		try {
+			visualEditor.init(getEditorSite(), getEditorInput());
+		} catch (PartInitException e) {
+			VpePlugin.reportProblem(e);
 		}
-		return file;
-	}
-	
-	private void formRequestToServer(IEditorPart editor) {
-		IFile ifile = getFileOpenedInEditor(editor);
-		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
-			String url = formUrl(ifile);
-			browser.setUrl(url);
-		} else {
-			browser.setUrl(ABOUT_BLANK);
-		}
-	}
 
-//	private class EditorListener implements IPartListener2 {
-//
-//		@Override
-//		public void partActivated(IWorkbenchPartReference partRef) {
-//			Activator.logInfo(partRef + " is Activated"); //$NON-NLS-1$
-//			if (partRef instanceof EditorReference) {
-//				Activator.logInfo("instance of Editor reference"); //$NON-NLS-1$
-//				IEditorPart editor = ((EditorReference) partRef).getEditor(false);
-//				editorChanged(editor);
-//			}
-//		}
-//
-//		@Override
-//		public void partOpened(IWorkbenchPartReference partRef) {
-//			Activator.logInfo(partRef + " is Opened"); //$NON-NLS-1$
-//		}
-//
-//		@Override
-//		public void partClosed(IWorkbenchPartReference partRef) {
-//			Activator.logInfo(partRef + " is Closed"); //$NON-NLS-1$
-//			if (partRef instanceof EditorReference) {
-//				IEditorPart editorPart = ((EditorReference) partRef).getEditor(false);
-//				if (isCurrentEditor(editorPart)) {
-//					editorChanged(null);
-//				}
-//			}
-//		}
-//
-//		@Override
-//		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-//		}
-//
-//		@Override
-//		public void partDeactivated(IWorkbenchPartReference partRef) {
-//		}
-//
-//		@Override
-//		public void partHidden(IWorkbenchPartReference partRef) {
-//		}
-//
-//		@Override
-//		public void partVisible(IWorkbenchPartReference partRef) {
-//		}
-//
-//		@Override
-//		public void partInputChanged(IWorkbenchPartReference partRef) {
-//		}
-//
-//		public void showBootstrapPart() {
-//			IEditorPart activeEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-//					.getActiveEditor();
-//			formRequestToServer(activeEditor);
-//		}
-//
-//	}
-	
-	private class SelectionListener implements ISelectionListener {
-
-		@Override
-		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-			if (selection instanceof IStructuredSelection && isInCurrentEditor((IStructuredSelection) selection)) {
-				updateSelectionAndScrollToIt(selection);
+		visualEditor.setEditorLoadWindowListener(new EditorLoadWindowListener() {
+			public void load() {
+				visualEditor.setEditorLoadWindowListener(null);
+				VPVController vpeController = new VPVController(VpvEditor2.this);
+				vpeController.init(sourceEditor, visualEditor, bundleMap);
 			}
-		}
-	}
-	
-	private ISelection getCurrentSelection() {
-		Activator activator = Activator.getDefault();
-		IWorkbench workbench = activator.getWorkbench();
-		IWorkbenchWindow workbenchWindow = workbench.getActiveWorkbenchWindow();
-		ISelectionService selectionService = workbenchWindow.getSelectionService();
-		ISelection selection = selectionService.getSelection();
-		return selection;
-	}
-
-	private boolean isInCurrentEditor(IStructuredSelection selection) {
-		Node selectedNode = getNodeFromSelection(selection);
-		Document selectionDocument = null;
-		if (selectedNode != null) {
-			selectionDocument = selectedNode.getOwnerDocument();
-		}
+		});
 		
-		Document editorDocument = getEditorDomDocument();
-		
-		if (selectionDocument != null && selectionDocument == editorDocument) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	private Document getEditorDomDocument() {
-		IDOMModel editorModel = null;
-		if (sourceEditor != null) {
-			editorModel = (IDOMModel) sourceEditor.getAdapter(IDOMModel.class);
-		}
-
-		IDOMDocument editorIdomDocument = null;
-		if (editorModel != null) {
-			editorIdomDocument = editorModel.getDocument();
-		}
-		
-		Element editorDocumentElement = null;
-		if (editorIdomDocument != null) {
-			editorDocumentElement = editorIdomDocument.getDocumentElement();
-		}
-		
-		Document editorDocument = null;
-		if (editorDocumentElement != null) {
-			editorDocument = editorDocumentElement.getOwnerDocument();
-		}
-		return editorDocument;
-	}
-	
-	private Node getNodeFromSelection(IStructuredSelection selection) {
-		Object firstElement = selection.getFirstElement();
-		if (firstElement instanceof Node) {
-			return (Node) firstElement;
-		} else {
-			return null;
-		}
-	}
-	
-	public Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
-		Long id = null;
-		if (selectedSourceNode != null && visualModel != null) {
-			Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();
-			
-			Node visualNode = null;
-			Node sourceNode = selectedSourceNode;
-			do {
-				visualNode = sourceVisuaMapping.get(sourceNode);
-				sourceNode = DomUtil.getParentNode(sourceNode);
-			} while (visualNode == null && sourceNode != null);
-			
-			if (!(visualNode instanceof Element)) { // text node, comment, etc
-				visualNode = DomUtil.getParentNode(visualNode); // should be element now or null
-			}
-			
-			String idString = null;
-			if (visualNode instanceof Element) {
-				Element elementNode = (Element) visualNode;
-				idString = elementNode.getAttribute(VpvDomBuilder.ATTR_VPV_ID);
-			}
-			
-			if (idString != null && !idString.isEmpty()) {
-				try {
-					id = Long.parseLong(idString);
-				} catch (NumberFormatException e) {
-					Activator.logError(e);
-				}
-			}
-		}
-		return id;
-	}
-	
-	private void updateBrowserSelection(Long currentSelectionId) {
-		String selectionStyle;
-		if (currentSelectionId == null) {
-			selectionStyle = ""; //$NON-NLS-1$
-		} else {
-			selectionStyle = "'[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"] {outline: 2px solid blue;}'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		
-		browser.execute(
-		"(function(css) {" + //$NON-NLS-1$
-			"var style=document.getElementById('VPV-STYLESHEET');" + //$NON-NLS-1$
-//			"if ('\\v' == 'v') /* ie only */ {alert('ie');" +
-//				"if (style == null) {" +
-//					"style = document.createStyleSheet();" +
-//				"}" +
-//				"style.cssText = css;" +
-//			"}" +
-//			"else {" +
-				"if (style == null) {" + //$NON-NLS-1$
-					"style = document.createElement('STYLE');" + //$NON-NLS-1$
-					"style.type = 'text/css';" + //$NON-NLS-1$
-				"}" + //$NON-NLS-1$
-				"style.innerHTML = css;" + //$NON-NLS-1$
-				"document.body.appendChild(style);" + //$NON-NLS-1$
-//			"}" +
-			"style.id = 'VPV-STYLESHEET';" +  //$NON-NLS-1$
-			"})(" + selectionStyle + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	private void scrollToId(Long currentSelectionId) {
-		if (currentSelectionId != null) {
-			browser.execute(
-					"(function(){" + //$NON-NLS-1$
-							"var selectedElement = document.querySelector('[" + VpvDomBuilder.ATTR_VPV_ID + "=\"" + currentSelectionId + "\"]');" + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							"selectedElement.scrollIntoView(true);" + //$NON-NLS-1$
-					"})()"   //$NON-NLS-1$
-			);
-		}
-	}
-
-	private void updateSelectionAndScrollToIt(ISelection currentSelection) {
-		if (currentSelection instanceof IStructuredSelection) {
-			Node sourceNode = getNodeFromSelection((IStructuredSelection) currentSelection);
-			Long currentSelectionId = getIdForSelection(sourceNode, visualModel);
-			updateBrowserSelection(currentSelectionId);
-			scrollToId(currentSelectionId);
-		}
-	}
-	
-	public Browser getBrowser() {
-		return browser;
-	}
-
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-		if (sourceEditor != null) {
-			sourceEditor.doSave(monitor);
-		}
-	}
-
-	@Override
-	public void doSaveAs() {
-		if (sourceEditor != null) {
-			sourceEditor.doSaveAs();
-			setInput(sourceEditor.getEditorInput());
-		}
-	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input)
-			throws PartInitException {
-		setSite(site);
-		setInput(input);
-	}
-
-	@Override
-	public boolean isDirty() {
-			return false;
-	}
-
-	@Override
-	public boolean isSaveAsAllowed() {
-		if (sourceEditor != null) {
-			return sourceEditor.isSaveAsAllowed();
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public void setVisualMode(int type) {
-		switch (type) {
-		case VISUALSOURCE_MODE:
+		toolBar = visualEditor.createVisualToolbar(verticalToolbarSplitter);
+		visualEditor.createPartControl(visualContent);
+		if (multiPageEditor instanceof JSPMultiPageEditor) {
+			JSPMultiPageEditor jspMultiPageEditor = (JSPMultiPageEditor) multiPageEditor;
 			/*
-			 * https://jira.jboss.org/browse/JBIDE-6832
-			 * Restore the state after switching from Preview, for example.
+			 * https://issues.jboss.org/browse/JBIDE-11302
 			 */
-//			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
-//			setVerticalToolbarVisible(true);
+			selectionBar = jspMultiPageEditor.getSelectionBar();
 			/*
-			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
-			 * author Denis Maliarevich.
+			 * https://issues.jboss.org/browse/JBIDE-10711
 			 */
-			container.setMaximizedControl(null);
-			if (sourceContent != null) {
-				sourceContent.setVisible(true);
-				if (sourceEditor != null) {
-                    activeEditor = sourceEditor;
-                }
-			}
-			if (visualContent != null)
-				visualContent.setVisible(true);
-			if (previewContent != null) {
-				previewContent.setVisible(false);
-			}
-			break;
-
-//		case VISUAL_MODE:
-//			selectionBar.showBar(showSelectionBar);
-//			if (sourceContent != null)
-//				sourceContent.setVisible(false);
-//			if (visualContent != null)
-//				visualContent.setVisible(true);
-//			if (previewContent != null) {
-//				previewContent.setVisible(false);
-//			}
-//			break;
-
-		case SOURCE_MODE:
-//			selectionBar.setVisible(selectionBar.getAlwaysVisibleOption());
-			if (sourceContent != null) {
-				sourceContent.setVisible(true);
-				if (sourceEditor != null) {
-                    activeEditor = sourceEditor;
-                }
+			if (!XulRunnerBrowser.isCurrentPlatformOfficiallySupported()) {
 				/*
-				 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
-				 * author Denis Maliarevich.
+				 * Set the flag in JSPMultiPageEditor
 				 */
-				container.setMaximizedControl(sourceContent);
-				
-				//Added by Max Areshkau
-				//was fixed bug(border which drawed by iflasher doesn't hide on MACOS when we swith
-				// to souce view)
-//				if(Platform.getOS().equals(Platform.OS_MACOSX)&&controller!=null) {
-//					
-//				visualEditor.getController().visualRefresh();
-//				}
+				jspMultiPageEditor.setXulRunnerBrowserIsNotSupported(true);
 			}
-			/*
-			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
-			 * author Denis Maliarevich.
-			 */
-//			if (visualContent != null)
-//				visualContent.setVisible(false);
-//			if (previewContent != null) {
-//				previewContent.setVisible(false);
-//			}
-			break;
-
-		case PREVIEW_MODE:
-//			if (selectionBar != null) {
-//				selectionBar.setVisible(false);
-//			}
-			/*
-			 * Fixes https://jira.jboss.org/jira/browse/JBIDE-3140
-			 * author Denis Maliarevich.
-			 */
-//			if (sourceContent != null) {
-//				sourceContent.setVisible(false);
-//			}
-//
-//			if (visualContent != null) {
-//				visualContent.setVisible(false);
-//			}
-
-			if (previewContent != null) {
-				previewContent.setVisible(true);
-				container.setMaximizedControl(previewContent);
-			}
-			break;
 		}
-		container.layout();
-		if (visualMode == SOURCE_MODE && type != SOURCE_MODE) {
-			visualMode = type;
-			refresh(browser);
-		}
-		visualMode = type;
 	}
-
-	@Override
-	public IVisualController getController() {
-		return null;
-	}
-
-	@Override
-	public Object getPreviewWebBrowser() {
-		return browser;
-	}
+	
 
 	@Override
 	public void createPreviewBrowser() {
 		
 	}
-
+	
 	@Override
-	public Object getVisualEditor() {
-		return null;
+	public void setFocus() {
+		if (activeEditor != null) {
+			activeEditor.setFocus();
+		}
 	}
-
+	
 	@Override
-	public void createVisualEditor() {
-//		System.out.println("CVE");
-//		browser = new Browser(visualContent, SWT.WEBKIT);
-//		browser.setUrl(ABOUT_BLANK);
-//		browser.addProgressListener(new ProgressAdapter() {
-//			@Override
-//			public void completed(ProgressEvent event) {
-//				ISelection currentSelection = getCurrentSelection();
-//				updateSelectionAndScrollToIt(currentSelection);
-//			}
-//		});
-//		inizializeSelectionListener();	
-//		inizializeEditorListener(browser, modelHolderId);
-//		
-//		makeActions();
-//		contributeToActionBars();
+	public void dispose() {
+//		deactivateServices();
+//		sourceActivation = null;
+//		sourceMaxmin = null;
+//		visualActivation = null;
+//		visualMaxmin = null;
+//		jumpingActivation = null;
+//		jumping = null;
+		if (verticalToolbarEmpty != null) {
+			if (!verticalToolbarEmpty.isDisposed()) {
+				verticalToolbarEmpty.dispose();
+			}
+			verticalToolbarEmpty = null;
+		}
+//		if (optionsObject != null) {
+//			optionsObject.getModel().removeModelTreeListener(listener);
+//			listener=null;
+//			optionsObject = null;
+//		}
+		if (editorSettings != null) {
+			editorSettings.dispose();
+			editorSettings = null;
+		}
+//		if (activationListener != null) {
+//			IWorkbenchWindow window = getSite().getWorkbenchWindow();
+//			window.getPartService().removePartListener(activationListener);
+//			Shell shell = window.getShell();
+//			if (shell != null && !shell.isDisposed())
+//				shell.removeShellListener(activationListener);
+//			activationListener = null;
+//		}
+		// editor will disposed as part of multipart editor
+		if (sourceEditor != null) {
+			sourceEditor.dispose();
+			sourceEditor = null;
+		}
+
+		if (visualEditor != null) {
+			visualEditor.dispose();
+			visualEditor = null;
+		}
+
+//		if (previewWebBrowser != null) {
+//			previewWebBrowser.dispose();
+//			previewWebBrowser=null;
+//		}
+		if (previewContent != null) {
+			previewContent.dispose();
+			previewContent = null;
+		}
+		
+		if (selectionBar != null) {
+			selectionBar.dispose();
+			selectionBar = null;
+		}
+		activeEditor = null;
+		multiPageEditor = null;
+		super.dispose();
 	}
+	
 
 	@Override
 	public void maximizeSource() {
@@ -941,7 +897,62 @@ public class VpvEditor2 extends EditorPart implements VpvVisualModelHolder, IVis
 //					controller.visualRefresh();
 //				}
 //			}
-			refresh(browser);
+			visualEditor.reload();
 		}
 	}
+	
+	
+	
+	public void updateSelectionBar(boolean isSelectionBarVisible) {
+		if (selectionBar != null) {
+			selectionBar.setVisible(isSelectionBarVisible);
+		} else {
+			VpePlugin.getDefault().logError("VPE Selection Bar is not initialized."); //$NON-NLS-1$
+		}
+	}
+
+	@Override
+	public IVisualController getController() {
+		return visualEditor.getController();
+	}
+
+	@Override
+	public Object getPreviewWebBrowser() {
+		return visualEditor.getBrowser();
+	}
+
+	@Override
+	public Object getVisualEditor() {
+		return visualEditor;
+	}
+	
+	/*
+	 * Updates current VpeEditorPart after 
+	 * OK/Apply button on "Visual Page Editor" preference page
+	 * has been pressed.
+	 */
+	public void updatePartAccordingToPreferences() {
+		/*
+		 * Update MozillaEditor's toolbar items
+		 */
+		if (visualEditor != null) {
+			visualEditor.updateToolbarItemsAccordingToPreferences();
+		}
+		/*
+		 * When switching from Source view to Visual/Source controller could be null.
+		 */
+		if (getController() != null) {
+			boolean prefsShowVPEToolBar = WebUiPlugin.getDefault().getPreferenceStore()
+					.getBoolean(IVpePreferencesPage.SHOW_VISUAL_TOOLBAR);
+			setVerticalToolbarVisible(prefsShowVPEToolBar);
+
+			fillContainer(false, null);
+		}
+	}
+
+	@Override
+	public CustomSashForm getContainer() {
+		return container;
+	}
+	
 }

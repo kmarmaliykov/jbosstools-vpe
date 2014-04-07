@@ -83,7 +83,7 @@ public class PageDesignOptionsHandler extends VisualPartAbstractHandler {
 			if(activeEditor instanceof JSPMultiPageEditor){
 					JSPMultiPageEditor jspEditor = (JSPMultiPageEditor) activeEditor;
 					if(jspEditor.getVisualEditor().getController()!=null)
-					isVisualPartVisible=((VpeController)(jspEditor.getVisualEditor().getController())).isVisualEditorVisible();
+					isVisualPartVisible = jspEditor.getVisualEditor().getController().isVisualEditorVisible();
 			}
 		}
 		boolean enabled=isFileExists&&isVisualPartVisible;

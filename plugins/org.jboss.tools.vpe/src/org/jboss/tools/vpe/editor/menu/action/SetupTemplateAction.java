@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.template.VpeAnyData;
 import org.jboss.tools.vpe.editor.template.VpeEditAnyDialog;
@@ -31,7 +32,7 @@ public class SetupTemplateAction extends Action {
 
 	private Node actionNode;
 
-	private VpePageContext pageContext;
+	private AbstractPageContext pageContext;
 
 	public void setActionNode(Node actionNode) {
 		this.actionNode = actionNode;
@@ -68,9 +69,9 @@ public class SetupTemplateAction extends Action {
 
 	@Override
 	public void run() {
-		boolean isCorrectNS = pageContext.isCorrectNS(actionNode);
+		boolean isCorrectNS = ((VpePageContext)pageContext).isCorrectNS(actionNode);
 		if (isCorrectNS) {
-			data.setUri(pageContext.getSourceTaglibUri(actionNode));
+			data.setUri(((VpePageContext)pageContext).getSourceTaglibUri(actionNode));
 			data.setName(actionNode.getNodeName());
 		}
 		

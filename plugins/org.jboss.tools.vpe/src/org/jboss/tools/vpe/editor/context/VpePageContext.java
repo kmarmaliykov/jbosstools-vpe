@@ -45,18 +45,11 @@ import org.w3c.dom.Node;
 /**
  * Contains the information on edited page.
  */
-@SuppressWarnings("restriction")
-public class VpePageContext implements IVisualContext {
+public class VpePageContext extends AbstractPageContext implements IVisualContext {
+	private VpeEditorPart editPart;
 	
-	public static final String CUSTOM_ELEMENTS_ATTRS = "customElementsAttributes"; //$NON-NLS-1$
-	public static final String CURRENT_VISUAL_NODE = "currentVisualNode"; //$NON-NLS-1$
-	public static final String RES_REFERENCES = "resourceReferences"; //$NON-NLS-1$
-	public static final String EL_EXPR_SERVICE = "elExprService"; //$NON-NLS-1$
-	
-	private BundleMap bundle;
 	private VpeSourceDomBuilder sourceBuilder;
 	private VpeVisualDomBuilder visualBuilder;
-	private VpeEditorPart editPart;
 	protected Map<String, Object> values = new HashMap<String, Object>();
 
 	public VpePageContext(BundleMap bundle, VpeEditorPart editPart) {

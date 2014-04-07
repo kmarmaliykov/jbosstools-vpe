@@ -21,6 +21,7 @@ import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeSourceDropInfo;
 import org.jboss.tools.vpe.editor.VpeSourceInnerDragInfo;
 import org.jboss.tools.vpe.editor.VpeVisualDomBuilder;
+import org.jboss.tools.vpe.editor.context.AbstractPageContext;
 import org.jboss.tools.vpe.editor.context.VpePageContext;
 import org.jboss.tools.vpe.editor.mapping.NodeData;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
@@ -227,9 +228,9 @@ public class VpeTemplateSafeWrapper implements VpeTemplate, IAdaptable {
 	 * @return
 	 * @see org.jboss.tools.vpe.editor.template.VpeTemplate#canInnerDrag(org.jboss.tools.vpe.editor.context.VpePageContext, org.w3c.dom.Element)
 	 */
-	public boolean canInnerDrag(VpePageContext pageContext, Element sourceElement) {
+	public boolean canInnerDrag(Element sourceElement) {
 		try {
-			return delegate.canInnerDrag(pageContext, sourceElement);
+			return delegate.canInnerDrag(sourceElement);
 		} catch (Exception ex) {
 			VpePlugin.getPluginLog().logError(ex);
 		}
@@ -243,7 +244,7 @@ public class VpeTemplateSafeWrapper implements VpeTemplate, IAdaptable {
 	 * @return
 	 * @see org.jboss.tools.vpe.editor.template.VpeTemplate#canInnerDrop(org.jboss.tools.vpe.editor.context.VpePageContext, org.w3c.dom.Node, org.w3c.dom.Node)
 	 */
-	public boolean canInnerDrop(VpePageContext pageContext, Node container,
+	public boolean canInnerDrop(AbstractPageContext pageContext, Node container,
 			Node sourceDragNode) {
 		try {
 			return delegate.canInnerDrop(pageContext, container, sourceDragNode);
