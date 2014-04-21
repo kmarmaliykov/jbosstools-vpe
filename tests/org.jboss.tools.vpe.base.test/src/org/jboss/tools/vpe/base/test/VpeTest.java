@@ -39,6 +39,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
+import org.jboss.tools.vpe.editor.VpeEditorPartFactory;
 import org.jboss.tools.vpe.editor.VpeSourceDomBuilder;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
 import org.jboss.tools.vpe.editor.mapping.VpeElementMapping;
@@ -233,12 +234,14 @@ public class VpeTest extends TestCase implements ILogListener {
 	 */
 	protected JSPMultiPageEditor openEditor(IEditorInput input)
 			throws PartInitException {
-
+		//set this property to make VPE always opened as visual part
+		System.setProperty(VpeEditorPartFactory.LOAD_XULRUNNER_ENGINE, String.valueOf(true));
+		
 		// get editor
-		JSPMultiPageEditor part = (JSPMultiPageEditor) PlatformUI
-				.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-				.openEditor(input, getEditorID(), true);
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		JSPMultiPageEditor part = (JSPMultiPageEditor) page.openEditor(input, getEditorID(), true);
 
+		
 		assertNotNull(part);
 		// It is needed to fix issues related with deferred messages processing like
 		// java.lang.NullPointerException
