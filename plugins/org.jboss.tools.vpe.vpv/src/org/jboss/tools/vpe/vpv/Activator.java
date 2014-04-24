@@ -16,11 +16,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.jboss.tools.vpe.vpv.server.VpvServer;
-import org.jboss.tools.vpe.vpv.transform.VpvController;
-import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
-import org.jboss.tools.vpe.vpv.transform.VpvTemplateProvider;
-import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolderRegistry;
+import org.jboss.tools.vpv.server.VpvServer;
+import org.jboss.tools.vpv.transform.VpvController;
+import org.jboss.tools.vpv.transform.VpvDomBuilder;
+import org.jboss.tools.vpv.transform.VpvTemplateProvider;
+import org.jboss.tools.vpv.transform.VpvVisualModelHolderRegistry;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -1,11 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JBoss Tools Visual Page Viewer
-Bundle-SymbolicName: org.jboss.tools.vpe.vpv; singleton:=true
+Bundle-SymbolicName: org.jboss.tools.vpe.vpv.core; singleton:=true
 Bundle-Version: 3.5.100.qualifier
-Bundle-Activator: org.jboss.tools.vpe.vpv.Activator
+Bundle-Activator: org.jboss.tools.vpv.core.VpvCorePlugin
 Bundle-Vendor: JBoss by Red Hat
-Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -13,11 +12,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.ui,
  org.eclipse.jface.text,
  org.eclipse.wst.sse.core,
- org.eclipse.wst.xml.core,
- org.jboss.tools.vpe.vpv.core
+ org.eclipse.wst.xml.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.compare,
  org.eclipse.core.resources,
  org.eclipse.ui
-Export-Package: org.jboss.tools.vpe.vpv.views
+Export-Package: org.jboss.tools.vpv.navigation,
+ org.jboss.tools.vpv.server,
+ org.jboss.tools.vpv.transform

@@ -10,11 +10,11 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.vpv.views;
 
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.ABOUT_BLANK;
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.HTTP;
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.LOCALHOST;
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.PROJECT_NAME;
-import static org.jboss.tools.vpe.vpv.server.HttpConstants.VIEW_ID;
+import static org.jboss.tools.vpv.server.HttpConstants.ABOUT_BLANK;
+import static org.jboss.tools.vpv.server.HttpConstants.HTTP;
+import static org.jboss.tools.vpv.server.HttpConstants.LOCALHOST;
+import static org.jboss.tools.vpv.server.HttpConstants.PROJECT_NAME;
+import static org.jboss.tools.vpv.server.HttpConstants.VIEW_ID;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -70,12 +70,12 @@ import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMNode;
 import org.jboss.tools.vpe.vpv.Activator;
-import org.jboss.tools.vpe.vpv.navigation.JsNavigationUtil;
-import org.jboss.tools.vpe.vpv.transform.DomUtil;
-import org.jboss.tools.vpe.vpv.transform.TransformUtil;
-import org.jboss.tools.vpe.vpv.transform.VpvDomBuilder;
-import org.jboss.tools.vpe.vpv.transform.VpvVisualModel;
-import org.jboss.tools.vpe.vpv.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpv.navigation.JsNavigationUtil;
+import org.jboss.tools.vpv.transform.DomUtil;
+import org.jboss.tools.vpv.transform.TransformUtil;
+import org.jboss.tools.vpv.transform.VpvDomBuilder;
+import org.jboss.tools.vpv.transform.VpvVisualModel;
+import org.jboss.tools.vpv.transform.VpvVisualModelHolder;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
