@@ -19,6 +19,7 @@ Export-Package:
  org.jboss.tools.vpe.editor.menu.action,
  org.jboss.tools.vpe.editor.menu.xpl,
  org.jboss.tools.vpe.editor.mozilla,
+ org.jboss.tools.vpe.editor.mozilla.listener,
  org.jboss.tools.vpe.editor.preferences,
  org.jboss.tools.vpe.editor.proxy,
  org.jboss.tools.vpe.editor.selection,

@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JBoss Tools Visual Page Preview
+Bundle-SymbolicName: org.jboss.tools.vpe.preview;singleton:=true
+Bundle-Version: 3.5.100.qualifier
+Bundle-Activator: org.jboss.tools.vpe.preview.editor.Activator
+Bundle-Vendor: JBoss by Red Hat
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui.ide,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.jface.text,
+ org.eclipse.wst.sse.core,
+ org.eclipse.wst.xml.core,
+ org.jboss.tools.vpe.preview.core,
+ org.eclipse.jface,
+ org.jboss.tools.vpe,
+ org.jboss.tools.jst.web.ui,
+ org.jboss.tools.common.resref.core,
+ org.jboss.tools.vpe.resref,
+ org.eclipse.compare,
+ org.jboss.tools.common.model.ui,
+ org.jboss.tools.vpe.xulrunner
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
