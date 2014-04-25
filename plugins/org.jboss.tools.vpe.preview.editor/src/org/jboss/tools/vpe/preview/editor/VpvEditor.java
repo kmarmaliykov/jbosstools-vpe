@@ -1,4 +1,4 @@
-package org.jboss.tools.vpe.editor;
+package org.jboss.tools.vpe.preview.editor;
 
 import static org.jboss.tools.vpe.preview.core.server.HttpConstants.ABOUT_BLANK;
 import static org.jboss.tools.vpe.preview.core.server.HttpConstants.HTTP;
@@ -63,17 +63,15 @@ import org.jboss.tools.vpe.editor.toolbar.format.TextFormattingToolBar;
 import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.transform.DomUtil;
-import org.jboss.tools.vpe.preview.core.transform.TransformUtil;
 import org.jboss.tools.vpe.preview.core.transform.VpvDomBuilder;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
-import org.jboss.tools.vpe.preview.core.util.EditorUtil;
-import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+@SuppressWarnings("restriction")
 public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReusableEditor{
 	/**
 	 * 

@@ -1,34 +1,19 @@
-package org.jboss.tools.vpe.editor;
+package org.jboss.tools.vpe.preview.editor;
 
 /**
  * @author Yahor Radtsevich (yradtsevich)
  */
 
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.ABOUT_BLANK;
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.HTTP;
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.LOCALHOST;
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.PROJECT_NAME;
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.VIEW_ID;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.compare.Splitter;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.resource.StringConverter;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -52,36 +37,23 @@ import org.jboss.tools.common.model.ui.editor.IModelObjectEditorInput;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
-import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.StorageRevisionEditorInputAdapter;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.bar.SelectionBar;
 import org.jboss.tools.vpe.IVpeHelpContextIds;
 import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.editor.IVisualEditor2;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
-import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
-import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
-import org.jboss.tools.vpe.editor.util.VpeStyleUtil;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm;
 import org.jboss.tools.vpe.editor.xpl.CustomSashForm.ICustomSashFormListener;
 import org.jboss.tools.vpe.editor.xpl.EditorSettings;
 import org.jboss.tools.vpe.editor.xpl.SashSetting;
-import org.jboss.tools.vpe.preview.core.transform.DomUtil;
-import org.jboss.tools.vpe.preview.core.transform.VpvDomBuilder;
-import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
-import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
-import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 public class VpvEditor2 extends EditorPart implements IVisualEditor2 {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
-	private Job currentJob;
-
 	protected EditorSettings editorSettings;
 //	private EditorListener editorListener;
 //	private SelectionListener selectionListener;

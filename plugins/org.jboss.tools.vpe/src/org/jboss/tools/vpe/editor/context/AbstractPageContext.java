@@ -6,13 +6,11 @@ import java.util.List;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.part.EditorPart;
 import org.jboss.tools.common.resref.core.ResourceReference;
 import org.jboss.tools.jst.web.tld.TaglibData;
 import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualContext;
 import org.jboss.tools.vpe.editor.IVisualEditor2;
-import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.resref.core.TaglibReferenceList;
 
 public abstract class AbstractPageContext implements IVisualContext {

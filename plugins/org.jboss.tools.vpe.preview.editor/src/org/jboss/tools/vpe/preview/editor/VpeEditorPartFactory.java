@@ -8,7 +8,7 @@
  * Contributors:
  *     Exadel, Inc. and Red Hat, Inc. - initial API and implementation
  ******************************************************************************/ 
-package org.jboss.tools.vpe.editor;
+package org.jboss.tools.vpe.preview.editor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -17,6 +17,7 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
+import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 
 public class VpeEditorPartFactory implements IVisualEditorFactory {
