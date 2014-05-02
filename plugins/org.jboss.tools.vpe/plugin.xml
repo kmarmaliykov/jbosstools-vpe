@@ -122,10 +122,10 @@
 			contextId="org.jboss.tools.vpe.editorContext"
 			sequence="M1+R"/>
 	</extension>
-  <extension
+  <!--extension
         point="org.jboss.tools.jst.web.ui.visulaEditorImplementations"  id="org.jboss.tools.vpe.editor.VpeEditorPartFactory">
         	<visualEditorImplementation name="%visualEditorImpl_name" class="org.jboss.tools.vpe.editor.VpeEditorPartFactory"/>
-  </extension>
+  </extension-->
   	<extension point="org.eclipse.core.expressions.definitions">
 			<definition id="org.jboss.tools.ui.vpe.editor">
 			<and>
