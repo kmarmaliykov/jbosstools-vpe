@@ -39,12 +39,12 @@ import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.VpeController;
-import org.jboss.tools.vpe.editor.VpeEditorPartFactory;
 import org.jboss.tools.vpe.editor.VpeSourceDomBuilder;
 import org.jboss.tools.vpe.editor.mapping.VpeDomMapping;
 import org.jboss.tools.vpe.editor.mapping.VpeElementMapping;
 import org.jboss.tools.vpe.editor.mapping.VpeNodeMapping;
 import org.jboss.tools.vpe.editor.util.SelectionUtil;
+import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 import org.jboss.tools.vpe.xulrunner.editor.XulRunnerEditor;
 import org.mozilla.interfaces.nsIDOMElement;
 import org.mozilla.interfaces.nsIDOMNode;
@@ -235,7 +235,7 @@ public class VpeTest extends TestCase implements ILogListener {
 	protected JSPMultiPageEditor openEditor(IEditorInput input)
 			throws PartInitException {
 		//set this property to make VPE always opened as visual part
-		System.setProperty(VpeEditorPartFactory.LOAD_XULRUNNER_ENGINE, String.valueOf(true));
+		System.setProperty(VpePlatformUtil.LOAD_XULRUNNER_ENGINE, String.valueOf(true));
 		
 		// get editor
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
