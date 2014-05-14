@@ -8,7 +8,7 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.preview.view;
+package org.jboss.tools.vpe.preview.core.util;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -17,7 +17,7 @@ import org.eclipse.osgi.util.NLS;
  * @author Ilya Buziuk (ibuziuk)
  */
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.jboss.tools.vpe.preview.view.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.jboss.tools.vpe.preview.core.util.messages"; //$NON-NLS-1$
 	public static String VpvView_REFRESH;
 	public static String VpvView_OPEN_IN_DEFAULT_BROWSER;
 	public static String VpvView_ENABLE_AUTOMATIC_REFRESH;

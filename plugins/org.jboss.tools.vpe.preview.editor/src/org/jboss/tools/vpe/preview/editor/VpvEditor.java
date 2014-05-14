@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -47,7 +46,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
@@ -55,7 +53,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.editors.text.ILocationProvider;
 import org.eclipse.ui.part.EditorPart;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
@@ -63,15 +60,14 @@ import org.jboss.tools.vpe.VpePlugin;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.preferences.VpeEditorPreferencesPage;
-import org.jboss.tools.vpe.editor.preferences.VpeResourcesDialogFactory;
 import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
 import org.jboss.tools.vpe.editor.toolbar.VpeToolBarManager;
 import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
 import org.jboss.tools.vpe.editor.toolbar.format.TextFormattingToolBar;
-import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
@@ -157,6 +153,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private SelectionListener selectionListener;
 	private IEditorPart sourceEditor;
 	
+	private ActionBarUtil actionBarUtil;
+	
 	public VpvEditor(IEditorPart sourceEditor) {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 		this.sourceEditor = sourceEditor;
@@ -240,7 +238,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		 * https://jira.jboss.org/jira/browse/JBIDE-3966
 		 * Disabling Page Design Options for external files. 
 		 */
-		IEditorInput input = getEditorInput();
+		/*	TODO: implement this feature for preview
+		 * IEditorInput input = getEditorInput();
 		IFile file = null;
 		if (input instanceof IFileEditorInput) {
 			file = ((IFileEditorInput) input).getFile();
@@ -265,7 +264,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			showResouceDialogAction.setEnabled(false);
 		}
 		showResouceDialogAction.setToolTipText(VpeUIMessages.PAGE_DESIGN_OPTIONS);
-		toolBarManager.add(showResouceDialogAction);
+		toolBarManager.add(showResouceDialogAction);*/
 		
 		
 		/*
@@ -315,44 +314,47 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		/*
 		 * Create SHOW TEXT FORMATTING tool bar item
 		 */
-		showTextFormattingAction = new Action(
-				VpeUIMessages.SHOW_TEXT_FORMATTING, IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				/*
-				 * Update Text Formatting Bar 
-				 */
-				vpeToolBarManager.setToolbarVisibility(this.isChecked());
-				WebUiPlugin.getDefault().getPreferenceStore().
-				setValue(IVpePreferencesPage.SHOW_TEXT_FORMATTING, this.isChecked());
-			}
-		};
-		showTextFormattingAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
-				ICON_TEXT_FORMATTING));
-		showTextFormattingAction.setToolTipText(VpeUIMessages.SHOW_TEXT_FORMATTING);
-		toolBarManager.add(showTextFormattingAction);
+		//TODO: implement this feature for preview. All visual stuff is done, need to implement only text formatting 
+//		showTextFormattingAction = new Action(
+//				VpeUIMessages.SHOW_TEXT_FORMATTING, IAction.AS_CHECK_BOX) {
+//			@Override
+//			public void run() {
+//				/*
+//				 * Update Text Formatting Bar 
+//				 */
+//				vpeToolBarManager.setToolbarVisibility(this.isChecked());
+//				WebUiPlugin.getDefault().getPreferenceStore().
+//				setValue(IVpePreferencesPage.SHOW_TEXT_FORMATTING, this.isChecked());
+//			}
+//		};
+//		showTextFormattingAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+//				ICON_TEXT_FORMATTING));
+//		showTextFormattingAction.setToolTipText(VpeUIMessages.SHOW_TEXT_FORMATTING);
+//		toolBarManager.add(showTextFormattingAction);
+		
 		
 		/*
 		 * https://issues.jboss.org/browse/JBIDE-11302
 		 * Create SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES tool bar item
 		 */
-		scrollLockAction = new Action(
-				VpeUIMessages.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
-				IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				/*
-				 * Change the enabled state, listeners in VpeController will do the rest
-				 */
-				WebUiPlugin.getDefault().getPreferenceStore().setValue(
-						IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
-						this.isChecked());
-			}
-		};
-		scrollLockAction.setImageDescriptor(ImageDescriptor.createFromFile(
-				MozillaEditor.class, ICON_SCROLL_LOCK));
-		scrollLockAction.setToolTipText(VpeUIMessages.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
-		toolBarManager.add(scrollLockAction);
+		// TODO: implement this for preview
+//		scrollLockAction = new Action(
+//				VpeUIMessages.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
+//				IAction.AS_CHECK_BOX) {
+//			@Override
+//			public void run() {
+//				/*
+//				 * Change the enabled state, listeners in VpeController will do the rest
+//				 */
+//				WebUiPlugin.getDefault().getPreferenceStore().setValue(
+//						IVpePreferencesPage.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES,
+//						this.isChecked());
+//			}
+//		};
+//		scrollLockAction.setImageDescriptor(ImageDescriptor.createFromFile(
+//				MozillaEditor.class, ICON_SCROLL_LOCK));
+//		scrollLockAction.setToolTipText(VpeUIMessages.SYNCHRONIZE_SCROLLING_BETWEEN_SOURCE_VISUAL_PANES);
+//		toolBarManager.add(scrollLockAction);
 
 		/*
 		 * Create SHOW SELECTION BAR tool bar item
@@ -390,6 +392,9 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				ICON_SELECTION_BAR));
 		showSelectionBarAction.setToolTipText(VpeUIMessages.SHOW_SELECTION_BAR);
 		toolBarManager.add(showSelectionBarAction);
+		
+		actionBarUtil = new ActionBarUtil(browser);
+		actionBarUtil.fillLocalToolBar(toolBarManager);
 		
 		updateToolbarItemsAccordingToPreferences();
 		toolBarManager.update(true);

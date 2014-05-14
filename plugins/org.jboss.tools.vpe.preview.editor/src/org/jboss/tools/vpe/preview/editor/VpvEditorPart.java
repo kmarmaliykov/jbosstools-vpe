@@ -731,8 +731,8 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			}
 		});
 		
-		toolBar = visualEditor.createVisualToolbar(verticalToolbarSplitter);
 		visualEditor.createPartControl(visualContent);
+		toolBar = visualEditor.createVisualToolbar(verticalToolbarSplitter);
 		if (multiPageEditor instanceof JSPMultiPageEditor) {
 			JSPMultiPageEditor jspMultiPageEditor = (JSPMultiPageEditor) multiPageEditor;
 			/*

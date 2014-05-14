@@ -16,25 +16,13 @@ import static org.jboss.tools.vpe.preview.core.server.HttpConstants.LOCALHOST;
 import static org.jboss.tools.vpe.preview.core.server.HttpConstants.PROJECT_NAME;
 import static org.jboss.tools.vpe.preview.core.server.HttpConstants.VIEW_ID;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import javax.xml.xpath.XPathExpressionException;
 
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IExecutionListener;
-import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
@@ -47,7 +35,6 @@ import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -60,7 +47,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.internal.EditorReference;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
@@ -71,6 +57,7 @@ import org.jboss.tools.vpe.preview.Activator;
 import org.jboss.tools.vpe.preview.core.transform.TransformUtil;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
+import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
@@ -83,15 +70,9 @@ import org.w3c.dom.Node;
 @SuppressWarnings("restriction")
 public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	public static final String ID = "org.jboss.tools.vpe.vpv.view.VpvView"; //$NON-NLS-1$
-	private static final String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
 
 	private Browser browser;
-	private IAction refreshAction;
-	private IAction openInDefaultBrowserAction;
-	private IAction enableAutomaticRefreshAction;
-	private IAction enableRefreshOnSaveAction;
-	private boolean enableAutomaticRefresh = true; // available by default
-	private IExecutionListener saveListener;
+	private ActionBarUtil actionBarUtil;
 	private Job currentJob;
 	private VpvVisualModel visualModel;
 	private int modelHolderId;
@@ -99,35 +80,10 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 	private SelectionListener selectionListener;
 	private IEditorPart currentEditor;
 	private IDocumentListener documentListener;
-	private Command saveCommand;
-	private Command saveAllCommand;
+
 
 	public VpvView() {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
-
-		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
-		saveCommand = commandService.getCommand("org.eclipse.ui.file.save"); //$NON-NLS-1$
-		saveAllCommand = commandService.getCommand("org.eclipse.ui.file.saveAll"); //$NON-NLS-1$
-		saveListener = new IExecutionListener() {
-
-			@Override
-			public void postExecuteSuccess(String arg0, Object arg1) {
-				refresh(browser);
-			}
-
-			@Override
-			public void notHandled(String arg0, NotHandledException arg1) {
-			}
-
-			@Override
-			public void postExecuteFailure(String arg0, ExecutionException arg1) {
-			}
-
-			@Override
-			public void preExecute(String arg0, ExecutionEvent arg1) {
-			}
-
-		};
 	}
 
 	@Override
@@ -190,21 +146,9 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		inizializeSelectionListener();
 		inizializeEditorListener(browser, modelHolderId);
 
-		makeActions();
-		contributeToActionBars();
-	}
-
-	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
-		fillLocalToolBar(bars.getToolBarManager());
-	}
-
-	private void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(refreshAction);
-		manager.add(openInDefaultBrowserAction);
-		manager.add(new Separator(GROUP_REFRESH));
-		manager.appendToGroup(GROUP_REFRESH, enableAutomaticRefreshAction);
-		manager.appendToGroup(GROUP_REFRESH, enableRefreshOnSaveAction);
+		actionBarUtil = new ActionBarUtil(browser);
+		actionBarUtil.fillLocalToolBar(bars.getToolBarManager());
 	}
 
 	private void inizializeEditorListener(Browser browser, int modelHolderId) {
@@ -285,7 +229,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 
 				@Override
 				public void documentChanged(DocumentEvent event) {
-					if (enableAutomaticRefresh) {
+					if (actionBarUtil.isAutomaticRefreshEnabled()) {
 						String fileExtension = EditorUtil.getFileExtensionFromEditor(currentEditor);
 						if (SuitableFileExtensions.isCssOrJs(fileExtension)) {
 							getActivePage().saveEditor(currentEditor, false); // saving all js and css stuff							
@@ -300,82 +244,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		return documentListener;
 	}
 
-	private void makeActions() {
-		makeRefreshAction();
-		makeOpenInDefaultBrowserAction();
-		makeEnableAutomaticRefreshAction();
-		makeEnableRefreshOnSaveAction();
-	}
-
-	private void makeEnableAutomaticRefreshAction() {
-		enableAutomaticRefreshAction = new Action(Messages.VpvView_ENABLE_AUTOMATIC_REFRESH, IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				if (enableAutomaticRefreshAction.isChecked()) {
-					enableAutomaticRefresh = true;
-
-					enableRefreshOnSaveAction.setChecked(false);
-					saveCommand.removeExecutionListener(saveListener);
-					saveAllCommand.removeExecutionListener(saveListener);
-				} else {
-					enableAutomaticRefresh = false;
-				}
-			}
-		};
-
-		enableAutomaticRefreshAction.setChecked(true);
-		enableAutomaticRefreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_change.png")); //$NON-NLS-1$
-	}
-
-	private void makeEnableRefreshOnSaveAction() {
-		enableRefreshOnSaveAction = new Action(Messages.VpvView_ENABLE_REFRESH_ON_SAVE, IAction.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				if (enableRefreshOnSaveAction.isChecked()) {
-					saveCommand.addExecutionListener(saveListener);
-					saveAllCommand.addExecutionListener(saveListener);
-					
-					enableAutomaticRefreshAction.setChecked(false);
-					enableAutomaticRefresh = false;
-				} else {
-					saveCommand.removeExecutionListener(saveListener);
-					saveAllCommand.removeExecutionListener(saveListener);
-				}
-			}
-		};
-
-		enableRefreshOnSaveAction.setChecked(false);
-		enableRefreshOnSaveAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh_on_save.png")); //$NON-NLS-1$
-	}
-
-	private void makeOpenInDefaultBrowserAction() {
-		openInDefaultBrowserAction = new Action() {
-			public void run() {
-				URL url;
-				try {
-					url = new URL(browser.getUrl()); // validate URL (to do not open 'about:blank' and similar)
-					Program.launch(url.toString());
-				} catch (MalformedURLException e) {
-					Activator.logError(e);
-				}
-			}
-		};
-
-		openInDefaultBrowserAction.setText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
-		openInDefaultBrowserAction.setToolTipText(Messages.VpvView_OPEN_IN_DEFAULT_BROWSER);
-		openInDefaultBrowserAction.setImageDescriptor(Activator.getImageDescriptor("icons/open_in_default_browser.gif")); //$NON-NLS-1$
-	}
-
-	private void makeRefreshAction() {
-		refreshAction = new Action() {
-			public void run() {
-				refresh(browser);
-			}
-		};
-		refreshAction.setText(Messages.VpvView_REFRESH);
-		refreshAction.setToolTipText(Messages.VpvView_REFRESH);
-		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
-	}
+	
 
 	private Job createPreviewUpdateJob() {
 		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
