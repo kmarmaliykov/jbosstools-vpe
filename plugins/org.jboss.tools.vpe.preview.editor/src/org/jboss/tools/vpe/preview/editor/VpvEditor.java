@@ -24,10 +24,16 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
@@ -54,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.VpePlugin;
@@ -152,12 +159,28 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private int modelHolderId;
 	private SelectionListener selectionListener;
 	private IEditorPart sourceEditor;
+	private Job currentJob;
 	
 	private ActionBarUtil actionBarUtil;
 	
 	public VpvEditor(IEditorPart sourceEditor) {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 		this.sourceEditor = sourceEditor;
+		IDocument document = (IDocument) this.sourceEditor.getAdapter(IDocument.class);
+		document.addDocumentListener(new IDocumentListener() {
+
+				@Override
+				public void documentAboutToBeChanged(DocumentEvent event) {
+				}
+
+				@Override
+				public void documentChanged(DocumentEvent event) {
+					if (actionBarUtil.isAutomaticRefreshEnabled()) {
+						updatePreview();
+					}
+				}
+
+			});
 	}
 	
 	@Override
@@ -479,6 +502,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				}
 			}
 		});
+		formRequestToServer();
 		inizializeSelectionListener();
 	}
 
@@ -505,6 +529,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	
 	public void dispose() {
 		WebUiPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
+		getSite().getPage().removeSelectionListener(selectionListener);
+		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		
 		if (vpeToolBarManager != null) {
 			vpeToolBarManager.dispose();
@@ -561,19 +587,17 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	public void reload() {
-		formRequestToServer(sourceEditor);
+		formRequestToServer();
+//		browser.setUrl(browser.getUrl());
 	}
 	
-	private void formRequestToServer(IEditorPart editor) {
-		IFile ifile = EditorUtil.getFileOpenedInEditor(editor);
+	private void formRequestToServer() {
+		IFile ifile = EditorUtil.getFileOpenedInEditor(sourceEditor);
 		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
 			String url = formUrl(ifile);
 			browser.setUrl(url, null, new String[] {"Cache-Control: no-cache"}); //$NON-NLS-1$
 		} else {
 			browser.setUrl(ABOUT_BLANK);
-			browser.getWebBrowser();
-			
-			
 		}
 	}
 	
@@ -585,6 +609,30 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				+ projectName + "&" + VIEW_ID + "=" + modelHolderId; //$NON-NLS-1$ //$NON-NLS-2$
 
 		return url;
+	}
+	
+	private void updatePreview() {
+		if (currentJob == null || currentJob.getState() != Job.WAITING) {
+			if (currentJob != null && currentJob.getState() == Job.SLEEPING) {
+				currentJob.cancel();
+			}
+			currentJob = createPreviewUpdateJob();
+		}
+
+		currentJob.schedule(500);
+	}
+	
+	private Job createPreviewUpdateJob() {
+		Job job = new UIJob("Preview Update") { //$NON-NLS-1$
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				if (!browser.isDisposed()) {
+					browser.setUrl(browser.getUrl());
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		return job;
 	}
 	
 	/**
