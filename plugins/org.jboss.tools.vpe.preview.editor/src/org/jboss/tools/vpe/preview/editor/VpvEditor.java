@@ -34,8 +34,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
-import org.eclipse.swt.browser.ProgressAdapter;
-import org.eclipse.swt.browser.ProgressEvent;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
@@ -68,6 +68,7 @@ import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
+import org.jboss.tools.vpe.preview.core.util.BrowserUtil;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
@@ -469,16 +470,18 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 
 		browser = new Browser(cmpEd, SWT.NONE);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		browser.addProgressListener(new ProgressAdapter() {
+		browser.addLocationListener(new LocationAdapter() {
 			@Override
-			public void completed(ProgressEvent event) {
+			public void changed(LocationEvent event) {
+				NavigationUtil.disableAlert(browser);
+				NavigationUtil.disableLinks(browser);
+
 				ISelection currentSelection = getCurrentSelection();
 				NavigationUtil.updateSelectionAndScrollToIt(currentSelection, browser, visualModel);
-				if (editorLoadWindowListener != null) {
-					editorLoadWindowListener.load();
-				}
 			}
 		});
+
+		BrowserUtil.addNavigationFromVisual(sourceEditor, browser, visualModel);
 		inizializeSelectionListener();
 	}
 
