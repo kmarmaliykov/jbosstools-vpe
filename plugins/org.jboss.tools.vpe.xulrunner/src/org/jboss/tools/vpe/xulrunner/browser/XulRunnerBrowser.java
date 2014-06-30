@@ -264,7 +264,7 @@ public class XulRunnerBrowser implements nsIWebBrowserChrome,
 	 * 
 	 * @see <a href="https://issues.jboss.org/browse/JBIDE-9188">JBIDE-9188</a>
 	 */
-	private static void ensureEmbeddedXulRunnerEnabled() throws XulRunnerException {
+	public static void ensureEmbeddedXulRunnerEnabled() throws XulRunnerException {
 		if (!EMBEDDED_XULRUNNER_ENABLED) {
 			throw new XulRunnerException(MessageFormat.format(
 					VpeXulrunnerMessages.XulRunnerBrowser_embeddedXulRunnerIsDisabledByOption, LOAD_XULRUNNER_SYSTEM_PROPERTY));

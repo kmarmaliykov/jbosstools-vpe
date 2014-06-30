@@ -64,14 +64,14 @@ public class MozillaPreview extends MozillaEditor {
 			getXulRunnerEditor().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (XulRunnerBundleNotFoundException e) {
 			// TODO add page with explanation what to do
-			showXulRunnerError(parent, e);
+			errorWrapper.showError(parent, e);
 		} catch (PlatformIsNotSupportedException e) {
 			// TODO add page with explanation what platforms supported and what tod o
-			showXulRunnerError(parent, e);
+			errorWrapper.showError(parent, e);
 		} catch (XulRunnerException e) {
-			showXulRunnerError(parent, e);
+			errorWrapper.showError(parent, e);
 		} catch(XPCOMException e) {
-			showXulRunnerError(parent, e);
+			errorWrapper.showError(parent, e);
 		}
 	}
 

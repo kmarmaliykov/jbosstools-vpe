@@ -60,7 +60,7 @@ import org.w3c.dom.Node;
  * @author Konstantin Marmalyukov (kmarmaliykov)
  */
 
-@SuppressWarnings({ "deprecation" })
+@SuppressWarnings({ "deprecation", "restriction" })
 public class VpvEditorController extends VisualController implements INodeAdapter, IModelLifecycleListener,
 		INodeSelectionListener, ITextSelectionListener, SelectionListener, ResourceReferenceListListener,
 		ISelectionChangedListener, IVisualController {

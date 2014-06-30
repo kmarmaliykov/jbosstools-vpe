@@ -18,7 +18,7 @@ public class XULRunnerInitializer {
 	/* XXX: yradtsevich: these constants are duplicated
 	 * in XulRunnerBrowser, see JBIDE-9188 */
 	private static final String LOAD_XULRUNNER_SYSTEM_PROPERTY = "org.jboss.tools.vpe.loadxulrunner";//$NON-NLS-1$
-	private static boolean EMBEDDED_XULRUNNER_ENABLED = !FALSE.equals(System.getProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY));
+	public static boolean EMBEDDED_XULRUNNER_ENABLED = !FALSE.equals(System.getProperty(LOAD_XULRUNNER_SYSTEM_PROPERTY));
 
 	static {
 		boolean initialize = EMBEDDED_XULRUNNER_ENABLED;

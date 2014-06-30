@@ -140,6 +140,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 
 	}
 	
+	private final ToolBarManager toolBarManager = new ToolBarManager(SWT.VERTICAL | SWT.FLAT);
 	private FormatControllerManager formatControllerManager = new FormatControllerManager();
 	private VpvEditorController controller;
 	private ToolBar verBar = null;
@@ -157,7 +158,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private Job currentJob;
 	
 	private ActionBarUtil actionBarUtil;
-	
+	protected BrowserErrorWrapper errorWrapper = new BrowserErrorWrapper();
 	public VpvEditor(IEditorPart sourceEditor) {
 		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 		this.sourceEditor = sourceEditor;
@@ -215,7 +216,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	public ToolBar createVisualToolbar(Composite parent) {
-		final ToolBarManager toolBarManager = new ToolBarManager(SWT.VERTICAL | SWT.FLAT);
 		verBar = toolBarManager.createControl(parent);
 		
 		/*
@@ -313,10 +313,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				ICON_SELECTION_BAR));
 		showSelectionBarAction.setToolTipText(VpeUIMessages.SHOW_SELECTION_BAR);
 		toolBarManager.add(showSelectionBarAction);
-		
-		actionBarUtil = new ActionBarUtil(browser);
-		actionBarUtil.fillLocalToolBar(toolBarManager);
-		
+
 		updateToolbarItemsAccordingToPreferences();
 		toolBarManager.update(true);
 
@@ -331,6 +328,12 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			}
 		});
 		return verBar;
+	}
+	
+	public void addPreviewToolbarItems() {
+		actionBarUtil = new ActionBarUtil(browser);
+		actionBarUtil.fillLocalToolBar(toolBarManager);
+		toolBarManager.update(true);
 	}
 	
 	@Override
@@ -385,35 +388,48 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		Color buttonDarker = parent.getDisplay().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
 		cmpEd.setBackground(buttonDarker);
 
-		browser = new Browser(cmpEd, SWT.NONE);
-		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		browser.addLocationListener(new LocationAdapter() {
-			@Override
-			public void changed(LocationEvent event) {
-				NavigationUtil.disableAlert(browser);
-				NavigationUtil.disableLinks(browser);
-				NavigationUtil.disableInputs(browser);
-
-				ISelection currentSelection = getCurrentSelection();
-				NavigationUtil.updateSelectionAndScrollToIt(currentSelection, browser, visualModel);
-				
-				if (editorLoadWindowListener != null) {
-					editorLoadWindowListener.load();
+		try {
+			browser = new Browser(cmpEd, SWT.NONE);
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			browser.addLocationListener(new LocationAdapter() {
+				@Override
+				public void changed(LocationEvent event) {
+					NavigationUtil.disableAlert(browser);
+					NavigationUtil.disableLinks(browser);
+					NavigationUtil.disableInputs(browser);
+					
+					ISelection currentSelection = getCurrentSelection();
+					NavigationUtil.updateSelectionAndScrollToIt(currentSelection, browser, visualModel);
 				}
+			});
+			
+			browser.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent event) {
+					NavigationUtil.navigateToVisual(sourceEditor, browser, visualModel, event.x, event.y);
+				}
+				
+			});
+			
+			if (editorLoadWindowListener != null) {
+				editorLoadWindowListener.load();
 			}
-		});
-
-		browser.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent event) {
-				NavigationUtil.navigateToVisual(sourceEditor, browser, visualModel, event.x, event.y);
+			
+			inizializeSelectionListener();
+		} catch (Throwable t) {
+			//cannot create browser. show error message then
+			
+			/*
+			 * Disable VPE toolbar
+			 */
+			if (verBar != null) {
+				verBar.setEnabled(false);
 			}
+			errorWrapper.showError(cmpEd, t);
+		}
 
-		});
-
-		inizializeSelectionListener();
 	}
-
+	
 	private void inizializeSelectionListener() {
 		selectionListener = new SelectionListener();
 		getSite().getPage().addPostSelectionListener(selectionListener);	
@@ -437,7 +453,9 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	
 	public void dispose() {
 		WebUiPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(selectionBarCloseListener);
-		getSite().getPage().removeSelectionListener(selectionListener);
+		if (selectionListener != null) {
+			getSite().getPage().removeSelectionListener(selectionListener);
+		}
 		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		
 		if (vpeToolBarManager != null) {
@@ -480,7 +498,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	public void reload() {
-		formRequestToServer();
+		if (browser != null)
+			formRequestToServer();
 //		browser.setUrl(browser.getUrl());
 	}
 	
@@ -489,7 +508,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
 			String url;
 			try {
-				url = EditorUtil.formUrl(ifile, modelHolderId, "" + Activator.getDefault().getServer().getPort());
+				url = EditorUtil.formUrl(ifile, modelHolderId, "" + Activator.getDefault().getServer().getPort()); //$NON-NLS-1$
 				browser.setUrl(url);
 			} catch (UnsupportedEncodingException e) {
 				Activator.logError(e);
@@ -537,6 +556,10 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	
 	public void setModelHolderId(int modelHolderId) {
 		this.modelHolderId = modelHolderId;
+	}
+	
+	public void setBrowser(Browser browser) {
+		this.browser = browser;
 	}
 	
 	public Browser getBrowser() {

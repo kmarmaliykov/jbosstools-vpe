@@ -82,6 +82,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	 */
 	private Composite sourceContent = null;
 	private Composite visualContent = null;
+	private Composite previewContent = null;
 	private Splitter verticalToolbarSplitter = null;
 	private Composite verticalToolbarEmpty = null;
 	private ToolBar toolBar = null;
@@ -89,6 +90,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	IEditorPart activeEditor;
 	
 	private VpvEditor visualEditor;
+	private VpvPreview vpvPreview;
 	
 	public VpvEditorPart(EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
 		this.sourceEditor = textEditor;
@@ -184,29 +186,35 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			}
 			if (visualContent != null)
 				visualContent.setVisible(true);
+			if (previewContent != null) {
+				previewContent.setVisible(false);
+			}
 			break;
 
 		case SOURCE_MODE:
 			VpePlugin.getDefault().countSourceTabEvent();
 			setVerticalToolbarVisible(false);
+
 			if (sourceContent != null) {
 				sourceContent.setVisible(true);
 				if (sourceEditor != null) {
-					activeEditor = sourceEditor;
-				}
+                    activeEditor = sourceEditor;
+                }
+				
 				container.setMaximizedControl(sourceContent);
 			}
+			
 			break;
 
 		case PREVIEW_MODE:
 			VpePlugin.getDefault().countVpvTabEvent();
 			setVerticalToolbarVisible(false);
-			if (visualContent != null) {
-				visualContent.setVisible(true);
-				if (visualEditor != null) {
-					activeEditor = visualEditor;
+			if (previewContent != null) {
+				previewContent.setVisible(true);
+				if (vpvPreview != null) {
+					activeEditor = vpvPreview;
 				}
-				container.setMaximizedControl(visualContent);
+				container.setMaximizedControl(previewContent);
 			}
 			break;
 		}
@@ -341,6 +349,10 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 		sourceContent.setLayout(new FillLayout());
 		visualContent.setLayout(new FillLayout());
 
+		// Create a preview content
+		previewContent = new Composite(container, SWT.NONE);
+		previewContent.setLayout(new GridLayout());
+		
 		if (sourceEditor == null)
 			sourceEditor = new StructuredTextEditor() {
 				public void safelySanityCheckState(IEditorInput input) {
@@ -425,6 +437,18 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 				}
 			});
 			
+			previewContent.addListener(SWT.Activate, new Listener() {
+				public void handleEvent(Event event) {
+					if (event.type == SWT.Activate) {
+						if (vpvPreview != null
+								&& activeEditor != vpvPreview) {
+							activeEditor = vpvPreview;
+							setFocus();
+						}
+					}
+				}
+			});
+			
 			IWorkbenchWindow window = getSite().getWorkbenchWindow();
 			window.getPartService().addPartListener(activationListener);
 			
@@ -492,6 +516,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			visualContent.setParent(newContainer);
 			sourceContent.setParent(newContainer);
 		}
+		previewContent.setParent(newContainer);
 
 		/*
 		 * https://jira.jboss.org/jira/browse/JBIDE-4513 New container should
@@ -593,8 +618,10 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			}
 		});
 		
-		visualEditor.createPartControl(visualContent);
 		toolBar = visualEditor.createVisualToolbar(verticalToolbarSplitter);
+		visualEditor.createPartControl(visualContent);
+		//items for preview must be added after browser creation because its actions is tied to browser
+		visualEditor.addPreviewToolbarItems();
 		if (multiPageEditor instanceof JSPMultiPageEditor) {
 			JSPMultiPageEditor jspMultiPageEditor = (JSPMultiPageEditor) multiPageEditor;
 			/*
@@ -616,7 +643,31 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 
 	@Override
 	public void createPreviewBrowser() {
-		createVisualEditor();
+		vpvPreview = new VpvPreview(sourceEditor);
+		try {
+			vpvPreview.init(getEditorSite(), getEditorInput());
+			vpvPreview.setEditorLoadWindowListener(new EditorLoadWindowListener() {
+				public void load() {
+					vpvPreview.setEditorLoadWindowListener(null);
+					vpvPreview.load();
+				}
+			});
+			vpvPreview.createPartControl(previewContent);
+		} catch (PartInitException e) {
+			VpePlugin.reportProblem(e);
+		}
+		/*
+		 * https://issues.jboss.org/browse/JBIDE-10711
+		 */
+		if (!XulRunnerBrowser.isCurrentPlatformOfficiallySupported()) {
+			if (multiPageEditor instanceof JSPMultiPageEditor) {
+				JSPMultiPageEditor jspMultiPageEditor = (JSPMultiPageEditor) multiPageEditor;
+				/*
+				 * Set the flag in JSPMultiPageEditor
+				 */
+				jspMultiPageEditor.setXulRunnerBrowserIsNotSupported(true);
+			}
+		}
 	}
 	
 	@Override
@@ -647,6 +698,15 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 		if (visualEditor != null) {
 			visualEditor.dispose();
 			visualEditor = null;
+		}
+		
+		if (vpvPreview != null) {
+			vpvPreview.dispose();
+			vpvPreview=null;
+		}
+		if (previewContent != null) {
+			previewContent.dispose();
+			previewContent = null;
 		}
 		
 		if (selectionBar != null) {
@@ -727,7 +787,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 
 	@Override
 	public Object getPreviewWebBrowser() {
-		return visualEditor != null ? visualEditor.getBrowser() : null;
+		return vpvPreview;
 	}
 
 	@Override
