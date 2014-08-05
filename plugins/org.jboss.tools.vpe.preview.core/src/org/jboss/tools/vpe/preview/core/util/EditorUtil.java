@@ -21,14 +21,18 @@ import java.net.URLEncoder;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
+import org.jboss.tools.common.resref.core.ResourceReference;
 import org.jboss.tools.common.web.WebUtils;
+import org.jboss.tools.vpe.resref.core.AbsoluteFolderReferenceList;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -94,22 +98,34 @@ public final class EditorUtil {
 	}
 
 	public static String formUrl(IFile file, int modelHolderId, String serverPort) throws UnsupportedEncodingException {
-		String projectName = file.getProject().getName();
 		String projectRelativePath = file.getProjectRelativePath().toString();
-		IContainer webroot = WebUtils.getWebRootFolder(file);
+		IPath webroot = getWebRoot(file);
 		String webrootRelativePathString = projectRelativePath;
 		String webrootString = null;
 		if(webroot!=null) {
-			IPath webrootRelativePath = file.getFullPath().makeRelativeTo(webroot.getFullPath());
+			IPath webrootRelativePath = file.getFullPath().makeRelativeTo(webroot);
 			webrootRelativePathString = webrootRelativePath.toString();
-			webrootString = webroot.getFullPath().toString();
-		} else {
+			webrootString = webroot.toString();
+		}  else {
+			String projectName = file.getProject().getName();
 			webrootString = "/" + projectName; //$NON-NLS-1$
 		}
 		String parameters = WEBROOT_PATH + "=" + URLEncoder.encode(webrootString, UTF_8) + "&" + VIEW_ID + "=" + modelHolderId; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		return HTTP + LOCALHOST + ":" + serverPort + "/" + webrootRelativePathString + "?" + parameters; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	private static IPath getWebRoot(IFile file) {
+		ResourceReference[] resources = AbsoluteFolderReferenceList.getInstance().getAllResources(file);
+		IContainer webroot = WebUtils.getWebRootFolder(file);
+		IPath webrootPath = webroot != null ? webroot.getFullPath() : null;
+		if (resources.length == 1) {
+			String location = resources[0].getLocation();
+			IPath path = new Path(location);
+			webrootPath = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path).getFullPath();
+		} 
+		return webrootPath;
+	}
+	
 	private static Document getEditorDomDocument(IEditorPart editor) {
 		IDOMModel editorModel = null;
 		if (editor != null) {

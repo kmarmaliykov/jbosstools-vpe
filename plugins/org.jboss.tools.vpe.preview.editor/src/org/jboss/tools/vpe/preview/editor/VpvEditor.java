@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,6 +50,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.ISelectionListener;
@@ -59,15 +61,19 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.editors.text.ILocationProvider;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.progress.UIJob;
+import org.jboss.tools.common.resref.core.ResourceReference;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.preferences.VpeEditorPreferencesPage;
+import org.jboss.tools.vpe.editor.preferences.VpeResourcesDialogFactory;
 import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
 import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
+import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.exceptions.BrowserErrorWrapper;
 import org.jboss.tools.vpe.preview.core.exceptions.CannotOpenExternalFileException;
@@ -78,6 +84,7 @@ import org.jboss.tools.vpe.preview.core.util.ActionBarUtil;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.jboss.tools.vpe.resref.core.CSSReferenceList;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -107,6 +114,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private static List<String> layoutValues;
 	private int currentOrientationIndex = 1;
 	private Action openVPEPreferencesAction;
+	private Action showResouceDialogAction;
 	private Action rotateEditorsAction;
 	private Action showSelectionBarAction;
 	static {
@@ -218,6 +226,40 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				ICON_PREFERENCE));
 		openVPEPreferencesAction.setToolTipText(VpeUIMessages.PREFERENCES);
 		toolBarManager.add(openVPEPreferencesAction);
+		
+		/*
+		 * Create SHOW RESOURCE DIALOG tool bar item
+		 * 
+		 * https://jira.jboss.org/jira/browse/JBIDE-3966
+		 * Disabling Page Design Options for external files. 
+		 */
+		IEditorInput input = getEditorInput();
+		IFile file = null;
+		if (input instanceof IFileEditorInput) {
+			file = ((IFileEditorInput) input).getFile();
+		} else if (input instanceof ILocationProvider) {
+			ILocationProvider provider = (ILocationProvider) input;
+			IPath path = provider.getPath(input);
+			if (path != null) {
+			    file = FileUtil.getFile(input, path.lastSegment());
+			}
+		}
+		boolean fileExistsInWorkspace = ((file != null) && (file.exists()));
+		showResouceDialogAction = new Action(VpeUIMessages.PAGE_DESIGN_OPTIONS,
+				IAction.AS_PUSH_BUTTON) {
+			@Override
+			public void run() {
+				VpeResourcesDialogFactory.openVpeResourcesDialog(VpvEditor.this);
+			}
+		};
+		showResouceDialogAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+				fileExistsInWorkspace ? ICON_PAGE_DESIGN_OPTIONS : ICON_PAGE_DESIGN_OPTIONS_DISABLED));
+		if (!fileExistsInWorkspace) {
+			showResouceDialogAction.setEnabled(false);
+		}
+		showResouceDialogAction.setToolTipText(VpeUIMessages.PAGE_DESIGN_OPTIONS);
+		toolBarManager.add(showResouceDialogAction);
+		
 		
 		/*
 		 * Create ROTATE EDITORS tool bar item
@@ -502,6 +544,16 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			try {
 				url = EditorUtil.formUrl(ifile, modelHolderId, "" + Activator.getDefault().getServer().getPort()); //$NON-NLS-1$
 				browser.setUrl(url);
+				ResourceReference[] csss = CSSReferenceList.getInstance().getAllResources(ifile);
+				for (ResourceReference css : csss) {
+					String path = "file:///" + css.getLocation();
+					String script = "var fileref = document.createElement('link');" + 
+									"fileref.setAttribute('rel', 'stylesheet');" + 
+									"fileref.setAttribute('type', 'text/css');" + 
+									"fileref.setAttribute('href', '" + path + "');" +  
+									"document.getElementsByTagName('head')[0].appendChild(fileref);";
+					browser.execute(script);
+				}
 			} catch (UnsupportedEncodingException e) {
 				Activator.logError(e);
 			}

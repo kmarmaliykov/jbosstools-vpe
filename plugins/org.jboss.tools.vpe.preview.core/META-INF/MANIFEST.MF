@@ -14,7 +14,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.sse.core,
  org.eclipse.wst.xml.core,
  org.jboss.tools.common.core,
- org.jboss.tools.vpe.xulrunner
+ org.jboss.tools.vpe.xulrunner,
+ org.jboss.tools.common.resref.core,
+ org.jboss.tools.vpe.resref
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.core.resources,

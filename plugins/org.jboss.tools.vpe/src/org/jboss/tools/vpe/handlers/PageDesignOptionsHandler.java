@@ -20,20 +20,12 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.ISources;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.ILocationProvider;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.jboss.tools.common.resref.core.ResourceReference;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.jspeditor.JSPMultiPageEditor;
-import org.jboss.tools.vpe.VpePlugin;
-import org.jboss.tools.vpe.editor.VpeController;
-import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
 import org.jboss.tools.vpe.editor.preferences.VpeResourcesDialogFactory;
 import org.jboss.tools.vpe.editor.util.FileUtil;
-import org.jboss.tools.vpe.editor.util.VpeStyleUtil;
-import org.jboss.tools.vpe.messages.VpeUIMessages;
-import org.jboss.tools.vpe.resref.core.VpeResourcesDialog;
 
 /**
  * Handler for PageDesignOptions
@@ -48,7 +40,7 @@ public class PageDesignOptionsHandler extends VisualPartAbstractHandler {
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IEditorPart activeEditor = HandlerUtil.getActiveEditorChecked(event);
-		VpeResourcesDialogFactory.openVpeResourcesDialog(activeEditor.getEditorInput());
+		VpeResourcesDialogFactory.openVpeResourcesDialog(activeEditor);
 		
 		return null;
 	}

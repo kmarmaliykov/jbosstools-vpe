@@ -77,7 +77,7 @@ public class VpvSocketProcessor implements Runnable {
 		Map<String, String> queryParametersMap = parseUrlParameters(httpRequestString);
 
 		String path = getPath(httpRequestString);
-		String webrootPath = getWebrootPath(queryParametersMap, requestHeaders);
+		String webrootPath = getWebrootPath(path, queryParametersMap, requestHeaders);
 		String fullPath = webrootPath + path;
 		Integer viewId = getViewId(queryParametersMap);
 		vpvController.getResource(fullPath, viewId, new ResourceAcceptor() {
@@ -209,7 +209,48 @@ public class VpvSocketProcessor implements Runnable {
 		return path;
 	}
 
-	private String getWebrootPath(Map<String, String> queryParametersMap, Map<String, String> requestHeaders) {
+	private String getWebrootPath(String requestedFile, Map<String, String> queryParametersMap, Map<String, String> requestHeaders) {
+//		if (requestedFile.startsWith("/")) { //$NON-NLS-1$
+//			ResourceReference[] resources = AbsoluteFolderReferenceList
+//					.getInstance().getAllResources(includeFile);
+//			if (resources.length == 1) {
+//				String location = resources[0].getLocation() + fileName;
+//				IPath path = new Path(location);
+//				file = ResourcesPlugin.getWorkspace().getRoot()
+//						.getFileForLocation(path);
+//			} else {
+//				//WebArtifactEdit edit = WebArtifactEdit
+//				//		.getWebArtifactEditForRead(includeFile.getProject());
+//				IContainer[] webRootFolders = WebUtils.getWebRootFolders(includeFile.getProject());
+//				if (webRootFolders.length > 0) {
+//					for (IContainer webRootFolder : webRootFolders) {
+//						IFile handle = webRootFolder.getFile(new Path(fileName));
+//						if (handle.exists()) {
+//							file = handle;
+//							break;
+//						}
+//					}
+//				} else {
+//					/* Yahor Radtsevich (yradtsevich):
+//					 * Fix of JBIDE-4416: assume that the parent directory
+//					 * of the opened file is the web-root directory */
+//					file = resolveRelatedPath(includeFile, fileName);
+//				}
+//			}
+//		} else {
+//			ResourceReference[] resources = RelativeFolderReferenceList
+//					.getInstance().getAllResources(includeFile);
+//			if (resources.length == 1) {
+//				String location = resources[0].getLocation() + File.separator
+//						+ fileName;
+//				IPath path = new Path(location);
+//				file = ResourcesPlugin.getWorkspace().getRoot()
+//						.getFileForLocation(path);
+//			} else {
+//				file = resolveRelatedPath(includeFile, fileName);
+//			}
+//		}
+
 		String path = queryParametersMap.get(HttpConstants.WEBROOT_PATH);
 		if (path == null) {
 			String referer = requestHeaders.get(REFERER);

@@ -54,6 +54,10 @@ import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
 import org.jboss.tools.vpe.handlers.VisualPartAbstractHandler;
 import org.jboss.tools.vpe.preview.editor.context.VpvPageContext;
+import org.jboss.tools.vpe.resref.core.AbsoluteFolderReferenceList;
+import org.jboss.tools.vpe.resref.core.CSSReferenceList;
+import org.jboss.tools.vpe.resref.core.RelativeFolderReferenceList;
+import org.jboss.tools.vpe.resref.core.TaglibReferenceList;
 import org.w3c.dom.Node;
 
 /**
@@ -74,6 +78,10 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 	private boolean visualEditorVisible = true;
 	
 	private static List<String> vpeCategoryCommands = null;
+	
+	private CSSReferenceList cssReferenceListListener;
+	private AbsoluteFolderReferenceList absoluteFolderReferenceListListener;
+	private RelativeFolderReferenceList relativeFolderReferenceListListener;
 	
 	public VpvEditorController(VpvEditorPart editPart) {
 		this.editPart = editPart;
@@ -196,6 +204,16 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 
 		// yradtsevich: we have to refresh VPE selection on init 
 		// (fix of JBIDE-4037)
+		
+		cssReferenceListListener = CSSReferenceList.getInstance();
+		cssReferenceListListener.addChangeListener(this);
+
+		absoluteFolderReferenceListListener = AbsoluteFolderReferenceList.getInstance();
+		absoluteFolderReferenceListListener.addChangeListener(this);
+
+		relativeFolderReferenceListListener = RelativeFolderReferenceList.getInstance();
+		relativeFolderReferenceListListener.addChangeListener(this);
+		
 		sourceSelectionChanged();
 		refreshCommands();
 	}
@@ -279,7 +297,12 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 
 	@Override
 	public void changed(Object source) {
-		// is used for external references which is not implemented now
+		if (cssReferenceListListener == source) {
+			visualRefresh();
+		} else if (absoluteFolderReferenceListListener == source
+				|| relativeFolderReferenceListListener == source) {
+			visualRefresh();
+		}
 	}
 
 	@Override
@@ -444,21 +467,15 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 			visualEditor = null;
 		}
 
-//		if (cssReferenceListListener != null) {
-//			cssReferenceListListener.removeChangeListener(this);
-//		}
-//		if (taglibReferenceListListener != null) {
-//			taglibReferenceListListener.removeChangeListener(this);
-//		}
-//		if (absoluteFolderReferenceListListener != null) {
-//			absoluteFolderReferenceListListener.removeChangeListener(this);
-//		}
-//		if (elReferenceListListener != null) {
-//			elReferenceListListener.removeChangeListener(this);
-//		}
-//		if (relativeFolderReferenceListListener != null) {
-//			relativeFolderReferenceListListener.removeChangeListener(this);
-//		}
+		if (cssReferenceListListener != null) {
+			cssReferenceListListener.removeChangeListener(this);
+		}
+		if (absoluteFolderReferenceListListener != null) {
+			absoluteFolderReferenceListListener.removeChangeListener(this);
+		}
+		if (relativeFolderReferenceListListener != null) {
+			relativeFolderReferenceListListener.removeChangeListener(this);
+		}
 		toolbarFormatControllerManager = null;
 	}
 	

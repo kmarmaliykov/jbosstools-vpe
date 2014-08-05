@@ -277,7 +277,7 @@ public class MozillaEditor extends EditorPart implements IReusableEditor {
 				IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				VpeResourcesDialogFactory.openVpeResourcesDialog(getEditorInput());
+				VpeResourcesDialogFactory.openVpeResourcesDialog(MozillaEditor.this);
 			}
 		};
 		showResouceDialogAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
