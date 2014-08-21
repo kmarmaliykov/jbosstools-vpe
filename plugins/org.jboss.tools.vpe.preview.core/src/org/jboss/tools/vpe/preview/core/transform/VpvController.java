@@ -73,7 +73,7 @@ public class VpvController {
 		}
 		
 		String htmlText = null;
-		if (visualModel != null) {
+		if (visualModel != null && !"xml".equals(requestedFile.getFileExtension())&& !"xsl".equals(requestedFile.getFileExtension())) {
 			try {
 				htmlText = DomUtil.nodeToString(visualModel.getVisualDocument());
 			} catch (TransformerException e) {

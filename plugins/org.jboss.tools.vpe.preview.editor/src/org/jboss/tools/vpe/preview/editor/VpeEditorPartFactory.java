@@ -41,7 +41,7 @@ public class VpeEditorPartFactory implements IVisualEditorFactory {
 		if (editorInput instanceof IFileEditorInput) {
 			String fileExtension = ((IFileEditorInput) editorInput).getFile().getFileExtension();
 			isHtmlFile = "html".equals(fileExtension) //$NON-NLS-1$
-					|| "htm".equals(fileExtension); //$NON-NLS-1$
+					|| "htm".equals(fileExtension) || "xml".equals(fileExtension); //$NON-NLS-1$
 		} else { //not a file, maybe some html text, should use simple preview for it
 			isHtmlFile = true;
 		}

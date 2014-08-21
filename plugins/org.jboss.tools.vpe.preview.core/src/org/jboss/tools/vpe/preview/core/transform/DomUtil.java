@@ -41,7 +41,7 @@ public class DomUtil {
 	public static String nodeToString(Node node) throws TransformerException {
 		Transformer transformer = getTransformer();
 		StringWriter buffer = new StringWriter();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes"); //$NON-NLS-1$
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no"); //$NON-NLS-1$
 		transformer.transform(new DOMSource(node), new StreamResult(buffer));
 		return buffer.toString();
 	}

@@ -18,6 +18,7 @@ public enum SuitableFileExtensions {
 	HTM("htm"), //$NON-NLS-1$
 	CSS("css"), //$NON-NLS-1$
 	JS("js"); //$NON-NLS-1$
+	XML("xml"); //$NON-NLS-1$
 
 	private final String value;
 
