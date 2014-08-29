@@ -57,6 +57,7 @@ public class VpvSocketProcessor implements Runnable {
 			DataOutputStream outputToClient = new DataOutputStream(clientSocket.getOutputStream());
 			
 			String initialContextLine = getInitialRequestLine(inputFromClient);
+			Activator.logInfo("=>" + inputFromClient);
 			if (initialContextLine != null) {
 				Map<String, String> requestHeader = getRequestHeader(inputFromClient);				
 			
@@ -73,7 +74,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
 	private void processRequest(String initialRequestLine, final Map<String, String> requestHeaders, final DataOutputStream outputToClient, final BufferedReader inputFromClient) {
-		String httpRequestString = getHttpRequestString(initialRequestLine);
+;		String httpRequestString = getHttpRequestString(initialRequestLine);
 		Map<String, String> queryParametersMap = parseUrlParameters(httpRequestString);
 
 		String path = getPath(httpRequestString);
@@ -267,6 +268,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
     private void sendFile(File file, DataOutputStream outputToClient) {
+    	Activator.logInfo("Sending file " + file.toPath());
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
@@ -275,6 +277,7 @@ public class VpvSocketProcessor implements Runnable {
             while ((bytesRead = fileInputStream.read(buffer)) >= 0) {
                 outputToClient.write(buffer, 0, bytesRead);
             }
+        	Activator.logInfo("file sent");
         } catch (FileNotFoundException e) {
             Activator.logError(e);
         } catch (IOException e) {
@@ -302,7 +305,7 @@ public class VpvSocketProcessor implements Runnable {
 	private String getOkResponceHeader(String mimeType, String eTag) {
 		String responceHeader = "HTTP/1.1 200 OK\r\n" + //$NON-NLS-1$
 				"Server: VPV server" +"\r\n"+ //$NON-NLS-1$ //$NON-NLS-2$
-				"Content-Type: " + mimeType + "; charset=UTF-8\r\n" + //$NON-NLS-1$ //$NON-NLS-2$
+				"Content-Type: " + mimeType + "\r\n" + //$NON-NLS-1$ //$NON-NLS-2$
 				"Cache-Control: max-age=0\r\n" +  //$NON-NLS-1$
 				"Etag: " + eTag + "\r\n" +  //$NON-NLS-1$//$NON-NLS-2$
 				"Connection: close\r\n\r\n"; //$NON-NLS-1$
