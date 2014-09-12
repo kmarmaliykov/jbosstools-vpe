@@ -860,7 +860,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 			if (fActivePart == multiPageEditor) {
 				if (sourceEditor != null && visualEditor != null) {
 					if (isVisualEditorVisible()) {
-						visualEditor.getController().visualRefresh();
+						visualEditor.refresh(visualEditor.getBrowser());
 					}
 					sourceEditor.safelySanityCheckState(getEditorInput());
 				}

@@ -544,11 +544,13 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	public void refresh(Browser browser) {
-		String url = browser.getUrl();
-		if (PlatformUtil.isWindows()) {
-			url = NavigationUtil.removeAnchor(url);
+		if (browser != null && !browser.isDisposed()) {
+			String url = browser.getUrl();
+			if (PlatformUtil.isWindows()) {
+				url = NavigationUtil.removeAnchor(url);
+			}
+			browser.setUrl(url);
 		}
-		browser.setUrl(url);
 	}
 	
 	private void formRequestToServer() {
