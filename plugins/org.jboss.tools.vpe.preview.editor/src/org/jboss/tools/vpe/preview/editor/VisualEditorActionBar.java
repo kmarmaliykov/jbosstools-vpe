@@ -15,7 +15,6 @@ import org.eclipse.swt.browser.Browser;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
 import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
-import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -32,11 +31,7 @@ public class VisualEditorActionBar extends ActionBar{
 	@Override
 	protected void refresh(Browser browser) {
 		if (controller.isVisualEditorVisible()) {
-			String url = browser.getUrl();
-			if (PlatformUtil.isWindows()) {
-				url = NavigationUtil.removeAnchor(url);
-			}
-			browser.setUrl(url);
+			browser.setUrl(NavigationUtil.fixUrl(browser));
 		}
 	}
 }

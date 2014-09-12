@@ -43,4 +43,7 @@ public final class PlatformUtil {
 		return OS.WINDOWS.equals(getOs());
 	}
 	
+	public static boolean isMacOS() {
+		return OS.MACOS.equals(getOs());
+	}
 }

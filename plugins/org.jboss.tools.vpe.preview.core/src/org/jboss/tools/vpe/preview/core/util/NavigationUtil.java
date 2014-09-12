@@ -127,6 +127,24 @@ public final class NavigationUtil {
 		return url;
 	}
 	
+	/** Modify current URL to make Visual Editor/HTML Preview work correct
+	 * 
+	 * @see JBIDE-18043
+	 * @see JBIDE-18302
+	 * 
+	 * @param browser
+	 * @return updated URL
+	 */
+	public static String fixUrl(Browser browser) {
+		String url = browser.getUrl();
+		if (PlatformUtil.isWindows()) {
+			return NavigationUtil.removeAnchor(url);
+		} else if (PlatformUtil.isMacOS()) {
+			return (String) browser.evaluate("return window.location.href");
+		}
+		return url;
+	}
+	
 	public static void navigateToVisual(IEditorPart currentEditor, Browser browser, VpvVisualModel visualModel, int x, int y) {
 		String stringToEvaluate = ""; //$NON-NLS-1$
 		if (OS.LINUX.equals(PlatformUtil.getOs())) {

@@ -42,7 +42,7 @@ public class ViewActionBar extends ActionBar {
 				if (SuitableFileExtensions.isCssOrJs(ext)) {
 					browser.refresh(); // Files are saved - need to perform refresh
 				} else {
-					browser.setUrl(NavigationUtil.removeAnchor(url)); // JBIDE-18043 Need to get changes via VPVSocketProcessor 
+					browser.setUrl(NavigationUtil.fixUrl(browser));
 				}
 			}
 		} else {

@@ -83,7 +83,6 @@ import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
-import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 import org.jboss.tools.vpe.resref.core.CSSReferenceList;
 
@@ -545,11 +544,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	
 	public void refresh(Browser browser) {
 		if (browser != null && !browser.isDisposed()) {
-			String url = browser.getUrl();
-			if (PlatformUtil.isWindows()) {
-				url = NavigationUtil.removeAnchor(url);
-			}
-			browser.setUrl(url);
+			browser.setUrl(NavigationUtil.fixUrl(browser));
 		}
 	}
 	

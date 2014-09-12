@@ -10,8 +10,8 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.preview.view;
 
-import static org.jboss.tools.vpe.preview.core.server.HttpConstants.ABOUT_BLANK;
 import static org.jboss.tools.vpe.preview.Messages.VISUAL_PREVIEW;
+import static org.jboss.tools.vpe.preview.core.server.HttpConstants.ABOUT_BLANK;
 
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
@@ -274,7 +274,7 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 			if (SuitableFileExtensions.isCssOrJs(ext)) {
 				browser.refresh(); // Files are saved - need to perform refresh
 			} else {
-				browser.setUrl(NavigationUtil.removeAnchor(url)); // JBIDE-18043 Need to get changes via VPVSocketProcessor 
+				browser.setUrl(NavigationUtil.fixUrl(browser)); // JBIDE-18043 Need to get changes via VPVSocketProcessor 
 			}	
 		} else {
 			browser.setUrl(url);
