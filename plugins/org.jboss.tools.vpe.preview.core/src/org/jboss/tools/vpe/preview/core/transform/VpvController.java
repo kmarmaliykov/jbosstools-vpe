@@ -17,13 +17,24 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.wst.sse.core.StructuredModelManager;
+import org.eclipse.wst.sse.core.internal.provisional.IModelManager;
 import org.eclipse.wst.sse.core.internal.provisional.IStructuredModel;
+import org.eclipse.wst.sse.core.internal.provisional.text.IStructuredDocument;
 import org.eclipse.wst.xml.core.internal.provisional.document.IDOMModel;
 import org.jboss.tools.vpe.preview.core.Activator;
+import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 import org.w3c.dom.Document;
 
 /**
@@ -48,6 +59,19 @@ public class VpvController {
 		IStructuredModel sourceModel = null;
 		try {
 			sourceModel = StructuredModelManager.getModelManager().getExistingModelForRead(requestedFile);
+			if (sourceModel == null) {
+			    ITextFileBufferManager bufferManager = FileBuffers.getTextFileBufferManager();
+			    ITextFileBuffer buffer = null;
+			    IFileStore fileStore = EFS.getStore(workspacePath.toFile().toURI());
+    			bufferManager.connectFileStore(fileStore, new NullProgressMonitor());
+    			buffer = bufferManager.getFileStoreTextFileBuffer(fileStore);
+    			
+    			IDocument document = buffer.getDocument();
+    			if (document instanceof IStructuredDocument) {
+        			IModelManager modelManager = StructuredModelManager.getModelManager();
+        			sourceModel = modelManager.getModelForEdit((IStructuredDocument)document);
+    			}
+			}
 			Document sourceDocument = null;
 			if (sourceModel instanceof IDOMModel) {
 				IDOMModel sourceDomModel = (IDOMModel) sourceModel;
@@ -61,7 +85,9 @@ public class VpvController {
 					Activator.logError(e);
 				}
 			}
-		} finally {
+		} catch (Exception e) {
+            Activator.logError(e);
+        } finally {
 			if (sourceModel != null) {
 				sourceModel.releaseFromRead();
 			}
@@ -89,6 +115,10 @@ public class VpvController {
 			File file = requestedFile.getLocation().toFile();
 			String mimeType = getMimeType(file);
 			resourceAcceptor.acceptFile(file, mimeType);
+		} else if(workspacePath.isAbsolute() && workspacePath.toFile().exists()) {
+		    File file = workspacePath.toFile();
+            String mimeType = getMimeType(file);
+            resourceAcceptor.acceptFile(file, mimeType);
 		} else {
 			resourceAcceptor.acceptError();
 		}

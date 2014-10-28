@@ -10,9 +10,11 @@
  ******************************************************************************/ 
 package org.jboss.tools.vpe.preview.editor;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
@@ -22,6 +24,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
+import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -37,10 +40,12 @@ public class VpeEditorPartFactory implements IVisualEditorFactory {
 		
 		IEditorInput editorInput = multiPageEditor.getEditorInput();
 		boolean isHtmlFile = false;
-		if (editorInput instanceof IFileEditorInput) {
+		if (editorInput instanceof IFileEditorInput) { //file opened from workspace
 			String fileExtension = ((IFileEditorInput) editorInput).getFile().getFileExtension();
-			isHtmlFile = "html".equals(fileExtension) //$NON-NLS-1$
-					|| "htm".equals(fileExtension); //$NON-NLS-1$
+			isHtmlFile = SuitableFileExtensions.isHTML(fileExtension);
+		} else  if (editorInput instanceof IPathEditorInput) { //handle external file
+		    IPath externalFile = ((IPathEditorInput) editorInput).getPath();
+		    isHtmlFile = SuitableFileExtensions.isHTML(externalFile.getFileExtension());
 		} else { //not a file, maybe some html text, should use simple preview for it
 			isHtmlFile = true;
 		}

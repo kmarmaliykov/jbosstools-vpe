@@ -217,7 +217,7 @@ public class VpvSocketProcessor implements Runnable {
 				path = parseUrlParameters(referer).get(HttpConstants.WEBROOT_PATH);
 			}
 		}
-		return path;
+		return path != null ? path : "";
 	}
 
 	private Integer getViewId(Map<String, String> queryParametersMap) {

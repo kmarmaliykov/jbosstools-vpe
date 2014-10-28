@@ -17,6 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbench;
@@ -300,28 +302,35 @@ public class VpvView extends ViewPart implements VpvVisualModelHolder {
 		removeErrorMessage();
 		if (file != null && file.exists()) {
 			fileExtension = file.getFileExtension();
-		} else {
-			if (editor != null) { //nothing opened - no error message
-				changeControlVisibility(browser, false);
-				errorWrapper.showError(browser.getParent(), 
-					new CannotOpenExternalFileException(MessageFormat.format(Messages.CANNOT_SHOW_EXTERNAL_FILE, VISUAL_PREVIEW)));
+			if (SuitableFileExtensions.contains(fileExtension)) {
+			    if (SuitableFileExtensions.isHTML(fileExtension)) {
+			        String url;
+			        try {
+			            url = EditorUtil.formUrl(file, modelHolderId, Integer.toString(Activator.getDefault().getServer().getPort()));
+			            browser.setUrl(url);
+			        } catch (UnsupportedEncodingException e) {
+			            Activator.logError(e);
+			        }
+			    }
 			}
+		} else {
+                if (editor.getEditorInput() instanceof IPathEditorInput) { // handle external file
+                    try {
+                        IPath externalFile = ((IPathEditorInput) editor.getEditorInput()).getPath();
+                        String url = EditorUtil.formUrl(externalFile, modelHolderId, Integer.toString(Activator.getDefault().getServer().getPort()));
+                        browser.setUrl(url);
+                    } catch (UnsupportedEncodingException e) {
+                        Activator.logError(e);
+                    }
+                } else if (editor != null) {//nothing opened - no error message
+                    changeControlVisibility(browser, false);
+                    errorWrapper.showError(browser.getParent(),
+                            new CannotOpenExternalFileException(MessageFormat.format(Messages.CANNOT_SHOW_EXTERNAL_FILE, VISUAL_PREVIEW)));                    
+                    browser.setUrl(ABOUT_BLANK);
+                }
 		}
 		browser.getParent().layout();
 		
-		if (SuitableFileExtensions.contains(fileExtension)) {
-			if (SuitableFileExtensions.isHTML(fileExtension)) {
-				String url;
-				try {
-					url = EditorUtil.formUrl(file, modelHolderId, "" + Activator.getDefault().getServer().getPort()); //$NON-NLS-1$
-					browser.setUrl(url);
-				} catch (UnsupportedEncodingException e) {
-					Activator.logError(e);
-				}
-			}
-		} else {
-			browser.setUrl(ABOUT_BLANK);
-		}
 	}
 
 	private void changeControlVisibility(Control c, boolean visible) {
