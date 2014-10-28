@@ -17,7 +17,7 @@ public enum SuitableFileExtensions {
 	HTML("html"), //$NON-NLS-1$
 	HTM("htm"), //$NON-NLS-1$
 	CSS("css"), //$NON-NLS-1$
-
+	JS("js"), //$NON-NLS-1$
 	XML("xml"); //$NON-NLS-1$
 
 	private final String value;
@@ -47,7 +47,7 @@ public enum SuitableFileExtensions {
 	}
 	
 	public static boolean isHTML(String fileExtension) {
-		if (HTML.getValue().equals(fileExtension) || HTM.getValue().equals(fileExtension)) {
+		if (HTML.getValue().equals(fileExtension) || HTM.getValue().equals(fileExtension) || XML.getValue().equals(fileExtension)) {
 			return true;
 		}
 		return false;

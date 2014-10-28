@@ -52,6 +52,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPathEditorInput;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.ISelectionService;
@@ -152,7 +153,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	private IVpeToolBarManager vpeToolBarManager;
 	
 	private EditorLoadWindowListener editorLoadWindowListener;
-	private EditorListener editorListener;
 	private IDocumentListener documentListener;
 	
 	private Browser browser;
@@ -444,7 +444,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			}
 			
 			inizializeSelectionListener();
-			inizializeEditorListener();
 		} catch (Throwable t) {
 			//cannot create browser. show error message then
 			
@@ -486,9 +485,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		}
 		if (selectionListener != null) {
 			getSite().getPage().removePostSelectionListener(selectionListener);
-		}
-		if (editorListener != null) {
-			getSite().getPage().removePartListener(editorListener);
 		}
 		Activator.getDefault().getVisualModelHolderRegistry().unregisterHolder(this);
 		
@@ -549,32 +545,35 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	private void formRequestToServer() {
-		IFile ifile = EditorUtil.getFileOpenedInEditor(sourceEditor);
-		if (ifile != null && SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
-			String url;
-			try {
-				url = EditorUtil.formUrl(ifile, modelHolderId, "" + Activator.getDefault().getServer().getPort()); //$NON-NLS-1$
-				browser.setUrl(url);
-				ResourceReference[] csss = CSSReferenceList.getInstance().getAllResources(ifile);
-				for (ResourceReference css : csss) {
-					String path = "file:///" + css.getLocation();
-					String script = "var fileref = document.createElement('link');" + 
-									"fileref.setAttribute('rel', 'stylesheet');" + 
-									"fileref.setAttribute('type', 'text/css');" + 
-									"fileref.setAttribute('href', '" + path + "');" +  
-									"document.getElementsByTagName('head')[0].appendChild(fileref);";
-					browser.execute(script);
-				}
-			} catch (UnsupportedEncodingException e) {
-				Activator.logError(e);
-			}
-		} else {
-			Composite parent = browser.getParent();
-			browser.dispose();
-			browser = null;
-			errorWrapper.showError(parent, 
-					new CannotOpenExternalFileException(MessageFormat.format(Messages.CANNOT_SHOW_EXTERNAL_FILE, VpeUIMessages.VISUAL_EDITOR)));
-		}
+        IFile ifile = EditorUtil.getFileOpenedInEditor(sourceEditor);
+        if (ifile != null) {
+            if (SuitableFileExtensions.contains(ifile.getFileExtension().toString())) {
+                try {
+                    String url = EditorUtil.formUrl(ifile, modelHolderId,
+                            "" + Activator.getDefault().getServer().getPort()); //$NON-NLS-1$
+                    browser.setUrl(url);
+                } catch (UnsupportedEncodingException e) {
+                    Activator.logError(e);
+                }
+            }
+        } else {
+            if (sourceEditor.getEditorInput() instanceof IPathEditorInput) {
+                try {
+                    browser.setUrl(EditorUtil.formUrl(((IPathEditorInput) sourceEditor.getEditorInput()).getPath(), modelHolderId, "" + Activator.getDefault().getServer().getPort()));
+                } catch (UnsupportedEncodingException e) {
+                    Activator.logError(e);
+                }
+            } else {
+                Composite parent = browser.getParent();
+                browser.dispose();
+                browser = null;
+                errorWrapper.showError(
+                        parent,
+                        new CannotOpenExternalFileException(MessageFormat
+                                .format(Messages.CANNOT_SHOW_EXTERNAL_FILE,
+                                        VpeUIMessages.VISUAL_EDITOR)));
+            }
+        }
 	}
 	
 	private void updatePreview() {
@@ -629,55 +628,6 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		editorLoadWindowListener = listener;
 	}
 	
-	protected void inizializeEditorListener() {
-		editorListener = new EditorListener();
-		getSite().getPage().addPartListener(editorListener);
-	}
-	
-	private class EditorListener implements IPartListener2 {
-
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {
-		}
-
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-			IWorkbenchPage page = partRef.getPage();
-			if (page != null) {
-				IEditorPart editor = page.getActiveEditor();
-				if (editor != null) {
-					setSourceEditor(editor);
-					formRequestToServer();
-				}
-			}
-		}
-	}
-
-		
 	/**
 	 * @param sourceEditor the sourceEditor to set
 	 */

@@ -74,7 +74,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
 	private void processRequest(String initialRequestLine, final Map<String, String> requestHeaders, final DataOutputStream outputToClient, final BufferedReader inputFromClient) {
-;		String httpRequestString = getHttpRequestString(initialRequestLine);
+		String httpRequestString = getHttpRequestString(initialRequestLine);
 		Map<String, String> queryParametersMap = parseUrlParameters(httpRequestString);
 
 		String path = getPath(httpRequestString);
@@ -218,7 +218,7 @@ public class VpvSocketProcessor implements Runnable {
 				path = parseUrlParameters(referer).get(HttpConstants.WEBROOT_PATH);
 			}
 		}
-		return path;
+		return path != null ? path : "";
 	}
 
 	private Integer getViewId(Map<String, String> queryParametersMap) {
@@ -268,7 +268,7 @@ public class VpvSocketProcessor implements Runnable {
 	}
 
     private void sendFile(File file, DataOutputStream outputToClient) {
-    	Activator.logInfo("Sending file " + file.toPath());
+    	//Activator.logInfo("Sending file " + file.toPath());
         FileInputStream fileInputStream = null;
         try {
             fileInputStream = new FileInputStream(file);
