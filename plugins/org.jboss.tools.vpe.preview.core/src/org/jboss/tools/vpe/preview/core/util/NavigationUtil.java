@@ -210,7 +210,7 @@ public final class NavigationUtil {
 		}
 	}
 	
-	private static Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
+	public static Long getIdForSelection(Node selectedSourceNode, VpvVisualModel visualModel) {
 		Long id = null;
 		if (selectedSourceNode != null && visualModel != null) {
 			Map<Node, Node> sourceVisuaMapping = visualModel.getSourceVisualMapping();

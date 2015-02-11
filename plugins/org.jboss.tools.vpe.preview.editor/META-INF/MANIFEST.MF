@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.compare,
  org.jboss.tools.common.model.ui,
  org.jboss.tools.vpe.xulrunner,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.jboss.tools.jst.web.kb
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin

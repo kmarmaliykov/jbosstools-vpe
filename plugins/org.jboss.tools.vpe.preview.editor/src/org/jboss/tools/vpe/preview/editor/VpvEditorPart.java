@@ -780,7 +780,12 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	public VpvEditor getVisualEditor() {
 		return visualEditor;
 	}
-	
+
+	@Override
+	public void initBrowser() {
+		// TODO initialize browser and all needed infrastructure even if the visual part of the editor is not shown 
+	}
+
 	/*
 	 * Updates current VpeEditorPart after 
 	 * OK/Apply button on "Visual Page Editor" preference page

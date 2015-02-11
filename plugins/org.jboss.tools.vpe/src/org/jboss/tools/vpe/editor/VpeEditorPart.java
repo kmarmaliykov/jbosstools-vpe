@@ -1204,5 +1204,10 @@ public class VpeEditorPart extends EditorPart implements
 	
 	public CustomSashForm getContainer() {
 		return container;
+	}
+
+	@Override
+	public void initBrowser() {
+		//Do nothing
 	}	
 }

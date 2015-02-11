@@ -19,6 +19,7 @@
 		<module>org.jboss.tools.vpe.html.test</module>
 		<module>org.jboss.tools.vpe.spring.test</module>
 		<module>org.jboss.tools.vpe.jsp.test</module>
+		<module>org.jboss.tools.vpe.jst.test</module>
 		<module>org.jboss.tools.vpe.test</module>
 		<module>org.jboss.tools.vpe.xulrunner.test</module>
 		<module>org.jboss.tools.vpe.preview.editor.test</module>

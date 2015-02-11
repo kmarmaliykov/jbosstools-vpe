@@ -83,6 +83,7 @@ import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.w3c.dom.Node;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -513,7 +514,21 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			rotateEditorsAction.setToolTipText(layoutNames.get(prefsOrientation));
 		}
 	}
-	
+
+	public Long getCurrentSelectedElementId() {
+		if(sourceEditor!=null) {
+			ISelection currentSelection = sourceEditor.getEditorSite().getSelectionProvider().getSelection();
+			if(currentSelection!=null) {
+				Node sourceNode = EditorUtil.getNodeFromSelection((IStructuredSelection) currentSelection);
+				Long currentSelectionId = NavigationUtil.getIdForSelection(sourceNode, visualModel);
+				if(currentSelectionId!=null) {
+					return currentSelectionId;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void refresh() {
 		if (browser != null && !browser.isDisposed()) {
 			if (ABOUT_BLANK.equals(browser.getUrl())) {
@@ -524,7 +539,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		}
 	}
 
-    /**
+	/**
      * @return the controller
      */
 	public VpvEditorController getController() {
