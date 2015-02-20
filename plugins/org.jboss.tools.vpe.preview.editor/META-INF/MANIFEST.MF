@@ -15,16 +15,17 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.wst.xml.core,
  org.jboss.tools.vpe.preview.core,
  org.eclipse.jface,
- org.jboss.tools.vpe,
  org.jboss.tools.jst.web.ui,
+ org.jboss.tools.jst.web,
  org.jboss.tools.common.resref.core,
  org.jboss.tools.vpe.resref,
  org.eclipse.compare,
  org.jboss.tools.common.model.ui,
- org.jboss.tools.vpe.xulrunner,
+ org.jboss.tools.usage
  org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.jboss.tools.vpe.preview.editor;x-internal:=true,
+Export-Package: org.jboss.tools.vpe.editor.xpl,
+ org.jboss.tools.vpe.preview.editor;x-internal:=true,
  org.jboss.tools.vpe.preview.editor.context;x-internal:=true

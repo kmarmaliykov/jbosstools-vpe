@@ -16,6 +16,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.jboss.tools.common.log.BaseUIPlugin;
+import org.jboss.tools.usage.event.UsageEventType;
+import org.jboss.tools.usage.event.UsageReporter;
 import org.jboss.tools.vpe.preview.core.server.VpvServer;
 import org.jboss.tools.vpe.preview.core.transform.VpvController;
 import org.jboss.tools.vpe.preview.core.transform.VpvDomBuilder;
@@ -29,8 +32,13 @@ import org.osgi.framework.BundleContext;
  * @author Yahor Radtsevich (yradtsevich)
  * @author Ilya Buziuk (ibuziuk)
  */
-public class Activator extends AbstractUIPlugin {
-
+public class Activator extends BaseUIPlugin {
+	
+	private static final String EDITOR_EVENT_ACTION = "editor"; //$NON-NLS-1$
+	private static final String SOURCE_EVENT_LABEL = "source"; //$NON-NLS-1$
+	private static final String VPE_EVENT_LABEL = "visual-vpe"; //$NON-NLS-1$
+	private static final String VPV_EVENT_LABEL = "visual-vpv"; //$NON-NLS-1$
+	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe.preview.editor"; //$NON-NLS-1$
 
@@ -42,6 +50,8 @@ public class Activator extends AbstractUIPlugin {
 	private VpvVisualModelHolderRegistry visualModelHolderRegistry;
 
 	private VpvDomBuilder domBuilder;
+
+	private UsageEventType editorEventType;
 	
 	/**
 	 * The constructor
@@ -62,6 +72,9 @@ public class Activator extends AbstractUIPlugin {
 		visualModelHolderRegistry = new VpvVisualModelHolderRegistry();
 		VpvController vpvController = new VpvController(domBuilder, visualModelHolderRegistry);
 		server = new VpvServer(vpvController);
+		
+		editorEventType = new UsageEventType(this, EDITOR_EVENT_ACTION, Messages.UsageEventTypeEditorLabelDescription, UsageEventType.HOW_MANY_TIMES_VALUE_DESCRIPTION);
+		UsageReporter.getInstance().registerEvent(editorEventType);
 	}
 
 	/*
@@ -114,11 +127,15 @@ public class Activator extends AbstractUIPlugin {
 		return server;
 	}
 	
-	public static void logError(Throwable e) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
+	public void countSourceTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(SOURCE_EVENT_LABEL));
 	}
-	
-	public static void logInfo(String info) {
-		getDefault().getLog().log(new Status(IStatus.INFO, PLUGIN_ID, info));
+
+	public void countVpeTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(VPE_EVENT_LABEL));
+	}
+
+	public void countVpvTabEvent() {
+		UsageReporter.getInstance().countEvent(editorEventType.event(VPV_EVENT_LABEL));
 	}
 }

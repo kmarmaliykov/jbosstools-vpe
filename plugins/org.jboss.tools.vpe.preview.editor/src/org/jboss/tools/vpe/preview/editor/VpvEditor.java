@@ -65,11 +65,8 @@ import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
-import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 import org.jboss.tools.vpe.editor.preferences.VpeEditorPreferencesPage;
 import org.jboss.tools.vpe.editor.preferences.VpeResourcesDialogFactory;
-import org.jboss.tools.vpe.editor.toolbar.IVpeToolBarManager;
-import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
 import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.exceptions.BrowserErrorWrapper;
@@ -81,6 +78,8 @@ import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.jboss.tools.vpe.preview.editor.toolbar.IVpeToolBarManager;
+import org.jboss.tools.vpe.preview.editor.toolbar.format.FormatControllerManager;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -583,7 +582,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
                     String url = EditorUtil.formUrl(ifile, modelHolderId, Integer.toString(Activator.getDefault().getServer().getPort()));
                     browser.setUrl(url);
                 } catch (UnsupportedEncodingException e) {
-                    Activator.logError(e);
+                    Activator.getDefault().logError(e);
                 }
             }
         } else {
@@ -593,7 +592,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
                     String url = EditorUtil.formUrl(externalFile, modelHolderId, Integer.toString(Activator.getDefault().getServer().getPort()));
                     browser.setUrl(url);
                 } catch (UnsupportedEncodingException e) {
-                    Activator.logError(e);
+                    Activator.getDefault().logError(e);
                 }
             } else {
                 Composite parent = browser.getParent();

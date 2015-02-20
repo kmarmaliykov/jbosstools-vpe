@@ -1,4 +1,4 @@
-package org.jboss.tools.vpe.editor;
+package org.jboss.tools.vpe.preview.editor;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -10,8 +10,8 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
 import org.eclipse.wst.sse.ui.internal.view.events.NodeSelectionChangedEvent;
 import org.eclipse.wst.sse.ui.internal.view.events.TextSelectionChangedEvent;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
-import org.jboss.tools.vpe.editor.context.AbstractPageContext;
-import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
+import org.jboss.tools.vpe.preview.editor.context.AbstractPageContext;
+import org.jboss.tools.vpe.preview.editor.toolbar.format.FormatControllerManager;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")

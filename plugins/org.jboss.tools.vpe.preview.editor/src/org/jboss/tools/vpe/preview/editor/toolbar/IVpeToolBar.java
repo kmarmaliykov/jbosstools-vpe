@@ -8,7 +8,7 @@
  * Contributors:
  *     Exadel, Inc. and Red Hat, Inc. - initial API and implementation
  ******************************************************************************/ 
-package org.jboss.tools.vpe.editor.toolbar;
+package org.jboss.tools.vpe.preview.editor.toolbar;
 
 import org.eclipse.swt.widgets.Composite;
 
