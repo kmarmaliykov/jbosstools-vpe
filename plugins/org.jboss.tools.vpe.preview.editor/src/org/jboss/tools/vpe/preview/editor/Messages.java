@@ -19,6 +19,8 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.jboss.tools.vpe.preview.editor.messages"; //$NON-NLS-1$
 	public static String VpvEditorPart_SELECTION_BAR_NOT_INITIALIZED;
 	public static String EngineDialog_MESSAGE;
+	public static String UsageEventTypeEditorLabelDescription;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

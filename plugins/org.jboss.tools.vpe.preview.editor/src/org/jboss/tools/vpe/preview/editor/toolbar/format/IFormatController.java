@@ -8,9 +8,10 @@
  * Contributors:
  *     Exadel, Inc. and Red Hat, Inc. - initial API and implementation
  ******************************************************************************/ 
-package org.jboss.tools.vpe.editor.toolbar.format;
+package org.jboss.tools.vpe.preview.editor.toolbar.format;
 
 import org.eclipse.swt.widgets.Listener;
+import org.jboss.tools.vpe.editor.toolbar.format.IFormatItemSelector;
 
 /**
  * @author Igels

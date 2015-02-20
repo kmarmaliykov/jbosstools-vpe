@@ -15,7 +15,6 @@ import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorPart;
-import org.jboss.tools.vpe.editor.mozilla.listener.EditorLoadWindowListener;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)

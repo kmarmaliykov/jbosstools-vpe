@@ -47,13 +47,8 @@ import org.jboss.tools.jst.web.ui.internal.editor.bundle.BundleMap;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IJSPTextEditor;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
 import org.jboss.tools.jst.web.ui.internal.editor.selection.SelectionHelper;
-import org.jboss.tools.vpe.VpeDebug;
-import org.jboss.tools.vpe.VpePlugin;
-import org.jboss.tools.vpe.editor.VisualController;
-import org.jboss.tools.vpe.editor.VpeEditorPart;
-import org.jboss.tools.vpe.editor.toolbar.format.FormatControllerManager;
-import org.jboss.tools.vpe.handlers.VisualPartAbstractHandler;
 import org.jboss.tools.vpe.preview.editor.context.VpvPageContext;
+import org.jboss.tools.vpe.preview.editor.toolbar.format.FormatControllerManager;
 import org.jboss.tools.vpe.resref.core.AbsoluteFolderReferenceList;
 import org.w3c.dom.Node;
 
@@ -178,15 +173,12 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 		/*
 		 * Update Text Formatting Toolbar state
 		 */
-		if (editPart.getVisualMode() != VpeEditorPart.SOURCE_MODE) {
+		if (editPart.getVisualMode() != VpvEditorPart.SOURCE_MODE) {
 			if (toolbarFormatControllerManager != null)
 				toolbarFormatControllerManager.selectionChanged();
 		}
 
-		if (editPart.getVisualMode() != VpeEditorPart.SOURCE_MODE) {
-			if (VpeDebug.PRINT_SOURCE_SELECTION_EVENT) {
-				System.out.println(">>>>>>>>>>>>>> selectionChanged  " + event.getSource()); //$NON-NLS-1$
-			}
+		if (editPart.getVisualMode() != VpvEditorPart.SOURCE_MODE) {
 			sourceSelectionChanged();
 		}
 	}
@@ -287,7 +279,7 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 						vpeCategoryCommands.add(command.getId());
 					}
 				} catch (NotDefinedException e) {
-					VpePlugin.reportProblem(e);
+					Activator.getDefault().logError(e);
 				}
 			}
 		}
@@ -306,7 +298,7 @@ public class VpvEditorController extends VisualController implements INodeAdapte
 	}
 
 	public void sourceSelectionToVisualSelection() {
-		if (editPart.getVisualMode() != VpeEditorPart.SOURCE_MODE) {
+		if (editPart.getVisualMode() != VpvEditorPart.SOURCE_MODE) {
 			sourceSelectionChanged();
 		}
 	}

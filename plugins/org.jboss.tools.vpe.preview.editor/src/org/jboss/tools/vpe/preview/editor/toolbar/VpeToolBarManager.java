@@ -8,7 +8,7 @@
  * Contributors:
  *     Exadel, Inc. and Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.editor.toolbar;
+package org.jboss.tools.vpe.preview.editor.toolbar;
 
 
 import org.eclipse.compare.Splitter;
@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
-import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.preview.editor.Activator;
 
 /**
  * @author Erick Created on 14.07.2005
@@ -90,7 +90,7 @@ public class VpeToolBarManager implements IVpeToolBarManager {
 		if (cmpToolBar != null) {
 			setStateToolbar(cmpToolBar, isVisible);
 		} else {
-			VpePlugin.getDefault().logError("Toolbar control is not initialized.");
+			Activator.getDefault().logError("Toolbar control is not initialized."); //$NON-NLS-1$
 		}
 	}
 

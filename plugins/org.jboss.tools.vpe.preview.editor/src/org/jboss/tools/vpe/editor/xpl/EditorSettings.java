@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.part.FileEditorInput;
-import org.jboss.tools.vpe.VpePlugin;
+import org.jboss.tools.vpe.preview.editor.Activator;
 
  
 /**
@@ -29,7 +29,7 @@ public class EditorSettings {
 	
 	protected IResource file;
 	protected IEditorPart editor;	
-	protected ArrayList settings = new ArrayList();
+	protected ArrayList<ISetting>settings = new ArrayList<ISetting>();
 	
 	
 	/**
@@ -59,7 +59,7 @@ public class EditorSettings {
 	}
 	
 	public void addSetting(ISetting s) {
-		s.setQualifier(VpePlugin.PLUGIN_ID);
+		s.setQualifier(Activator.PLUGIN_ID);
 		s.setEditor(editor);
 		s.setResource(file);
 		settings.add(s);

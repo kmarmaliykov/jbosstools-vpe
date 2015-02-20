@@ -8,7 +8,7 @@
  * Contributors:
  *     Exadel, Inc. and Red Hat, Inc. - initial API and implementation
  ******************************************************************************/ 
-package org.jboss.tools.vpe.editor.mozilla.listener;
+package org.jboss.tools.vpe.preview.editor;
 
 import java.util.EventListener;
 
