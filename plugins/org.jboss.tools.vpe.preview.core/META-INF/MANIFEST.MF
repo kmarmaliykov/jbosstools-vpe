@@ -16,7 +16,9 @@ Require-Bundle: org.eclipse.ui,
  org.jboss.tools.common.core,
  org.jboss.tools.common.resref.core,
  org.jboss.tools.vpe.resref,
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.jboss.tools.common.model,
+ org.jboss.tools.jst.web
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: org.jboss.tools.vpe.preview.core.exceptions,
