@@ -66,10 +66,6 @@ import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.progress.UIJob;
 import org.jboss.tools.jst.web.ui.WebUiPlugin;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
-import org.jboss.tools.vpe.editor.mozilla.MozillaEditor;
-import org.jboss.tools.vpe.editor.preferences.VpeEditorPreferencesPage;
-import org.jboss.tools.vpe.editor.preferences.VpeResourcesDialogFactory;
-import org.jboss.tools.vpe.editor.util.FileUtil;
 import org.jboss.tools.vpe.messages.VpeUIMessages;
 import org.jboss.tools.vpe.preview.core.exceptions.BrowserErrorWrapper;
 import org.jboss.tools.vpe.preview.core.exceptions.CannotOpenExternalFileException;
@@ -78,10 +74,10 @@ import org.jboss.tools.vpe.preview.core.transform.VpvVisualModel;
 import org.jboss.tools.vpe.preview.core.transform.VpvVisualModelHolder;
 import org.jboss.tools.vpe.preview.core.util.ActionBar;
 import org.jboss.tools.vpe.preview.core.util.EditorUtil;
+import org.jboss.tools.vpe.preview.core.util.FileUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 import org.jboss.tools.vpe.preview.editor.toolbar.IVpeToolBarManager;
-import org.jboss.tools.vpe.preview.editor.toolbar.format.FormatControllerManager;
 
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
@@ -140,7 +136,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 	}
 	
 	private final ToolBarManager toolBarManager = new ToolBarManager(SWT.VERTICAL | SWT.FLAT);
-	private FormatControllerManager formatControllerManager = new FormatControllerManager();
+//	private FormatControllerManager formatControllerManager = new FormatControllerManager();
 	private VpvEditorController controller;
 	private ToolBar verBar = null;
 	private IPropertyChangeListener selectionBarCloseListener;
@@ -200,8 +196,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 
 	public void setController(VpvEditorController controller){
 		this.controller = controller;
-		formatControllerManager.setVpeController(controller);
-		controller.setToolbarFormatControllerManager(formatControllerManager);
+//		formatControllerManager.setVpeController(controller);
+//		controller.setToolbarFormatControllerManager(formatControllerManager);
 	}
 	
 	public ToolBar createVisualToolbar(Composite parent) {
@@ -214,10 +210,10 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				VpeEditorPreferencesPage.openPreferenceDialog();
+				//VpeEditorPreferencesPage.openPreferenceDialog();
 			}
 		};
-		openVPEPreferencesAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+		openVPEPreferencesAction.setImageDescriptor(ImageDescriptor.createFromFile(VpvEditor.class,
 				ICON_PREFERENCE));
 		openVPEPreferencesAction.setToolTipText(VpeUIMessages.PREFERENCES);
 		toolBarManager.add(openVPEPreferencesAction);
@@ -247,7 +243,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				VpeResourcesDialogFactory.openVpeResourcesDialog(VpvEditor.this);
 			}
 		};
-		showResouceDialogAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+		showResouceDialogAction.setImageDescriptor(ImageDescriptor.createFromFile(VpvEditor.class,
 				fileExistsInWorkspace ? ICON_PAGE_DESIGN_OPTIONS : ICON_PAGE_DESIGN_OPTIONS_DISABLED));
 		if (!fileExistsInWorkspace) {
 			showResouceDialogAction.setEnabled(false);
@@ -283,7 +279,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				 * Update icon and tooltip
 				 */
 				this.setImageDescriptor(ImageDescriptor.createFromFile(
-						MozillaEditor.class, layoutIcons.get(newOrientation)));
+						VpvEditor.class, layoutIcons.get(newOrientation)));
 				
 				this.setToolTipText(layoutNames.get(newOrientation));
 				/*
@@ -295,7 +291,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 					setValue(IVpePreferencesPage.VISUAL_SOURCE_EDITORS_SPLITTING, newOrientation);
 			}
 		};
-		rotateEditorsAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+		rotateEditorsAction.setImageDescriptor(ImageDescriptor.createFromFile(VpvEditor.class,
 				layoutIcons.get(newOrientation)));
 		rotateEditorsAction.setToolTipText(layoutNames.get(newOrientation));
 		toolBarManager.add(rotateEditorsAction);
@@ -332,7 +328,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		};
 		WebUiPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(selectionBarCloseListener);
 		
-		showSelectionBarAction.setImageDescriptor(ImageDescriptor.createFromFile(MozillaEditor.class,
+		showSelectionBarAction.setImageDescriptor(ImageDescriptor.createFromFile(VpvEditor.class,
 				ICON_SELECTION_BAR));
 		showSelectionBarAction.setToolTipText(VpeUIMessages.SHOW_SELECTION_BAR);
 		toolBarManager.add(showSelectionBarAction);
@@ -488,8 +484,8 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 			browser = null;
 		}
 
-		formatControllerManager.setVpeController(null);
-		formatControllerManager=null;
+//		formatControllerManager.setVpeController(null);
+//		formatControllerManager=null;
 		super.dispose();
 	}
 
@@ -508,7 +504,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 		if (rotateEditorsAction != null) {
 			currentOrientationIndex = prefsOrientationIndex;
 			rotateEditorsAction.setImageDescriptor(ImageDescriptor.createFromFile(
-					MozillaEditor.class, layoutIcons.get(prefsOrientation)));
+					VpvEditor.class, layoutIcons.get(prefsOrientation)));
 			rotateEditorsAction.setToolTipText(layoutNames.get(prefsOrientation));
 		}
 	}

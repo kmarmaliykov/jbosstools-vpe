@@ -21,11 +21,14 @@ Require-Bundle: org.eclipse.ui,
  org.jboss.tools.vpe.resref,
  org.eclipse.compare,
  org.jboss.tools.common.model.ui,
- org.jboss.tools.usage
- org.eclipse.swt
+ org.jboss.tools.usage,
+ org.eclipse.swt,
+ org.eclipse.draw2d
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.jboss.tools.vpe.editor.xpl,
+ org.jboss.tools.vpe.messages,
  org.jboss.tools.vpe.preview.editor;x-internal:=true,
  org.jboss.tools.vpe.preview.editor.context;x-internal:=true
+Import-Package: org.jboss.ide.eclipse.as.core.util

@@ -11,7 +11,6 @@ import org.eclipse.wst.sse.ui.internal.view.events.NodeSelectionChangedEvent;
 import org.eclipse.wst.sse.ui.internal.view.events.TextSelectionChangedEvent;
 import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualController;
 import org.jboss.tools.vpe.preview.editor.context.AbstractPageContext;
-import org.jboss.tools.vpe.preview.editor.toolbar.format.FormatControllerManager;
 import org.w3c.dom.Node;
 
 @SuppressWarnings("restriction")
@@ -65,8 +64,5 @@ public abstract class VisualController implements IVisualController{
 	public abstract void setVisualEditorVisible(boolean visualEditorVisible);
 	
 	public abstract StructuredTextEditor getSourceEditor();
-	
-	public abstract void setToolbarFormatControllerManager(
-			FormatControllerManager formatControllerManager);
 
 }
