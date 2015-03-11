@@ -9,4 +9,9 @@
          point="org.eclipse.core.runtime.preferences">
                <initializer class="org.jboss.tools.vpe.preview.editor.VpvEditorPreferencesInitializer"/>
    </extension>
+   	<extension point="org.eclipse.ui.preferencePages">
+      <page category="org.jboss.tools.common.xstudio.editors" class="org.jboss.tools.vpe.preview.editor.preferences.VpeEditorPreferencesPage" id="org.jboss.tools.vpe.editor" 
+            name="%PreferencePage_VpeEditor">
+      </page>
+   	</extension>
 </plugin>

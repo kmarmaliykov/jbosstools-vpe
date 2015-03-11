@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.preview.editor.context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -48,7 +49,7 @@ public class VpvPageContext extends AbstractPageContext implements IVisualContex
 	}
 
 	public List<TaglibData> getIncludeTaglibs() {
-		return null;
+		return new ArrayList<TaglibData>();
 	}
 
 	public ResourceReference getRuntimeRelativeFolder(IFile file) {
