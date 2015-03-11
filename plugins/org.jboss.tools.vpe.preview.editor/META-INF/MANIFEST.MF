@@ -31,4 +31,3 @@ Export-Package: org.jboss.tools.vpe.editor.xpl,
  org.jboss.tools.vpe.messages,
  org.jboss.tools.vpe.preview.editor;x-internal:=true,
  org.jboss.tools.vpe.preview.editor.context;x-internal:=true
-Import-Package: org.jboss.ide.eclipse.as.core.util

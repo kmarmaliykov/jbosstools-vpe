@@ -12,9 +12,6 @@
 	<name>vpe.features</name>
 	<packaging>pom</packaging>
 	<modules>
-		<module>org.jboss.tools.vpe.feature</module>
-		<module>org.jboss.tools.vpe.test.feature</module>
-		<module>org.jboss.tools.xulrunner.feature</module>
 		<module>org.jboss.tools.vpe.preview.feature</module>
 	</modules>
 	<build>
