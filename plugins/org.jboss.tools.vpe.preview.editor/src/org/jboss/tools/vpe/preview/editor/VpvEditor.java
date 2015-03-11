@@ -75,6 +75,7 @@ import org.jboss.tools.vpe.preview.core.util.EditorUtil;
 import org.jboss.tools.vpe.preview.core.util.FileUtil;
 import org.jboss.tools.vpe.preview.core.util.NavigationUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
+import org.jboss.tools.vpe.preview.editor.preferences.VpeEditorPreferencesPage;
 import org.jboss.tools.vpe.preview.editor.toolbar.IVpeToolBarManager;
 
 /**
@@ -208,7 +209,7 @@ public class VpvEditor extends EditorPart implements VpvVisualModelHolder, IReus
 				IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				//VpeEditorPreferencesPage.openPreferenceDialog();
+				VpeEditorPreferencesPage.openPreferenceDialog();
 			}
 		};
 		openVPEPreferencesAction.setImageDescriptor(ImageDescriptor.createFromFile(VpvEditor.class,
