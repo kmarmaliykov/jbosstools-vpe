@@ -13,6 +13,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+	  <module>org.jboss.tools.vpe.preview.test</module>
 	</modules>
 
 	<properties>
