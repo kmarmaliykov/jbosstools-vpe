@@ -31,12 +31,6 @@
                         <layout>p2</layout>
                         <url>${jbosstools-jst-site}</url>
                 </repository>
-                <repository>
-                        <id>jbosstools-xulrunner</id>
-                        <layout>p2</layout>
-                        <url>${jbosstools-xulrunner-site}</url>
-                </repository>
-
 
 		<!-- To resolve parent artifact -->
 		<repository>
