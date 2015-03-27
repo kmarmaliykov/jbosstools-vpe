@@ -8,27 +8,24 @@
  * Contributor:
  *     Red Hat, Inc. - initial API and implementation
  ******************************************************************************/
-package org.jboss.tools.vpe.base.test;
+package org.jboss.tools.vpe.preview.editor.test.util;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.Assert;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.jboss.tools.test.util.JobUtils;
 import org.jboss.tools.test.util.ResourcesUtils;
+import org.jboss.tools.vpe.preview.editor.test.PreviewEditorTestPlugin;
 import org.osgi.framework.Bundle;
 
 /**
@@ -38,9 +35,9 @@ import org.osgi.framework.Bundle;
  * @author Yahor Radtsevich (yradtsevich)
  */
 public class ProjectsLoader {
-	private static final String TEST_PROJECT_ELEMENT = "testProject";
-	private static final String TEST_PROJECT_PATH_ATTRIBUTE = "path";
-	private static final String TEST_PROJECT_NAME_ATTRIBUTE = "name";
+	private static final String TEST_PROJECT_ELEMENT = "testProject"; //$NON-NLS-1$
+	private static final String TEST_PROJECT_PATH_ATTRIBUTE = "path"; //$NON-NLS-1$
+	private static final String TEST_PROJECT_NAME_ATTRIBUTE = "name"; //$NON-NLS-1$
 	private Map<String, ProjectLocation> projectNameToLocation;
 	private static ProjectsLoader instance = null;
 
@@ -51,7 +48,7 @@ public class ProjectsLoader {
 		 * loaded data in {@link #projectNameToLocation}.
 		 */
 		projectNameToLocation = new HashMap<String, ProjectLocation>();
-		IExtension[] extensions = VPEBaseTestPlugin.getDefault().getVpeTestExtensions();
+		IExtension[] extensions = PreviewEditorTestPlugin.getDefault().getVpeTestExtensions();
 		for (IExtension extension : extensions) {
 			IConfigurationElement[] confElements = extension.getConfigurationElements();
 			for (IConfigurationElement configurationElement : confElements) {
@@ -93,24 +90,24 @@ public class ProjectsLoader {
 			ProjectLocation location = projectNameToLocation.get(projectName);
 			if (location == null) {
 				throw new RuntimeException(
-						"Project '" + project + "' is not defined.");
+						"Project '" + project + "' is not defined."); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 			try {
 				project = ResourcesUtils.importProject(location.getBundle(), location.getPath(), projectName, new NullProgressMonitor(),true);
 			} catch (CoreException e) {
-				throw new RuntimeException("Project by the path='" + location.getPath()
-						+ "' cannot be imported.",e);
+				throw new RuntimeException("Project by the path='" + location.getPath() //$NON-NLS-1$
+						+ "' cannot be imported.",e); //$NON-NLS-1$
 			} catch (InvocationTargetException e) {
-				throw new RuntimeException("Project by the path='" + location.getPath()
-						+ "' cannot be imported.",e);
+				throw new RuntimeException("Project by the path='" + location.getPath() //$NON-NLS-1$
+						+ "' cannot be imported.",e); //$NON-NLS-1$
 			} catch (InterruptedException e) {
-				throw new RuntimeException("Project by the path='" + location.getPath()
-						+ "' cannot be imported.",e);
+				throw new RuntimeException("Project by the path='" + location.getPath() //$NON-NLS-1$
+						+ "' cannot be imported.",e); //$NON-NLS-1$
 			}
 			if (project == null) {
-				throw new RuntimeException("Project by the path='" + location.getPath()
-						+ "' cannot be imported.");
+				throw new RuntimeException("Project by the path='" + location.getPath() //$NON-NLS-1$
+						+ "' cannot be imported."); //$NON-NLS-1$
 			}
 		}
 
@@ -195,7 +192,7 @@ public class ProjectsLoader {
 		}
 
 		public String toString() {
-			return String.format("(%s, %s)",
+			return String.format("(%s, %s)", //$NON-NLS-1$
 					bundle == null ? null : bundle.getLocation(), path);
 		}
 	}

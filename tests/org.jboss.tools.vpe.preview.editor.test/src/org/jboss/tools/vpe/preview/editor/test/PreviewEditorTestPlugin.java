@@ -10,6 +10,10 @@
  ******************************************************************************/
 package org.jboss.tools.vpe.preview.editor.test;
 
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -22,7 +26,8 @@ public class PreviewEditorTestPlugin extends AbstractUIPlugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.jboss.tools.vpe.preview.editor.test"; //$NON-NLS-1$
-
+	
+	public static final String VPE_TEST_EXTENTION_POINT_ID = "org.jboss.tools.vpe.ui.test"; //$NON-NLS-1$
 	// The shared instance
 	private static PreviewEditorTestPlugin plugin;
 	
@@ -59,4 +64,14 @@ public class PreviewEditorTestPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
+	/**
+	 * Returns all extensions of {@value #VPE_TEST_EXTENTION_POINT_ID}
+	 */
+	public IExtension[] getVpeTestExtensions() {
+		IExtensionRegistry extensionRegistry = Platform.getExtensionRegistry();
+		IExtensionPoint extensionPoint = extensionRegistry
+				.getExtensionPoint(VPE_TEST_EXTENTION_POINT_ID);
+		IExtension[] extensions = extensionPoint.getExtensions();
+		return extensions;
+	}
 }

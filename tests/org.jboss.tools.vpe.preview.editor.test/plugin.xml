@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
+   <extension-point id="org.jboss.tools.vpe.ui.test" name="Visual Page Editor JUnit Test" schema="schema/vpe.ui.test.exsd"/>
    <extension
          point="org.jboss.tools.vpe.ui.test">
       <tests
