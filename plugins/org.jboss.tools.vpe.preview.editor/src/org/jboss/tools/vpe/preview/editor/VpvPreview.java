@@ -24,6 +24,7 @@ public class VpvPreview extends VpvEditor {
 	private EditorLoadWindowListener editorLoadWindowListener;
 
 	public VpvPreview(IEditorPart sourceEditor) {
+		setModelHolderId(Activator.getDefault().getVisualModelHolderRegistry().registerHolder(this));
 		this.sourceEditor = sourceEditor;
 	}
 	

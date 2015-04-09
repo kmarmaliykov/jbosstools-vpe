@@ -42,7 +42,7 @@ public class BrowserDataProvider implements IBrowserDataProvider {
 			IVisualEditor ve = editor.getVisualEditor();
 			if(ve!=null) {
 				ve.initBrowser();
-				Object obj = ve.getVisualEditor();
+				Object obj = ve.getPreviewWebBrowser();
 				if(obj instanceof VpvEditor) {
 					VpvEditor vpv = (VpvEditor)obj;
 					Browser browser = vpv.getBrowser();
@@ -52,9 +52,8 @@ public class BrowserDataProvider implements IBrowserDataProvider {
 						Long id = vpv.getCurrentSelectedElementId();
 						if(id!=null) {
 							parameters.put(BrowserDataProviderManager.ELEMENT_ID_VALUE_PARAM, id.toString());
-							js = BrowserDataProviderManager.format(js, parameters);
 							try {
-								return browser.evaluate(js);
+								return browser.evaluate(BrowserDataProviderManager.format(js, parameters));
 							} catch(SWTException e) {
 								if(e.code != SWT.ERROR_FAILED_EVALUATE && e.code != SWT.ERROR_INVALID_RETURN_VALUE) {
 									Activator.logError(e);

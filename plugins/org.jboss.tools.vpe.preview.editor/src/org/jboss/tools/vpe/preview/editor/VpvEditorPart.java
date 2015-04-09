@@ -61,7 +61,7 @@ import org.jboss.tools.vpe.editor.xpl.SashSetting;
 /**
  * @author Konstantin Marmalyukov (kmarmaliykov)
  */
-public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
+public class VpvEditorPart extends DocumentListeningEditorPart implements IVisualEditor2 {
 
 	public static final String ID = "org.jboss.tools.vpe.vpv.views.VpvView"; //$NON-NLS-1$
 	protected EditorSettings editorSettings;
@@ -86,7 +86,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 	private ToolBar toolBar = null;
 	
 	IEditorPart activeEditor;
-	
+
 	private VpvEditor visualEditor;
 	private VpvPreview vpvPreview;
 	
@@ -669,6 +669,7 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 		}
 		// editor will disposed as part of multipart editor
 		if (sourceEditor != null) {
+			removeDocumentListener(sourceEditor);
 			sourceEditor.dispose();
 			sourceEditor = null;
 		}
@@ -783,9 +784,25 @@ public class VpvEditorPart extends EditorPart implements IVisualEditor2 {
 
 	@Override
 	public void initBrowser() {
-		// TODO initialize browser and all needed infrastructure even if the visual part of the editor is not shown 
+		if (vpvPreview == null) {
+			createPreviewBrowser();
+		} else {
+			vpvPreview.refresh();
+		}
+		
+		addDocumentListener(sourceEditor);
 	}
 
+	@Override
+	protected void performAction() {
+		vpvPreview.refresh();
+	}
+
+	@Override
+	protected boolean actionHappening() {
+		return !vpvPreview.getBrowser().isDisposed();
+	}
+	
 	/*
 	 * Updates current VpeEditorPart after 
 	 * OK/Apply button on "Visual Page Editor" preference page
