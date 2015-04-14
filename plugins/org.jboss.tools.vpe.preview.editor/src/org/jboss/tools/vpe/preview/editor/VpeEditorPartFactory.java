@@ -25,6 +25,7 @@ import org.jboss.tools.jst.web.ui.internal.editor.editor.IVisualEditorFactory;
 import org.jboss.tools.jst.web.ui.internal.editor.preferences.IVpePreferencesPage;
 import org.jboss.tools.vpe.editor.VpeEditorPart;
 import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
+import org.jboss.tools.vpe.preview.core.util.PlatformUtil;
 import org.jboss.tools.vpe.preview.core.util.SuitableFileExtensions;
 
 /**
@@ -83,7 +84,7 @@ public class VpeEditorPartFactory implements IVisualEditorFactory {
 	}
 	
 	private IVisualEditor getVpeEditor(final EditorPart multiPageEditor, StructuredTextEditor textEditor, int visualMode, BundleMap bundleMap) {
-		return new VpeEditorPart(multiPageEditor, textEditor, visualMode, bundleMap) {
+		return PlatformUtil.isMacOS() ? null : new VpeEditorPart(multiPageEditor, textEditor, visualMode, bundleMap) {
 			public void doSave(IProgressMonitor monitor) {
 				multiPageEditor.doSave(monitor);
 			}
