@@ -14,6 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.jboss.tools.test.util.ProjectImportTestSetup;
+import org.jboss.tools.vpe.editor.util.VpePlatformUtil;
 import org.jboss.tools.vpe.jst.angularjs.test.ca.AngularDynamicCATest;
 
 /**
@@ -22,13 +23,16 @@ import org.jboss.tools.vpe.jst.angularjs.test.ca.AngularDynamicCATest;
 public class VpeJstAllTests {
 
 	public static Test suite() {
+		// set this property to make VPE always opened as visual part
+		System.setProperty(VpePlatformUtil.LOAD_DEFAULT_ENGINE, String.valueOf(true));
+		
 		TestSuite suite = new TestSuite(VpeJstAllTests.class.getName());
 
-		TestSuite s = new TestSuite("Angular Dynamic CA project tests");
+		TestSuite s = new TestSuite("Angular Dynamic CA project tests"); //$NON-NLS-1$
 		s.addTestSuite(AngularDynamicCATest.class);
 		suite.addTest(
 				new ProjectImportTestSetup(s,
-				"org.jboss.tools.vpe.jst.test",
+				"org.jboss.tools.vpe.jst.test", //$NON-NLS-1$
 				new String[] { "projects/AngularPhonecat" }, //$NON-NLS-1$
 				new String[] { "AngularPhonecat" })); //$NON-NLS-1$
 		return suite;
