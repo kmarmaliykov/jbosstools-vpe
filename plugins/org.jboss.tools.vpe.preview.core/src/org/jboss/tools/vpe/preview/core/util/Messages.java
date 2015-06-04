@@ -19,6 +19,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.jboss.tools.vpe.preview.core.util.messages"; //$NON-NLS-1$
 	public static String VpvView_REFRESH;
+	public static String VpvView_BACK;
+	public static String VpvView_FORWARD;
 	public static String VpvView_OPEN_IN_DEFAULT_BROWSER;
 	public static String VpvView_ENABLE_AUTOMATIC_REFRESH;
 	public static String VpvView_ENABLE_REFRESH_ON_SAVE;

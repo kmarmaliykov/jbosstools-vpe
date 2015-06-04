@@ -12,6 +12,7 @@ package org.jboss.tools.vpe.preview.core.util;
 
 import static org.jboss.tools.vpe.preview.core.preferences.VpvPreferencesInitializer.REFRESH_ON_CHANGE_PREFERENCES;
 import static org.jboss.tools.vpe.preview.core.preferences.VpvPreferencesInitializer.REFRESH_ON_SAVE_PREFERENCES;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -26,6 +27,8 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.program.Program;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -39,6 +42,8 @@ public abstract class ActionBar {
 	private static final String GROUP_REFRESH = "org.jboss.tools.vpv.refresh"; //$NON-NLS-1$
 
 	private IAction refreshAction;
+	private IAction goBackAction;
+	private IAction goForwardAction;
 	private IAction openInDefaultBrowserAction;
 	private IAction enableAutomaticRefreshAction;
 	private IAction enableRefreshOnSaveAction;
@@ -83,6 +88,8 @@ public abstract class ActionBar {
 		makeActions();
 		
 		manager.add(refreshAction);
+		manager.add(goBackAction);
+		manager.add(goForwardAction);
 		manager.add(openInDefaultBrowserAction);
 		manager.add(new Separator(GROUP_REFRESH));
 		manager.appendToGroup(GROUP_REFRESH, enableAutomaticRefreshAction);
@@ -91,6 +98,8 @@ public abstract class ActionBar {
 	
 	private void makeActions() {
 		makeRefreshAction();
+		makeGoBackAction();
+		makeGoForwardAction();
 		makeOpenInDefaultBrowserAction();
 		makeEnableAutomaticRefreshAction();
 		makeEnableRefreshOnSaveAction();
@@ -98,6 +107,15 @@ public abstract class ActionBar {
 		//initialize save listeners to make refresh options work properly 
 		enableAutomaticRefreshAction.run();
 		enableRefreshOnSaveAction.run();
+		
+		browser.addLocationListener(new LocationAdapter() {
+			@Override
+			public void changed(LocationEvent event) {
+				Browser browser = (Browser)event.widget;
+				goBackAction.setEnabled(browser.isBackEnabled());
+				goForwardAction.setEnabled(browser.isForwardEnabled());
+			}
+		});
 	}
 	
 	protected abstract void refresh(Browser browser);
@@ -167,6 +185,31 @@ public abstract class ActionBar {
 		refreshAction.setImageDescriptor(Activator.getImageDescriptor("icons/refresh.gif")); //$NON-NLS-1$
 	}
 	
+	private void makeGoBackAction() {
+		goBackAction = new Action() {
+			public void run() {
+				if (browser.isBackEnabled()) {
+					browser.back();
+				}
+			}
+		};
+		goBackAction.setText(Messages.VpvView_BACK);
+		goBackAction.setToolTipText(Messages.VpvView_BACK);
+		goBackAction.setImageDescriptor(Activator.getImageDescriptor("icons/nav_backward.gif")); //$NON-NLS-1$
+	}
+	
+	private void makeGoForwardAction() {
+		goForwardAction = new Action() {
+			public void run() {
+				if (browser.isForwardEnabled()) {
+					browser.forward();
+				}
+			}
+		};
+		goForwardAction.setText(Messages.VpvView_FORWARD);
+		goForwardAction.setToolTipText(Messages.VpvView_FORWARD);
+		goForwardAction.setImageDescriptor(Activator.getImageDescriptor("icons/nav_forward.gif")); //$NON-NLS-1$
+	}
 	
 	public boolean isAutomaticRefreshEnabled() {
 		return enableAutomaticRefreshAction.isChecked();
