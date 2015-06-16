@@ -18,6 +18,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -72,6 +73,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 //	private Group visualEditorToolbarGroup;
 	private Group visualEditorEngineGroup;
 	private boolean iswebkit;
+	private VpeRadioGroupFieldEditor mode;
 
 	private ICommandService commandService = null;
 	
@@ -146,22 +148,18 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 	    			{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_JSF, String.valueOf(false) },
 	    			{ VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HTML5, String.valueOf(true) } };
 	    	
+	    	mode = new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
+	    			VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup);
+	    	VpeBooleanFieldEditor remember = new VpeBooleanFieldEditor(REMEMBER_VISUAL_EDITOR_ENGINE,
+	    			VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_SHOW_DIALOG, visualEditorEngineGroup);
 	    	if (!xulrunnerCanBeLoaded) {
 	    		addField(new LabelFieldEditor(VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_DISABLED, visualEditorEngineGroup));
-	    		VpeRadioGroupFieldEditor mode = new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
-	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup);
-	    		VpeBooleanFieldEditor remember = new VpeBooleanFieldEditor(REMEMBER_VISUAL_EDITOR_ENGINE,
-	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_SHOW_DIALOG, visualEditorEngineGroup);
 	    		remember.setEnabled(false, visualEditorEngineGroup);
 	    		mode.setEnabled(false, visualEditorEngineGroup);	    		
-	    		addField(mode);
-	    		addField(remember);
-	    	} else {
-	    		addField(new VpeRadioGroupFieldEditor(USE_VISUAL_EDITOR_FOR_HTML5,
-	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_HEADER, 1, labelsAndValues, visualEditorEngineGroup));
-	    		addField(new VpeBooleanFieldEditor(REMEMBER_VISUAL_EDITOR_ENGINE,
-	    				VpeUIMessages.VISUAL_EDITOR_ENGINE_PREFERENCES_SHOW_DIALOG, visualEditorEngineGroup));
+	    		
 	    	}
+	    	addField(mode);
+    		addField(remember);
 	    	
 	    }
 	    addField(new VpeBooleanFieldEditor(SHOW_BORDER_FOR_UNKNOWN_TAGS,
@@ -202,8 +200,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 
 	@Override
 	public boolean performOk() {
-	    super.performOk();
-	    boolean we = WebUiPlugin.getDefault().getPreferenceStore().getBoolean(USE_VISUAL_EDITOR_FOR_HTML5);
+	    boolean we = getSelectedVisualMode();
 	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux() && we != iswebkit) {
 	    	if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM, VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM_MESSAGE) ){
 	    		Display.getDefault().asyncExec(new Runnable() {
@@ -265,7 +262,18 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 				}
 			}
 	    }
+	    super.performOk();
 	    return true;
+	}
+	
+	/**
+	 * 
+	 * @return <code>true</code> for HTML5 mode, <code>false</code> for JSF mode
+	 */
+	private Boolean getSelectedVisualMode() {
+		Control[] radiobuttons = mode.getRadioBoxControl(visualEditorEngineGroup).getChildren();
+		Button html5Mode = (Button) radiobuttons[1];
+		return html5Mode.getSelection();
 	}
 	
 	/**
