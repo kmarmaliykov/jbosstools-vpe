@@ -16,15 +16,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Link;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
+import org.jboss.tools.foundation.ui.util.BrowserUtility;
 import org.jboss.tools.vpe.preview.core.Activator;
 import org.jboss.tools.vpe.xulrunner.XulRunnerBundleNotFoundException;
 import org.jboss.tools.vpe.xulrunner.XulRunnerException;
 import org.jboss.tools.vpe.xulrunner.browser.XulRunnerBrowser;
 
-@SuppressWarnings("restriction")
 public class XulRunnerErrorWrapper {
 	public static final String ID = "org.jboss.tools.vpe.editor";  //$NON-NLS-1$
 	
@@ -78,12 +75,7 @@ public class XulRunnerErrorWrapper {
 						} catch (MalformedURLException e) {
 							Activator.logError(e);
 						}
-						IWorkbenchBrowserSupport support = PlatformUI.getWorkbench().getBrowserSupport();
-						try {
-							support.getExternalBrowser().openURL(theURL);
-						} catch (PartInitException e) {
-							Activator.logError(e);
-						}
+						new BrowserUtility().checkedCreateExternalBrowser(theURL.toString(), Activator.PLUGIN_ID, Activator.getDefault().getLog());
 					}
 				});
 			}
