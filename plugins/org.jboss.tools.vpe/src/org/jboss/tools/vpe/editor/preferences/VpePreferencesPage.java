@@ -200,8 +200,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 
 	@Override
 	public boolean performOk() {
-	    boolean we = getSelectedVisualMode();
-	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux() && we != iswebkit) {
+	    if (VpePlatformUtil.xulrunnerCanBeLoadedOnLinux() && iswebkit != getSelectedVisualMode()) {
 	    	if (MessageDialog.openConfirm(Display.getDefault().getActiveShell(), VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM, VpeUIMessages.VISUAL_EDITOR_ENGINE_RESTART_CONFIRM_MESSAGE) ){
 	    		Display.getDefault().asyncExec(new Runnable() {
 	    			public void run() {
@@ -212,6 +211,7 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 	    		return false;
 	    	}
 	    } else {
+		    super.performOk();
 			IEditorReference[] editors = VpePlugin.getDefault().getWorkbench()
 					.getActiveWorkbenchWindow().getActivePage()
 					.getEditorReferences();
@@ -262,7 +262,6 @@ public class VpePreferencesPage extends FieldEditorPreferencePage implements
 				}
 			}
 	    }
-	    super.performOk();
 	    return true;
 	}
 	
